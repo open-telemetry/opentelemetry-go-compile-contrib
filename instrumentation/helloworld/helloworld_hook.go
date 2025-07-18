@@ -23,6 +23,7 @@ func init() {
 }
 
 func setupOpenTelemetry() {
+	fmt.Println("=setupOpenTelemetry=")
 	// Print all the signal to stdout
 	spanExporter, _ := stdouttrace.New()
 	stdoutTraceProvider := trace.NewTracerProvider(trace.WithSpanProcessor(trace.NewSimpleSpanProcessor(spanExporter)))
@@ -36,7 +37,6 @@ func setupOpenTelemetry() {
 
 var helloWorldInstrumenter = BuildNetHttpClientOtelInstrumenter()
 
-//go:linkname MyHookBefore main.Hook
 func MyHookBefore(ictx inst.Context) {
 	// Use instrumenter to create span and metrics
 	// When the main is executed, we should instrumenter#start to create span
@@ -58,7 +58,6 @@ func MyHookBefore(ictx inst.Context) {
 	time.Sleep(2 * time.Second)
 }
 
-//go:linkname MyHookAfter main.Hook
 func MyHookAfter(ictx inst.Context) {
 	// This is the after hook, we can do some clean up work here if needed
 	fmt.Println("[MyHook] after hook executed!")
