@@ -3,7 +3,12 @@
 
 package inst
 
-type Context interface {
+// !!! Any modification MUST be synced with tool/internal/instrument/template_api.go
+type HookContext interface {
+	// Set the skip call flag, can be used to skip the original function call
+	SetSkipCall(bool)
+	// Get the skip call flag, can be used to skip the original function call
+	IsSkipCall() bool
 	// Set the data field, can be used to pass information between Before and After hooks
 	SetData(interface{})
 	// Get the data field, can be used to pass information between Before and After hooks
