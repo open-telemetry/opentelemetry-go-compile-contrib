@@ -13,17 +13,14 @@ env:
 
 jobs:
   golangci:
-    strategy:
-      matrix:
-        go: [oldstable, stable]
     name: Format and Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
-          go-version: ${{ matrix.go }}
           cache-dependency-path: "**/go.mod"
+          go-version-file: go.mod
       - name: Install golangci-lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANGCI_LINT_VERSION }}

@@ -61,8 +61,8 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
-          go-version: oldstable
           cache-dependency-path: '**/go.mod'
+          go-version-file: go.mod
       # Run the conventionalcommit tool to validate PR title and assign labels
       # This step is skipped if we don't have write permissions (e.g., pull_request from fork on synchronize)
       - name: Assign Labels
