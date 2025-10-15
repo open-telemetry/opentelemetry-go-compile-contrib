@@ -7,7 +7,7 @@
   "packageRules": [
     {
       "groupName": "all non-major versions",
-      "matchUpdateTypes": ["patch", "minor"],
+      "matchUpdateTypes": ["patch", "minor", "digest"],
       "schedule": ["before 8am on Monday"]
     },
     {
