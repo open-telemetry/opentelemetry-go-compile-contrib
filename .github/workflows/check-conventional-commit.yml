@@ -14,7 +14,7 @@ permissions:
 jobs:
   update-labels:
     permissions:
-      pull-requests: write # Needed to post comments & update labels
+      pull-requests: write  # Needed to post comments & update labels
     name: Update Labels
     runs-on: ubuntu-latest
     # Prevent double triggers: skip pull_request runs for forks (pull_request_target will handle them)
@@ -30,13 +30,13 @@ jobs:
         id: check-permissions
         run: |
           if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
-            echo "has_permissions=true" >> $GITHUB_OUTPUT
+            echo "has_permissions=true" >> "$GITHUB_OUTPUT"
             echo "✅ Running with pull_request_target - has write permissions"
           elif [[ "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.repository }}" ]]; then
-            echo "has_permissions=true" >> $GITHUB_OUTPUT
+            echo "has_permissions=true" >> "$GITHUB_OUTPUT"
             echo "✅ Running with pull_request from same repository - has write permissions"
           else
-            echo "has_permissions=false" >> $GITHUB_OUTPUT
+            echo "has_permissions=false" >> "$GITHUB_OUTPUT"
             echo "❌ Running with pull_request from fork - no write permissions"
             echo "⚠️  Labels cannot be updated on this run. They will be updated when:"
             echo "   - The PR is opened, edited, or reopened (uses pull_request_target)"
@@ -57,16 +57,18 @@ jobs:
           echo "Base Repo: ${{ github.repository }}"
           echo "Is Fork: ${{ github.event.pull_request.head.repo.full_name != github.repository }}"
       - name: Check out
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955  # v4.3.0
       - name: Setup go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5  # v5.5.0
         with:
-          cache-dependency-path: '**/go.mod'
+          cache-dependency-path: "**/go.mod"
           go-version-file: go.mod
       # Run the conventionalcommit tool to validate PR title and assign labels
       # This step is skipped if we don't have write permissions (e.g., pull_request from fork on synchronize)
       - name: Assign Labels
         if: steps.check-permissions.outputs.has_permissions == 'true'
-        run: go -C .github/tools/conventionalcommit run . -owner="${{ github.repository_owner }}" -repo="${{ github.event.repository.name }}" -pr="${{ github.event.pull_request.number }}"
+        run: go -C .github/tools/conventionalcommit run . -owner="${{ github.repository_owner }}" -repo="${{ github.event.repository.name
+          }}" -pr="${{ github.event.pull_request.number }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
