@@ -26,7 +26,6 @@ on:
 permissions: read-all
 jobs:
   test-unit-coverage:
-    if: false  # temporary disable
     name: Coverage Unit Tests
     runs-on: ubuntu-latest
     steps:

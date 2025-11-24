@@ -28,7 +28,6 @@ on:
 permissions: read-all
 jobs:
   test-e2e-coverage:
-    if: false  # temporary disable
     name: Coverage E2E Tests
     runs-on: ubuntu-latest
     steps:

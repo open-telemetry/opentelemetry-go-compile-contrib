@@ -26,7 +26,6 @@ on:
 permissions: read-all
 jobs:
   test-integration-coverage:
-    if: false  # temporary disable
     name: Coverage Integration Tests
     runs-on: ubuntu-latest
     steps:
