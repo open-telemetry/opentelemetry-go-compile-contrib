@@ -42,6 +42,7 @@ func TestBasic(t *testing.T) {
 		"isSkipCall:false",
 		"Ellipsis",
 		"Hello from stdio",
+		"Underscore",
 	}
 	for _, e := range expect {
 		require.Contains(t, output, e)
