@@ -118,7 +118,9 @@ func MyHookGenericAfter(ictx inst.HookContext, _ interface{}) {
 	ictx.SetReturnVal(0, 999)
 }
 
-func BeforeUnderscore(ictx inst.HookContext, _ int, _ float32) {}
+func BeforeUnderscore(ictx inst.HookContext, _ int, _ float32) {
+	println("Underscore")
+}
 
 func MyHookEllipsisBefore(ictx inst.HookContext, p1 []string) {
 	println("Ellipsis")
