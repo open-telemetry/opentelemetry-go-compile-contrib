@@ -120,7 +120,7 @@ func TestBeforeNewClient(t *testing.T) {
 
 			// Verify no panic even with edge cases
 			assert.NotPanics(t, func() {
-				BeforeNewClient(ictx, tt.target, tt.opts)
+				BeforeNewClient(ictx, tt.target, tt.opts...)
 			}, "BeforeNewClient should not panic")
 
 			newOpts, ok := ictx.GetParam(newClientOptionsParamIndex).([]grpc.DialOption)
@@ -243,7 +243,7 @@ func TestBeforeDialContext(t *testing.T) {
 
 			ctx := context.Background()
 			ictx := newMockHookContext(ctx, tt.target, tt.opts)
-			BeforeDialContext(ictx, ctx, tt.target, tt.opts)
+			BeforeDialContext(ictx, ctx, tt.target, tt.opts...)
 
 			newOpts, ok := ictx.GetParam(dialOptionsParamIndex).([]grpc.DialOption)
 			require.True(t, ok)
@@ -393,7 +393,7 @@ func TestClientStatsHandler_Integration(t *testing.T) {
 	}
 
 	ictx := newMockHookContext(target, opts)
-	BeforeNewClient(ictx, target, opts)
+	BeforeNewClient(ictx, target, opts...)
 
 	newOpts := ictx.GetParam(newClientOptionsParamIndex).([]grpc.DialOption)
 	assert.Greater(t, len(newOpts), len(opts), "Expected stats handler to be added")
@@ -401,7 +401,7 @@ func TestClientStatsHandler_Integration(t *testing.T) {
 	// Test DialContext as well
 	ctx := context.Background()
 	ictx2 := newMockHookContext(ctx, target, opts)
-	BeforeDialContext(ictx2, ctx, target, opts)
+	BeforeDialContext(ictx2, ctx, target, opts...)
 
 	newOpts2 := ictx2.GetParam(dialOptionsParamIndex).([]grpc.DialOption)
 	assert.Greater(t, len(newOpts2), len(opts), "Expected stats handler to be added for DialContext")

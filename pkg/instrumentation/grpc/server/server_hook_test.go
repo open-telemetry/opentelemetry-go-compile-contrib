@@ -99,7 +99,7 @@ func TestBeforeNewServer(t *testing.T) {
 			}
 
 			ictx := newMockHookContext(tt.opts)
-			BeforeNewServer(ictx, tt.opts)
+			BeforeNewServer(ictx, tt.opts...)
 
 			newOpts, ok := ictx.GetParam(0).([]grpc.ServerOption)
 			require.True(t, ok)
@@ -251,7 +251,7 @@ func TestServerStatsHandler_Integration(t *testing.T) {
 	// Create instrumented server
 	opts := []grpc.ServerOption{}
 	ictx := newMockHookContext(opts)
-	BeforeNewServer(ictx, opts)
+	BeforeNewServer(ictx, opts...)
 
 	newOpts := ictx.GetParam(0).([]grpc.ServerOption)
 	assert.Greater(t, len(newOpts), 0, "Expected stats handler to be added")

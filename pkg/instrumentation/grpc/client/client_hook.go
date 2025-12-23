@@ -132,7 +132,7 @@ func (g grpcClientEnabler) Enable() bool {
 var clientEnabler = grpcClientEnabler{}
 
 // BeforeNewClient hooks before grpc.NewClient (v1.63+)
-func BeforeNewClient(ictx inst.HookContext, target string, opts []grpc.DialOption) {
+func BeforeNewClient(ictx inst.HookContext, target string, opts ...grpc.DialOption) {
 	if !clientEnabler.Enable() {
 		logger.Debug("gRPC client instrumentation disabled")
 		return
@@ -161,7 +161,7 @@ func AfterNewClient(ictx inst.HookContext, conn *grpc.ClientConn, err error) {
 }
 
 // BeforeDialContext hooks before grpc.DialContext (v1.44-1.63)
-func BeforeDialContext(ictx inst.HookContext, ctx context.Context, target string, opts []grpc.DialOption) {
+func BeforeDialContext(ictx inst.HookContext, ctx context.Context, target string, opts ...grpc.DialOption) {
 	if !clientEnabler.Enable() {
 		logger.Debug("gRPC client instrumentation disabled")
 		return
