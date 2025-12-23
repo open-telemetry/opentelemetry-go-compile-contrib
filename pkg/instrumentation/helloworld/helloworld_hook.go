@@ -122,7 +122,7 @@ func BeforeUnderscore(ictx inst.HookContext, _ int, _ float32) {
 	println("Underscore")
 }
 
-func MyHookEllipsisBefore(ictx inst.HookContext, p1 []string) {
+func MyHookEllipsisBefore(ictx inst.HookContext, p1 ...string) {
 	println("Ellipsis")
 }
 

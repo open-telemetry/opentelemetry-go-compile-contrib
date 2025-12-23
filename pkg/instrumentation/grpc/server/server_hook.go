@@ -130,7 +130,7 @@ func (g grpcServerEnabler) Enable() bool {
 var serverEnabler = grpcServerEnabler{}
 
 // BeforeNewServer hooks before grpc.NewServer to inject stats handler
-func BeforeNewServer(ictx inst.HookContext, opts []grpc.ServerOption) {
+func BeforeNewServer(ictx inst.HookContext, opts ...grpc.ServerOption) {
 	if !serverEnabler.Enable() {
 		logger.Debug("gRPC server instrumentation disabled")
 		return
