@@ -1,4 +1,4 @@
-module github.com/open-telemetry/opentelemetry-go-compile-instrumentation/pkg/instrumentation/helloworld
+module github.com/open-telemetry/opentelemetry-go-compile-instrumentation/pkg/instrumentation/basic
 
 go 1.24.0
 
