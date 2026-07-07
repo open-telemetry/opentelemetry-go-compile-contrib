@@ -1,4 +1,4 @@
-module github.com/open-telemetry/opentelemetry-go-compile-instrumentation/test/apps/otelsdk
+module go.opentelemetry.io/otelc/test/apps/otelsdk
 
 go 1.25.0
 
