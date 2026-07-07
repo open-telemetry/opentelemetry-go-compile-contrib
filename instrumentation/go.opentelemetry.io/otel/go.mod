@@ -1,8 +1,8 @@
-module go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/hook
+module go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel
 
 go 1.25.0
 
-replace go.opentelemetry.io/otelc/pkg => ../../../../pkg
+replace go.opentelemetry.io/otelc/pkg => ../../../pkg
 
 require (
 	go.opentelemetry.io/otel/trace v1.44.0
