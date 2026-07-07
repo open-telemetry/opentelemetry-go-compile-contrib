@@ -6,8 +6,8 @@ package hook
 import (
 	_ "unsafe"
 
-	"github.com/open-telemetry/opentelemetry-go-compile-instrumentation/pkg/hook"
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otelc/pkg/hook"
 )
 
 //go:linkname traceContextDelSpan go.opentelemetry.io/otel/sdk/trace.traceContextDelSpan

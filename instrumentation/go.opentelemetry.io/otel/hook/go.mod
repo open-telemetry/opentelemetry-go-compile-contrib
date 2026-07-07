@@ -1,12 +1,12 @@
-module github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/hook
+module go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/hook
 
 go 1.25.0
 
-replace github.com/open-telemetry/opentelemetry-go-compile-instrumentation/pkg => ../../../../pkg
+replace go.opentelemetry.io/otelc/pkg => ../../../../pkg
 
 require (
-	github.com/open-telemetry/opentelemetry-go-compile-instrumentation/pkg v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/otel/trace v1.44.0
+	go.opentelemetry.io/otelc/pkg v0.0.0-00010101000000-000000000000
 )
 
 require (
