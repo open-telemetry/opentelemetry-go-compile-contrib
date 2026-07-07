@@ -6,8 +6,8 @@ trace_context:
   do:
     - add_file:
         file: otel_trace_context.go
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/sdk/trace"
-        module: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace"
+        module: "go.opentelemetry.io/otelc/instrumentation"
 
 # Function hooks for go.opentelemetry.io/otel/sdk/trace
 hook_non_recording_span_end:
@@ -19,7 +19,7 @@ hook_non_recording_span_end:
   do:
     - inject_hooks:
         before: nonRecordingSpanEndBefore
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/hook"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/hook"
 
 hook_recording_span_end:
   target: go.opentelemetry.io/otel/sdk/trace
@@ -30,7 +30,7 @@ hook_recording_span_end:
   do:
     - inject_hooks:
         before: recordingSpanEndBefore
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/hook"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/hook"
 
 hook_new_recording_span:
   target: go.opentelemetry.io/otel/sdk/trace
@@ -41,7 +41,7 @@ hook_new_recording_span:
   do:
     - inject_hooks:
         after: newRecordingSpanAfter
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/hook"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/hook"
 
 hook_new_non_recording_span:
   target: go.opentelemetry.io/otel/sdk/trace
@@ -52,7 +52,7 @@ hook_new_non_recording_span:
   do:
     - inject_hooks:
         after: newNonRecordingSpanAfter
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/hook"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/hook"
 
 # File injection for go.opentelemetry.io/otel/sdk/metric
 metric_test_func_holder:
@@ -60,8 +60,8 @@ metric_test_func_holder:
   do:
     - add_file:
         file: otel_metric_test_func_holder.go
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/sdk/metric"
-        module: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/metric"
+        module: "go.opentelemetry.io/otelc/instrumentation"
 
 # Function hook for go.opentelemetry.io/otel/trace
 hook_span_from_context:
@@ -71,7 +71,7 @@ hook_span_from_context:
   do:
     - inject_hooks:
         after: spanFromContextOnExit
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/hook"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/hook"
 
 # File injection for go.opentelemetry.io/otel
 trace_init:
@@ -79,8 +79,8 @@ trace_init:
   do:
     - add_file:
         file: trace_init.go
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/provider/trace"
-        module: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/provider/trace"
+        module: "go.opentelemetry.io/otelc/instrumentation"
 
 # Function hook for go.opentelemetry.io/otel
 hook_set_tracer_provider:
@@ -90,4 +90,4 @@ hook_set_tracer_provider:
   do:
     - inject_hooks:
         before: setTracerProviderOnEnter
-        path: "github.com/open-telemetry/opentelemetry-go-compile-instrumentation/instrumentation/go.opentelemetry.io/otel/hook"
+        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/hook"

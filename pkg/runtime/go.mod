@@ -1,4 +1,4 @@
-module github.com/open-telemetry/opentelemetry-go-compile-instrumentation/pkg/runtime
+module go.opentelemetry.io/otelc/pkg/runtime
 
 go 1.25.0
 
