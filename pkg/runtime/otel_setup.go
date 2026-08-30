@@ -55,7 +55,7 @@ func SetupOTelSDK() {
 
 	// Initialize OpenTelemetry SDK with defensive error handling
 	Initialize(Config{
-		InstrumentationName:    "go.opentelemetry.io/otelc",
+		InstrumentationName:    "go.opentelemetry.io/otelc-contrib",
 		InstrumentationVersion: ModuleVersion(),
 	})
 }

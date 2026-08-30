@@ -1,12 +1,11 @@
-module go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace
+module go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace
 
 go 1.25.0
 
-replace go.opentelemetry.io/otelc/pkg => ../../../../../pkg
 
 require (
 	go.opentelemetry.io/otel/trace v1.45.0
-	go.opentelemetry.io/otelc/pkg v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc/pkg v1.1.0
 )
 
 require (

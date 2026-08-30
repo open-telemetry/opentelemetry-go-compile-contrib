@@ -6,4 +6,4 @@ hook_set_tracer_provider:
   do:
     - inject_hooks:
         before: beforeSetTracerProvider
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel"

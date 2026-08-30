@@ -6,4 +6,4 @@ anthropic_v1_new_client:
   do:
     - inject_hooks:
         before: BeforeNewClient
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/anthropics/anthropic-sdk-go"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/anthropics/anthropic-sdk-go"

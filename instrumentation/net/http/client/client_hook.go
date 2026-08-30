@@ -14,14 +14,14 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 
-	"go.opentelemetry.io/otelc/instrumentation/net/http/semconv"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/net/http/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
 	otelExporterPrefix  = "OTel OTLP Exporter Go"
-	instrumentationName = "go.opentelemetry.io/otelc/instrumentation/net/http"
+	instrumentationName = "go.opentelemetry.io/otelc-contrib/instrumentation/net/http"
 	instrumentationKey  = "NETHTTP"
 	requestParamIndex   = 1
 )

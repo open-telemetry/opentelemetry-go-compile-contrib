@@ -7,4 +7,4 @@ kafka_reader_readmessage:
     - inject_hooks:
         before: BeforeReadMessage
         after: AfterReadMessage
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/segmentio/kafka-go/consumer"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/consumer"

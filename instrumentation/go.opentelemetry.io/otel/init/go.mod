@@ -1,10 +1,9 @@
-module go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/init
+module go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/init
 
 go 1.25.0
 
-replace go.opentelemetry.io/otelc/pkg/runtime => ../../../../pkg/runtime
 
-require go.opentelemetry.io/otelc/pkg/runtime v0.0.0-00010101000000-000000000000
+require go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

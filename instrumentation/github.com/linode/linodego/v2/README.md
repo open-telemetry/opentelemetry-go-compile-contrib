@@ -7,7 +7,7 @@ Compile-time OpenTelemetry instrumentation for
 
 | Layer | Target | Span name | Scope |
 |-------|--------|-----------|--------|
-| Public API | Exported `*Client` methods with `(context.Context, …) (…, error)` | `linodego.<Method>` | `go.opentelemetry.io/otelc/instrumentation/github.com/linode/linodego/v2` |
+| Public API | Exported `*Client` methods with `(context.Context, …) (…, error)` | `linodego.<Method>` | `go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2` |
 | HTTP request | `(*Client).doRequest` | `{METHOD} {endpoint}` | same |
 
 Client configuration helpers (`SetToken`, `SetBaseURL`, …) are not instrumented.

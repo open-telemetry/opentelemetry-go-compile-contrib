@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.opentelemetry.io/otelc/instrumentation/database/sql/dsnparse"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/dsnparse"
 )
 
 // attrMap collapses the attribute slice into a lookup keyed by attribute name.

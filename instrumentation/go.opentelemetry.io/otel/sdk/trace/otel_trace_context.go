@@ -18,10 +18,10 @@ import (
 	trace "go.opentelemetry.io/otel/trace"
 )
 
-//go:linkname registerTraceAndSpanIDFunc go.opentelemetry.io/otelc/pkg/runtime.RegisterTraceAndSpanIDFunc
+//go:linkname registerTraceAndSpanIDFunc go.opentelemetry.io/otelc-contrib/pkg/runtime.RegisterTraceAndSpanIDFunc
 func registerTraceAndSpanIDFunc(f func() (string, string))
 
-//go:linkname registerSpanFromGLSFunc go.opentelemetry.io/otelc/pkg/runtime.RegisterSpanFromGLSFunc
+//go:linkname registerSpanFromGLSFunc go.opentelemetry.io/otelc-contrib/pkg/runtime.RegisterSpanFromGLSFunc
 func registerSpanFromGLSFunc(f func() trace.Span)
 
 // otelcLogger is reached by linkname, like the register funcs above, rather than
@@ -34,7 +34,7 @@ func registerSpanFromGLSFunc(f func() trace.Span)
 // var initializer would run first, latch the slog.Default() fallback, and silently
 // discard OTEL_LOG_LEVEL=debug output.
 //
-//go:linkname otelcLogger go.opentelemetry.io/otelc/pkg/runtime.Logger
+//go:linkname otelcLogger go.opentelemetry.io/otelc-contrib/pkg/runtime.Logger
 func otelcLogger() *slog.Logger
 
 const defaultGLSMaxSpans = 1000

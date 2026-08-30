@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/instrumentation/github.com/openai/openai-go
+module go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go
 
 go 1.25.0
 
@@ -8,9 +8,9 @@ require (
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/sdk v1.45.0
 	go.opentelemetry.io/otel/trace v1.45.0
-	go.opentelemetry.io/otelc/instrumentation/github.com/openai/openai-go/internal/streaming v0.0.0-00010101000000-000000000000
-	go.opentelemetry.io/otelc/pkg v0.0.0-00010101000000-000000000000
-	go.opentelemetry.io/otelc/pkg/runtime v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go/internal/streaming v0.0.0
+	go.opentelemetry.io/otelc/pkg v1.1.0
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0
 )
 
 require (
@@ -69,8 +69,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	go.opentelemetry.io/otelc/instrumentation/github.com/openai/openai-go/internal/streaming => ./internal/streaming
+	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go/internal/streaming => ./internal/streaming
 	go.opentelemetry.io/otelc/pkg => ../../../../pkg
-	go.opentelemetry.io/otelc/pkg/runtime => ../../../../pkg/runtime
+	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../pkg/runtime
 )

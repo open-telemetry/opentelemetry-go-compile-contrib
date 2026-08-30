@@ -5,4 +5,4 @@ mongodb_v2_hook_connect:
   do:
     - inject_hooks:
         before: BeforeConnect
-        path: "go.opentelemetry.io/otelc/instrumentation/go.mongodb.org/mongo-driver/v2/mongo"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.mongodb.org/mongo-driver/v2/mongo"

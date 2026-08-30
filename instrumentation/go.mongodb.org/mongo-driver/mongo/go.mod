@@ -1,17 +1,15 @@
-module go.opentelemetry.io/otelc/instrumentation/go.mongodb.org/mongo-driver/mongo
+module go.opentelemetry.io/otelc-contrib/instrumentation/go.mongodb.org/mongo-driver/mongo
 
 go 1.25.0
 
-replace go.opentelemetry.io/otelc/pkg => ../../../../pkg
 
-replace go.opentelemetry.io/otelc/pkg/runtime => ../../../../pkg/runtime
 
 require (
 	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.17.9
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.70.0
-	go.opentelemetry.io/otelc/pkg v0.0.0-00010101000000-000000000000
-	go.opentelemetry.io/otelc/pkg/runtime v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc/pkg v1.1.0
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0
 )
 
 require (

@@ -11,4 +11,4 @@ hook_log_output:
   do:
     - inject_hooks:
         before: BeforeLogOutput
-        path: "go.opentelemetry.io/otelc/instrumentation/log"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/log"

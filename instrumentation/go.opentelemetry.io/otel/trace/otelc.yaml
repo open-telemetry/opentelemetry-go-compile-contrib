@@ -6,4 +6,4 @@ hook_span_from_context:
   do:
     - inject_hooks:
         after: afterSpanFromContext
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/trace"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace"

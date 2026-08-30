@@ -18,7 +18,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 
-	kafkaprop "go.opentelemetry.io/otelc/instrumentation/github.com/segmentio/kafka-go/internal/propagation"
+	kafkaprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/internal/propagation"
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
 )
 

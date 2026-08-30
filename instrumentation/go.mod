@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/instrumentation
+module go.opentelemetry.io/otelc-contrib/instrumentation
 
 go 1.25.0
 

@@ -94,7 +94,7 @@ func TestK8SClientGoEnabler(t *testing.T) {
 
 func TestInstrumentationConstants(t *testing.T) {
 	assert.Equal(t,
-		"go.opentelemetry.io/otelc/instrumentation/k8s.io/client-go",
+		"go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go",
 		instrumentationName,
 	)
 	assert.Equal(t, "K8S_CLIENT_GO", instrumentationKey)

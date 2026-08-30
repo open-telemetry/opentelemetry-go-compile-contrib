@@ -10,4 +10,4 @@ hook_slog_new_record:
   do:
     - inject_hooks:
         after: AfterSlogNewRecord
-        path: "go.opentelemetry.io/otelc/instrumentation/log/slog"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/log/slog"

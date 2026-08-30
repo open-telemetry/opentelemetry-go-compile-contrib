@@ -5,4 +5,4 @@ aws_sdk_v2_hook_loaddefaultconfig:
   do:
     - inject_hooks:
         after: AfterLoadDefaultConfig
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/aws/aws-sdk-go-v2"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/aws/aws-sdk-go-v2"

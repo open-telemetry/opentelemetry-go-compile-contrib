@@ -12,13 +12,13 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/client-go/tools/cache"
 
-	"go.opentelemetry.io/otelc/instrumentation/k8s.io/client-go/semconv"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
-	instrumentationName = "go.opentelemetry.io/otelc/instrumentation/k8s.io/client-go"
+	instrumentationName = "go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go"
 	instrumentationKey  = "K8S_CLIENT_GO"
 )
 

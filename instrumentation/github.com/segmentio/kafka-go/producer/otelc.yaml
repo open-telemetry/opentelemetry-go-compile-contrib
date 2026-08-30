@@ -7,4 +7,4 @@ kafka_writer_writemessages:
     - inject_hooks:
         before: BeforeWriteMessages
         after: AfterWriteMessages
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/segmentio/kafka-go/producer"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/producer"

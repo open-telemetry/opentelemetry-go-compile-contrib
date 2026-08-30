@@ -10,4 +10,4 @@ linodego_hook_dorequest:
     - inject_hooks:
         before: BeforeDoRequest
         after: AfterDoRequest
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/linode/linodego/v2"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2"
