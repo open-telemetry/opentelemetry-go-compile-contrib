@@ -1,0 +1,35 @@
+go 1.26.5
+
+use (
+	./instrumentation/database/sql
+	./instrumentation/github.com/anthropics/anthropic-sdk-go
+	./instrumentation/github.com/aws/aws-sdk-go-v2
+	./instrumentation/github.com/gin-gonic/gin
+	./instrumentation/github.com/linode/linodego/v2
+	./instrumentation/github.com/openai/openai-go
+	./instrumentation/github.com/openai/openai-go/internal/streaming
+	./instrumentation/github.com/openai/openai-go/v2
+	./instrumentation/github.com/openai/openai-go/v3
+	./instrumentation/github.com/redis/go-redis/v9
+	./instrumentation/github.com/segmentio/kafka-go
+	./instrumentation/github.com/segmentio/kafka-go/consumer
+	./instrumentation/github.com/segmentio/kafka-go/producer
+	./instrumentation/github.com/sirupsen/logrus
+	./instrumentation/go.mongodb.org/mongo-driver/mongo
+	./instrumentation/go.mongodb.org/mongo-driver/v2/mongo
+	./instrumentation/go.opentelemetry.io/otel
+	./instrumentation/go.opentelemetry.io/otel/init
+	./instrumentation/go.opentelemetry.io/otel/sdk/trace
+	./instrumentation/go.opentelemetry.io/otel/trace
+	./instrumentation/google.golang.org/grpc
+	./instrumentation/google.golang.org/grpc/client
+	./instrumentation/google.golang.org/grpc/server
+	./instrumentation/k8s.io/client-go
+	./instrumentation/log
+	./instrumentation/log/slog
+	./instrumentation/net/http
+	./instrumentation/net/http/client
+	./instrumentation/net/http/server
+	./instrumentation/runtime
+	./pkg/runtime
+)
