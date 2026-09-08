@@ -1,0 +1,32 @@
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+
+# yamlfmt configuration file
+# See: https://github.com/google/yamlfmt/blob/main/docs/config-file.md
+
+formatter:
+  type: basic
+  retain_line_breaks: true
+  max_line_length: 120
+  indentless_arrays: false
+  drop_merge_tag: false
+  pad_line_comments: 2
+  include_document_start: false
+
+# Exclude patterns for files/directories to ignore.
+# With Makefile -dstar includes, patterns must also be doublestar-compatible
+# (prefix **/ …) so generated trees like schemas/otelc-contrib/.deps are skipped.
+exclude:
+  - "**/testdata/**"
+  - "**/vendor/**"
+  - "**/.git/**"
+  - "**/node_modules/**"
+  - "**/pb/**"
+  - "**/.otelc-build/**"
+  # Pre-fetched upstream semantic-conventions registry (generated, git-ignored).
+  # Upstream k8s/registry.yaml is not always valid YAML; never format/lint it.
+  - "**/schemas/otelc-contrib/.deps/**"
+  # Repo-scaffold workflows; kept byte-for-byte as generated, not reformatted.
+  - ".github/workflows/codeql.yml"
+  - ".github/workflows/scorecard.yml"
+  - ".github/workflows/zizmor.yml"
