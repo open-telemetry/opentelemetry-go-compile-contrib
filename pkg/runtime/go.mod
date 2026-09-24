@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/pkg/runtime
+module go.opentelemetry.io/otelc-contrib/pkg/runtime
 
 go 1.25.0
 

@@ -29,7 +29,7 @@ import (
 
 const (
 	modulePath   = "github.com/linode/linodego/v2"
-	instrPath    = "go.opentelemetry.io/otelc/instrumentation/github.com/linode/linodego/v2"
+	instrPath    = "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2"
 	defaultVer   = "v2.4.1"
 	outHooksGo   = "public_methods_gen.go"
 	outRulesYAML = "public_methods.otelc.yaml"

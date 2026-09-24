@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otelc/instrumentation/k8s.io/client-go/semconv"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/semconv"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"

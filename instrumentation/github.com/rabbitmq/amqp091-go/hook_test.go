@@ -18,7 +18,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 
-	amqprop "go.opentelemetry.io/otelc/instrumentation/github.com/rabbitmq/amqp091-go/internal/propagation"
+	amqprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/internal/propagation"
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
 )
 

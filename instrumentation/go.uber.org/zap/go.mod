@@ -1,15 +1,11 @@
-module go.opentelemetry.io/otelc/instrumentation/go.uber.org/zap
+module go.opentelemetry.io/otelc-contrib/instrumentation/go.uber.org/zap
 
 go 1.25.0
 
-replace go.opentelemetry.io/otelc/pkg => ../../../pkg
-
-replace go.opentelemetry.io/otelc/pkg/runtime => ../../../pkg/runtime
-
 require (
 	github.com/stretchr/testify v1.12.1
-	go.opentelemetry.io/otelc/pkg v0.0.0-00010101000000-000000000000
-	go.opentelemetry.io/otelc/pkg/runtime v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc/pkg v1.1.0
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0
 	go.uber.org/zap v1.27.1
 )
 

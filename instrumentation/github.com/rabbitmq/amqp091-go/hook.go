@@ -17,14 +17,14 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 
-	amqprop "go.opentelemetry.io/otelc/instrumentation/github.com/rabbitmq/amqp091-go/internal/propagation"
-	"go.opentelemetry.io/otelc/instrumentation/github.com/rabbitmq/amqp091-go/semconv"
+	amqprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/internal/propagation"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
-	instrumentationName = "go.opentelemetry.io/otelc/instrumentation/github.com/rabbitmq/amqp091-go"
+	instrumentationName = "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go"
 	instrumentationKey  = "AMQP"
 
 	// publishMsgIndex is Publishing in PublishWithDeferredConfirm

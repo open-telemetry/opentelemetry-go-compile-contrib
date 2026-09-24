@@ -16,13 +16,13 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
-	gocqlsemconv "go.opentelemetry.io/otelc/instrumentation/github.com/apache/cassandra-gocql-driver/v2/semconv"
+	gocqlsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/apache/cassandra-gocql-driver/v2/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
-	instrumentationName = "go.opentelemetry.io/otelc/instrumentation/github.com/apache/cassandra-gocql-driver/v2"
+	instrumentationName = "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/apache/cassandra-gocql-driver/v2"
 	instrumentationKey  = "GOCQL"
 )
 

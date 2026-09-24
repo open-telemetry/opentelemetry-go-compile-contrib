@@ -15,13 +15,13 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"go.opentelemetry.io/otelc/instrumentation/database/sql/semconv"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
-	instrumentationName = "go.opentelemetry.io/otelc/instrumentation/database/sql"
+	instrumentationName = "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql"
 	instrumentationKey  = "DATABASE"
 )
 

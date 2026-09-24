@@ -21,7 +21,7 @@ import (
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 
-	semconv "go.opentelemetry.io/otelc/instrumentation/github.com/openai/openai-go/v2/semconv"
+	semconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go/v2/semconv"
 
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"

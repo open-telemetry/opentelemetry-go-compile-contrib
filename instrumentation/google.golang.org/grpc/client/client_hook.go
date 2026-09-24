@@ -21,13 +21,13 @@ import (
 	"google.golang.org/grpc/stats"
 	"google.golang.org/grpc/status"
 
-	grpcsemconv "go.opentelemetry.io/otelc/instrumentation/google.golang.org/grpc/semconv"
+	grpcsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
-	instrumentationName        = "go.opentelemetry.io/otelc/instrumentation/google.golang.org/grpc"
+	instrumentationName        = "go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc"
 	instrumentationKey         = "GRPC"
 	dialOptionsParamIndex      = 2 // DialContext(ctx, target, opts...)
 	newClientOptionsParamIndex = 1 // NewClient(target, opts...)

@@ -9,7 +9,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	httpsemconv "go.opentelemetry.io/otelc/instrumentation/net/http/semconv"
+	httpsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/net/http/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
 )
 
