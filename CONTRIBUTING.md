@@ -405,5 +405,5 @@ Any [Maintainer] can merge the PR once the above criteria have been met.
 
 ## Release Process
 
-See [docs/RELEASE.md](docs/RELEASE.md) for the full release process, including release
-cadence, tagging conventions, cross-compilation targets, and hotfix guidance.
+The release process and cadence for `opentelemetry-go-compile-contrib` will be documented
+once established (tracked in [#7](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues/7)).

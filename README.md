@@ -32,7 +32,7 @@ package content will land here in subsequent pull requests.
 - [GitHub Discussions](https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/discussions) - Ask questions
 - [GitHub Issues](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues) - Report bugs
 - [Slack Channel](https://cloud-native.slack.com/archives/C088D8GSSSF) - Real-time chat
-- [Calendar](https://github.com/open-telemetry/community/#sig-go-compile-instrumentation) - Community meetings (Thursdays, UTC: 08:00 – 09:00)
+- [Calendar](https://github.com/open-telemetry/community/#sig-go-compile-instrumentation) - Community meetings (Thursdays, UTC: 09:30 – 10:30)
 
 ## Contributing
 
@@ -45,6 +45,7 @@ Here is a list of community roles with current and previous members:
 
 ### Maintainers
 
+- [Azhar Momin](https://github.com/amazingakai), Independent
 - [Dario Castañe](https://github.com/darccio), Datadog
 - [Haibin Zhang](https://github.com/NameHaibinZhang), Alibaba
 - [Huxing Zhang](https://github.com/ralf0131), Alibaba
@@ -56,8 +57,6 @@ Here is a list of community roles with current and previous members:
 For more information about the maintainer role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#maintainer).
 
 ### Approvers
-
-- [Azhar Momin](https://github.com/amazingakai), Independent
 
 For more information about the approver role, see the [community repository](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver).
 

@@ -42,10 +42,10 @@ PKG_COVERAGE_THRESHOLD ?= 70
 # by neither job, so adding a module without an app leaves it uncovered (currently
 # instrumentation/github.com/openai/openai-go/v3).
 # Demos are intentionally excluded (pinned example deps).
-GOVULNCHECK_CORE_MODULES := . $(shell find pkg -type f -name 'go.mod' -exec dirname {} \; | sort)
+GOVULNCHECK_CORE_MODULES := . $(shell [ -d pkg ] && find pkg -type f -name 'go.mod' -exec dirname {} \; 2>/dev/null | sort)
 # Top-level integration apps only (skip nested modules such as
 # test/apps/gincustom/instrumentation).
-GOVULNCHECK_TEST_APPS := $(shell find test/apps -mindepth 1 -maxdepth 1 -type d | sort)
+GOVULNCHECK_TEST_APPS := $(shell [ -d test/apps ] && find test/apps -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
 
 # OTel Weaver execution for the local semantic-convention registry under
 # schemas/otelc-contrib/. Weaver runs from an OCI image (no host install required);

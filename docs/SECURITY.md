@@ -52,16 +52,16 @@ escalations.
 The following controls are currently in place:
 
 - **OSSF Scorecard** — runs weekly and on every push to `main`
-  (`.github/workflows/ossf-scorecard.yml`).
+  (`.github/workflows/scorecard.yml`).
 - **Dependency management** — Renovate Bot keeps all dependencies up to date
   (`.github/renovate.json5`).
-- **CodeQL static analysis** — a workflow to scan Go source code for known
-  vulnerability patterns on every pull request is proposed in PR #536 and
-  pending merge.
+- **CodeQL static analysis** — runs on pull requests, pushes to `main`, and on a weekly schedule
+  (`.github/workflows/codeql.yml`).
 - **Workflow hardening** — all GitHub Actions workflows pin dependencies to
-  commit SHAs and follow least-privilege permission models.
-- **License compliance** — FOSSA checks run on every PR to verify dependency
-  license compatibility.
+  commit SHAs, follow least-privilege permission models, and are analyzed with Zizmor
+  (`.github/workflows/zizmor.yml`).
+- **License compliance** — license header checks run on every PR and push to `main`
+  (`.github/workflows/check-license-headers.yaml`).
 
 ## Security Notification Template
 

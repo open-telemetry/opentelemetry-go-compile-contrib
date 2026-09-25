@@ -1,5 +1,8 @@
 # Testing
 
+> [!NOTE]
+> **Migration in Progress**: This document describes the post-migration testing layout and categories. Some referenced paths (such as `pkg/`, `tool/`, and `test/`) will be populated as the migration from `opentelemetry-go-compile-instrumentation` progresses (tracked in [#5](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues/5)).
+
 This document describes the testing strategy for the project, the different test categories, and when to use each.
 
 Tests are organized in six categories, each with a distinct purpose and scope.

@@ -1,5 +1,8 @@
 # Semantic Conventions Management
 
+> [!NOTE]
+> **Migration in Progress**: This document describes the post-migration semantic conventions and registry layout. Schema files and instrumentation paths will be populated as the migration from `opentelemetry-go-compile-instrumentation` progresses (tracked in [#5](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues/5)).
+
 This document describes the tooling and workflow for managing [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) in the compile-instrumentation project.
 
 ## Overview
