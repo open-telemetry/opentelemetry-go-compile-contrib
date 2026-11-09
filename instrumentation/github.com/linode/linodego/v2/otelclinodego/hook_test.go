@@ -103,7 +103,7 @@ func TestLinodegoEnabler(t *testing.T) {
 
 func TestInstrumentationConstants(t *testing.T) {
 	assert.Equal(t,
-		"go.opentelemetry.io/otelc/instrumentation/github.com/linode/linodego/v2",
+		"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2/otelclinodego",
 		instrumentationName,
 	)
 	assert.Equal(t, "LINODEGO", instrumentationKey)

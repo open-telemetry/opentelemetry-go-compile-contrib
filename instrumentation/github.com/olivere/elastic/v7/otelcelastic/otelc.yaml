@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 # (*Client).PerformRequest is the shared HTTP path for Search, Index, Bulk,
 # Delete, and the rest of the public olivere/elastic v7 API.
@@ -13,4 +13,4 @@ elastic_hook_perform_request:
     - inject_hooks:
         before: BeforePerformRequest
         after: AfterPerformRequest
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/olivere/elastic/v7"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/olivere/elastic/v7/otelcelastic"

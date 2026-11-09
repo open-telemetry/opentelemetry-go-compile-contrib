@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 add_gls_field:
   target: "runtime"
@@ -19,7 +19,7 @@ gls_linker:
   do:
     - add_file:
         file: "runtime_gls.go"
-        path: "go.opentelemetry.io/otelc/instrumentation/runtime"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime"
 
 goroutine_propagate:
   target: "runtime"

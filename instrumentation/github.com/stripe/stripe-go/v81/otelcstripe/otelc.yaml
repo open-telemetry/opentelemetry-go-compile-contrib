@@ -1,3 +1,5 @@
+version: "v1.2.0"
+
 # Every stripe-go v81 API call — across all 200+ resource clients and the
 # client.API aggregate — funnels through requestWithRetriesAndTelemetry
 # on the backend. Hooking that one function covers the whole SDK and does
@@ -14,4 +16,4 @@ stripe_backend_request:
     - inject_hooks:
         before: BeforeRequest
         after: AfterRequest
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/stripe/stripe-go/v81"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/stripe/stripe-go/v81/otelcstripe"

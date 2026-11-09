@@ -13,7 +13,7 @@ description: |
   registry forms the complete contract of what otelc emits, validated by
   `make lint-schema` (`weaver registry check --future`).
 semconv_version: 0.1.0
-schema_base_url: https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/schemas/
+schema_base_url: https://github.com/open-telemetry/opentelemetry-go-compile-contrib/schemas/
 dependencies:
   # The dependency version MUST stay in sync with the upstream OpenTelemetry
   # semantic conventions version this project is built against, i.e. the value

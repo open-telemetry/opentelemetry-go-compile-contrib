@@ -10,7 +10,7 @@ import (
 	_ "unsafe"
 )
 
-//go:linkname setHostURLGetter go.opentelemetry.io/otelc/instrumentation/github.com/linode/linodego/v2.setHostURLGetter
+//go:linkname setHostURLGetter go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2/otelclinodego.setHostURLGetter
 func setHostURLGetter(fn func(*Client) string)
 
 func init() {

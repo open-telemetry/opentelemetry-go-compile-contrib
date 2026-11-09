@@ -1,16 +1,14 @@
-module go.opentelemetry.io/otelc/instrumentation/go.mongodb.org/mongo-driver/v2/mongo
+module go.opentelemetry.io/otelc-contrib/instrumentation/go.mongodb.org/mongo-driver/v2/mongo/otelcmongo
 
 go 1.26.0
-
-replace go.opentelemetry.io/otelc/pkg/runtime => ../../../../../pkg/runtime
 
 require (
 	github.com/stretchr/testify v1.12.1
 	go.mongodb.org/mongo-driver/v2 v2.9.2
 	// this should be updated to a tagged release once one is published by contrib
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/v2/mongo/otelmongo v0.0.0-20260814181354-b0f078590c22
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/otelc/pkg v0.1.0
-	go.opentelemetry.io/otelc/pkg/runtime v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -71,4 +69,8 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
 	google.golang.org/grpc v1.85.0-dev.0.20260825072537-93e31b48545e // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
+)
+
+replace (
+	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../../pkg/runtime
 )

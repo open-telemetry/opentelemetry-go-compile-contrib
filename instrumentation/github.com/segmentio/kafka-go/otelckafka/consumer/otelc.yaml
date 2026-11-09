@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 kafka_reader_readmessage:
   target: github.com/segmentio/kafka-go
@@ -9,7 +9,7 @@ kafka_reader_readmessage:
     - inject_hooks:
         before: BeforeReadMessage
         after: AfterReadMessage
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/segmentio/kafka-go/consumer"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka/consumer"
 
 kafka_reader_fetchmessage:
   target: github.com/segmentio/kafka-go
@@ -20,4 +20,4 @@ kafka_reader_fetchmessage:
     - inject_hooks:
         before: BeforeFetchMessage
         after: AfterFetchMessage
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/segmentio/kafka-go/consumer"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka/consumer"

@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 # The otel SDK floor tracks the version the injected instrumentation modules
 # require (instrumentation/**); raise it together with those modules.
@@ -8,7 +8,7 @@ trace_context:
   do:
     - add_file:
         file: otel_trace_context.go
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace"
 
 # Function hooks for go.opentelemetry.io/otel/sdk/trace
 hook_new_recording_span:
@@ -20,7 +20,7 @@ hook_new_recording_span:
   do:
     - inject_hooks:
         after: afterNewRecordingSpan
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace"
 
 hook_new_non_recording_span:
   target: go.opentelemetry.io/otel/sdk/trace
@@ -31,7 +31,7 @@ hook_new_non_recording_span:
   do:
     - inject_hooks:
         after: afterNewNonRecordingSpan
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace"
 
 hook_recording_span_end:
   target: go.opentelemetry.io/otel/sdk/trace
@@ -42,7 +42,7 @@ hook_recording_span_end:
   do:
     - inject_hooks:
         before: beforeRecordingSpanEnd
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace"
 
 hook_non_recording_span_end:
   target: go.opentelemetry.io/otel/sdk/trace
@@ -53,4 +53,4 @@ hook_non_recording_span_end:
   do:
     - inject_hooks:
         before: beforeNonRecordingSpanEnd
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace"

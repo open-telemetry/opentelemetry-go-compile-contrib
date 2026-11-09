@@ -20,9 +20,9 @@ import (
 	otelsemconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	"go.opentelemetry.io/otelc/instrumentation/github.com/anthropics/anthropic-sdk-go/semconv"
-	"go.opentelemetry.io/otelc/pkg/netutil"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/anthropics/anthropic-sdk-go/otelcanthropic/semconv"
+	"go.opentelemetry.io/otelc-contrib/pkg/netutil"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (

@@ -1,7 +1,7 @@
 # Copyright The OpenTelemetry Authors
 # SPDX-License-Identifier: Apache-2.0
 
-version: "v1.0.0"
+version: "v1.2.0"
 
 # Instrumentation for log to inject trace context into log messages
 
@@ -13,4 +13,4 @@ hook_log_output:
   do:
     - inject_hooks:
         before: BeforeLogOutput
-        path: "go.opentelemetry.io/otelc/instrumentation/log"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/log/otelclog"

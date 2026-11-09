@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 client_hook_newclient:
   target: google.golang.org/grpc
@@ -8,7 +8,7 @@ client_hook_newclient:
     - inject_hooks:
         before: BeforeNewClient
         after: AfterNewClient
-        path: "go.opentelemetry.io/otelc/instrumentation/google.golang.org/grpc/client"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc/client"
 
 client_hook_dialcontext:
   target: google.golang.org/grpc
@@ -18,4 +18,4 @@ client_hook_dialcontext:
     - inject_hooks:
         before: BeforeDialContext
         after: AfterDialContext
-        path: "go.opentelemetry.io/otelc/instrumentation/google.golang.org/grpc/client"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc/client"

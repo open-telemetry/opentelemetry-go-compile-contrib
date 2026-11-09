@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 func afterSpanFromContext(ictx hook.HookContext, span trace.Span) {

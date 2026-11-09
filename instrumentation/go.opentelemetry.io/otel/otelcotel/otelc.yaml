@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 # Function hook for go.opentelemetry.io/otel
 hook_set_tracer_provider:
@@ -8,4 +8,4 @@ hook_set_tracer_provider:
   do:
     - inject_hooks:
         before: beforeSetTracerProvider
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/otelcotel"

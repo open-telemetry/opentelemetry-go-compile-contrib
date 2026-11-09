@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 redis_hook_newclient:
   target: github.com/redis/go-redis/v9
@@ -7,7 +7,7 @@ redis_hook_newclient:
   do:
     - inject_hooks:
         after: afterNewRedisClientV9
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/redis/go-redis/v9"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/redis/go-redis/v9/otelcredis"
 
 redis_hook_newfailoverclient:
   target: github.com/redis/go-redis/v9
@@ -16,7 +16,7 @@ redis_hook_newfailoverclient:
   do:
     - inject_hooks:
         after: afterNewFailOverRedisClientV9
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/redis/go-redis/v9"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/redis/go-redis/v9/otelcredis"
 
 redis_hook_newsentinelclient:
   target: github.com/redis/go-redis/v9
@@ -25,7 +25,7 @@ redis_hook_newsentinelclient:
   do:
     - inject_hooks:
         after: afterNewSentinelClientV9
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/redis/go-redis/v9"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/redis/go-redis/v9/otelcredis"
 
 redis_client_hook:
   target: github.com/redis/go-redis/v9
@@ -36,7 +36,7 @@ redis_client_hook:
   do:
     - inject_hooks:
         after: afterClientConnV9
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/redis/go-redis/v9"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/redis/go-redis/v9/otelcredis"
 
 redis_hook_withtimeout:
   target: github.com/redis/go-redis/v9
@@ -49,4 +49,4 @@ redis_hook_withtimeout:
   do:
     - inject_hooks:
         after: afterClientWithTimeoutV9
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/redis/go-redis/v9"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/redis/go-redis/v9/otelcredis"

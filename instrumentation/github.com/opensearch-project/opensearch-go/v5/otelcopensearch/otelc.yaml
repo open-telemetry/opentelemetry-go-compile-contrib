@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 # (*Client).Request is the shared HTTP path for Search, Index, Bulk, Delete,
 # and the rest of the public opensearch-go v5 API. Node discovery and health
@@ -13,4 +13,4 @@ opensearch_client_request:
     - inject_hooks:
         before: BeforeRequest
         after: AfterRequest
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/opensearch-project/opensearch-go/v5"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/opensearch-project/opensearch-go/v5/otelcopensearch"

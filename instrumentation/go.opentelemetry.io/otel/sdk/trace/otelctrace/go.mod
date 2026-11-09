@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace
+module go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace
 
 go 1.26.0
 

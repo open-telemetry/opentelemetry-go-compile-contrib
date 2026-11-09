@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 # Function hook for go.opentelemetry.io/otel/trace
 hook_span_from_context:
@@ -8,4 +8,4 @@ hook_span_from_context:
   do:
     - inject_hooks:
         after: afterSpanFromContext
-        path: "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/trace"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace"

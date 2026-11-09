@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (

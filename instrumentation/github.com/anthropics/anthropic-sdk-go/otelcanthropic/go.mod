@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/instrumentation/github.com/anthropics/anthropic-sdk-go
+module go.opentelemetry.io/otelc-contrib/instrumentation/github.com/anthropics/anthropic-sdk-go/otelcanthropic
 
 go 1.26.0
 
@@ -10,9 +10,9 @@ require (
 	go.opentelemetry.io/otel/sdk v1.47.0
 	go.opentelemetry.io/otel/sdk/metric v1.47.0
 	go.opentelemetry.io/otel/trace v1.47.0
+	go.opentelemetry.io/otelc-contrib/pkg/netutil v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/otelc/pkg v0.1.0
-	go.opentelemetry.io/otelc/pkg/netutil v0.0.0-00010101000000-000000000000
-	go.opentelemetry.io/otelc/pkg/runtime v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -68,6 +68,6 @@ require (
 )
 
 replace (
-	go.opentelemetry.io/otelc/pkg/netutil => ../../../../pkg/netutil
-	go.opentelemetry.io/otelc/pkg/runtime => ../../../../pkg/runtime
+	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../pkg/runtime
+	go.opentelemetry.io/otelc-contrib/pkg/netutil => ../../../../../pkg/netutil
 )

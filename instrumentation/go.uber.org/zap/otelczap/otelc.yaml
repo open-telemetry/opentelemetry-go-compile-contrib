@@ -1,7 +1,7 @@
 # Copyright The OpenTelemetry Authors
 # SPDX-License-Identifier: Apache-2.0
 
-version: "v1.0.0"
+version: "v1.2.0"
 
 # Instrumentation for go.uber.org/zap to inject trace context into log fields
 
@@ -14,4 +14,4 @@ hook_zapcore_checked_entry_write:
   do:
     - inject_hooks:
         before: BeforeCheckedEntryWrite
-        path: "go.opentelemetry.io/otelc/instrumentation/go.uber.org/zap"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/go.uber.org/zap/otelczap"

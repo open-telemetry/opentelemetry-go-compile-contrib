@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel
+module go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/otelcotel
 
 go 1.26.0
 

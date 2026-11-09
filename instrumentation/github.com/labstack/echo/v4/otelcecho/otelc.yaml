@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 # Echo has no Context.Next. ServeHTTP matches the route with Router.Find,
 # then runs the handler chain. After Find, Context.Path() is the template.
@@ -11,7 +11,7 @@ echo_router_find_hook:
   do:
     - inject_hooks:
         after: AfterFind
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/labstack/echo/v4"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/labstack/echo/v4/otelcecho"
 
 # c.Error(err) calls HTTPErrorHandler immediately. It does not accumulate
 # errors the way gin does. Record the error on the net/http server span.
@@ -24,7 +24,7 @@ echo_context_error_hook:
   do:
     - inject_hooks:
         before: BeforeError
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/labstack/echo/v4"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/labstack/echo/v4/otelcecho"
 
 # Default HTTPErrorHandler. AfterFind wraps the route handler to record its
 # `return err`; this hook also covers errors from global middleware. 4xx
@@ -38,4 +38,4 @@ echo_default_http_error_handler_hook:
   do:
     - inject_hooks:
         before: BeforeDefaultHTTPErrorHandler
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/labstack/echo/v4"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/labstack/echo/v4/otelcecho"

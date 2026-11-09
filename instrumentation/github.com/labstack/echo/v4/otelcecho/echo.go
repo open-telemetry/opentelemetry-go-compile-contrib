@@ -6,7 +6,7 @@
 package server
 
 import (
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 // instrumentationKey names this instrumentation for

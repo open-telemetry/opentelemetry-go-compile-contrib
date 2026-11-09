@@ -1,3 +1,5 @@
+version: "v1.2.0"
+
 gocql_newsession:
   target: github.com/apache/cassandra-gocql-driver/v2
   version: v2.0.0
@@ -6,4 +8,4 @@ gocql_newsession:
   do:
     - inject_hooks:
         before: BeforeNewSession
-        path: "go.opentelemetry.io/otelc/instrumentation/github.com/apache/cassandra-gocql-driver/v2"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/apache/cassandra-gocql-driver/v2/otelcgocql"

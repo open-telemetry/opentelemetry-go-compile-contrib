@@ -1,4 +1,4 @@
-version: "v1.0.0"
+version: "v1.2.0"
 
 add_new_field_db:
   target: database/sql
@@ -74,7 +74,7 @@ hook_open:
     - inject_hooks:
         before: beforeOpenInstrumentation
         after: afterOpenInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_opendb:
   target: database/sql
@@ -84,7 +84,7 @@ hook_opendb:
     - inject_hooks:
         before: beforeOpenDBInstrumentation
         after: afterOpenDBInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_db_ping_context:
   target: database/sql
@@ -95,7 +95,7 @@ hook_db_ping_context:
     - inject_hooks:
         before: beforePingContextInstrumentation
         after: afterPingContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_db_prepare_context:
   target: database/sql
@@ -106,7 +106,7 @@ hook_db_prepare_context:
     - inject_hooks:
         before: beforePrepareContextInstrumentation
         after: afterPrepareContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_db_exec_context:
   target: database/sql
@@ -117,7 +117,7 @@ hook_db_exec_context:
     - inject_hooks:
         before: beforeExecContextInstrumentation
         after: afterExecContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_db_query_context:
   target: database/sql
@@ -128,7 +128,7 @@ hook_db_query_context:
     - inject_hooks:
         before: beforeQueryContextInstrumentation
         after: afterQueryContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_db_begin_tx:
   target: database/sql
@@ -139,7 +139,7 @@ hook_db_begin_tx:
     - inject_hooks:
         before: beforeTxInstrumentation
         after: afterTxInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_db_conn:
   target: database/sql
@@ -150,7 +150,7 @@ hook_db_conn:
     - inject_hooks:
         before: beforeConnInstrumentation
         after: afterConnInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_conn_ping_context:
   target: database/sql
@@ -161,7 +161,7 @@ hook_conn_ping_context:
     - inject_hooks:
         before: beforeConnPingContextInstrumentation
         after: afterConnPingContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_conn_prepare_context:
   target: database/sql
@@ -172,7 +172,7 @@ hook_conn_prepare_context:
     - inject_hooks:
         before: beforeConnPrepareContextInstrumentation
         after: afterConnPrepareContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_conn_exec_context:
   target: database/sql
@@ -183,7 +183,7 @@ hook_conn_exec_context:
     - inject_hooks:
         before: beforeConnExecContextInstrumentation
         after: afterConnExecContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_conn_query_context:
   target: database/sql
@@ -194,7 +194,7 @@ hook_conn_query_context:
     - inject_hooks:
         before: beforeConnQueryContextInstrumentation
         after: afterConnQueryContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_conn_begin_tx:
   target: database/sql
@@ -205,7 +205,7 @@ hook_conn_begin_tx:
     - inject_hooks:
         before: beforeConnTxInstrumentation
         after: afterConnTxInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_tx_stmt_context:
   target: database/sql
@@ -216,7 +216,7 @@ hook_tx_stmt_context:
     - inject_hooks:
         before: beforeTxStmtContextInstrumentation
         after: afterTxStmtContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_tx_prepare_context:
   target: database/sql
@@ -227,7 +227,7 @@ hook_tx_prepare_context:
     - inject_hooks:
         before: beforeTxPrepareContextInstrumentation
         after: afterTxPrepareContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_tx_exec_context:
   target: database/sql
@@ -238,7 +238,7 @@ hook_tx_exec_context:
     - inject_hooks:
         before: beforeTxExecContextInstrumentation
         after: afterTxExecContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_tx_query_context:
   target: database/sql
@@ -249,7 +249,7 @@ hook_tx_query_context:
     - inject_hooks:
         before: beforeTxQueryContextInstrumentation
         after: afterTxQueryContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_tx_commit:
   target: database/sql
@@ -260,7 +260,7 @@ hook_tx_commit:
     - inject_hooks:
         before: beforeTxCommitInstrumentation
         after: afterTxCommitInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_tx_rollback:
   target: database/sql
@@ -271,7 +271,7 @@ hook_tx_rollback:
     - inject_hooks:
         before: beforeTxRollbackInstrumentation
         after: afterTxRollbackInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_stmt_exec_context:
   target: database/sql
@@ -282,7 +282,7 @@ hook_stmt_exec_context:
     - inject_hooks:
         before: beforeStmtExecContextInstrumentation
         after: afterStmtExecContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"
 
 hook_stmt_query_context:
   target: database/sql
@@ -293,4 +293,4 @@ hook_stmt_query_context:
     - inject_hooks:
         before: beforeStmtQueryContextInstrumentation
         after: afterStmtQueryContextInstrumentation
-        path: "go.opentelemetry.io/otelc/instrumentation/database/sql"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/database/sql/otelcsql"

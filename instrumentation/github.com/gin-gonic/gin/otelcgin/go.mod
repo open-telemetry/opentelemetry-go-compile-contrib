@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/instrumentation/github.com/gin-gonic/gin
+module go.opentelemetry.io/otelc-contrib/instrumentation/github.com/gin-gonic/gin/otelcgin
 
 go 1.26.0
 
@@ -8,9 +8,9 @@ require (
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/sdk v1.47.0
 	go.opentelemetry.io/otel/trace v1.47.0
-	go.opentelemetry.io/otelc/instrumentation v0.0.0-20260903091335-1ff9e49ff4a9
+	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/otelc/pkg v0.1.0
-	go.opentelemetry.io/otelc/pkg/runtime v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -88,6 +88,7 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-replace go.opentelemetry.io/otelc/pkg/runtime => ../../../../pkg/runtime
-
-replace go.opentelemetry.io/otelc/instrumentation => ../../..
+replace (
+	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../pkg/runtime
+	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp => ../../../../net/http/otelchttp
+)

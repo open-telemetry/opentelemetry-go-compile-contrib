@@ -8,5 +8,5 @@ package init
 
 // import the runtime package to ensure it stays in go.mod
 import (
-	_ "go.opentelemetry.io/otelc/pkg/runtime"
+	_ "go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )

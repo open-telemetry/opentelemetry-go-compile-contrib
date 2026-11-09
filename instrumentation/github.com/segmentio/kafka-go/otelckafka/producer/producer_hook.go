@@ -14,15 +14,15 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 
-	kafkaprop "go.opentelemetry.io/otelc/instrumentation/github.com/segmentio/kafka-go/internal/propagation"
-	"go.opentelemetry.io/otelc/instrumentation/github.com/segmentio/kafka-go/semconv"
+	kafkaprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka/internal/propagation"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
-	instrumentationName = "go.opentelemetry.io/otelc/" +
-		"instrumentation/github.com/segmentio/kafka-go"
+	instrumentationName = "go.opentelemetry.io/otelc-contrib/" +
+		"instrumentation/github.com/segmentio/kafka-go/otelckafka"
 	instrumentationKey   = "KAFKA"
 	messagesParamIndex   = 2
 	propagatedHeadersCap = 2 // traceparent + baggage
