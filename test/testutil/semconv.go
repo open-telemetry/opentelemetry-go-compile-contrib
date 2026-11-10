@@ -1,0 +1,244 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+package testutil
+
+import (
+	"net"
+	"strconv"
+	"testing"
+
+	"go.opentelemetry.io/collector/pdata/ptrace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
+)
+
+// RequireHTTPClientSemconv verifies that an HTTP client span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-client-span
+func RequireHTTPClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	method, urlFull, serverAddress string,
+	statusCode, serverPort int64,
+	networkProtocolVersion, urlScheme string,
+) {
+	// Required attributes - all validated with exact values
+	RequireAttribute(t, span, string(semconv.HTTPRequestMethodKey), method)
+	RequireAttribute(t, span, string(semconv.ServerAddressKey), serverAddress)
+	RequireAttribute(t, span, string(semconv.URLFullKey), urlFull)
+	// Conditionally required (when response is received)
+	RequireAttribute(t, span, string(semconv.HTTPResponseStatusCodeKey), statusCode)
+	// Recommended attributes - all validated with exact values
+	RequireAttribute(t, span, string(semconv.NetworkProtocolVersionKey), networkProtocolVersion)
+	RequireAttribute(t, span, string(semconv.URLSchemeKey), urlScheme)
+	RequireAttribute(t, span, string(semconv.ServerPortKey), serverPort)
+}
+
+// RequireHTTPServerSemconv verifies that an HTTP server span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-server-span
+func RequireHTTPServerSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	method, urlPath, urlScheme string,
+	statusCode, serverPort int64,
+	clientAddress, userAgent, networkProtocolVersion, serverAddress string,
+) {
+	// Required attributes - all validated with exact values
+	RequireAttribute(t, span, string(semconv.HTTPRequestMethodKey), method)
+	RequireAttribute(t, span, string(semconv.URLPathKey), urlPath)
+	RequireAttribute(t, span, string(semconv.URLSchemeKey), urlScheme)
+	// Conditionally required (when response is sent)
+	RequireAttribute(t, span, string(semconv.HTTPResponseStatusCodeKey), statusCode)
+	// Recommended attributes - all validated with exact values
+	RequireAttribute(t, span, string(semconv.ClientAddressKey), clientAddress)
+	RequireAttribute(t, span, string(semconv.UserAgentOriginalKey), userAgent)
+	RequireAttribute(t, span, string(semconv.NetworkProtocolVersionKey), networkProtocolVersion)
+	RequireAttribute(t, span, string(semconv.ServerAddressKey), serverAddress)
+	RequireAttribute(t, span, string(semconv.ServerPortKey), serverPort)
+}
+
+// RequireGRPCClientSemconv verifies that a gRPC client span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/rpc/rpc-spans/
+func RequireGRPCClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	serverAddress, rpcService, rpcMethod string,
+	grpcStatusCode int64,
+) {
+	// Required attributes - all validated with exact values
+	RequireAttribute(t, span, string(semconv.RPCSystemKey), "grpc")
+	RequireAttribute(t, span, string(semconv.ServerAddressKey), serverAddress)
+	// Recommended attributes - all validated with exact values
+	RequireAttribute(t, span, string(semconv.RPCServiceKey), rpcService)
+	RequireAttribute(t, span, string(semconv.RPCMethodKey), rpcMethod)
+	// Conditionally required (when server responds) - validated with exact value
+	RequireAttribute(t, span, string(semconv.RPCGRPCStatusCodeKey), grpcStatusCode)
+}
+
+// RequireDBClientSemconv verifies that a database client span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/database/database-spans/
+func RequireDBClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	dbOperationName, dbQueryText, serverAddress string,
+	serverPort int64,
+	dbNamespace string,
+) {
+	// Required attributes
+	RequireAttribute(t, span, string(semconv.DBOperationNameKey), dbOperationName)
+	// Recommended attributes
+	RequireAttribute(t, span, string(semconv.DBQueryTextKey), dbQueryText)
+	RequireAttribute(t, span, string(semconv.ServerAddressKey), serverAddress)
+	if serverPort > 0 {
+		RequireAttribute(t, span, string(semconv.ServerPortKey), serverPort)
+	}
+	RequireAttribute(t, span, string(semconv.DBNamespaceKey), dbNamespace)
+}
+
+// RequireGRPCServerSemconv verifies that a gRPC server span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/rpc/rpc-spans/
+func RequireGRPCServerSemconv(t *testing.T, span ptrace.Span, rpcService, rpcMethod string, grpcStatusCode int64) {
+	// Required attributes - all validated with exact values
+	RequireAttribute(t, span, string(semconv.RPCSystemKey), "grpc")
+	// Recommended attributes - all validated with exact values
+	RequireAttribute(t, span, string(semconv.RPCServiceKey), rpcService)
+	RequireAttribute(t, span, string(semconv.RPCMethodKey), rpcMethod)
+	// Conditionally required (when response is sent) - validated with exact value
+	RequireAttribute(t, span, string(semconv.RPCGRPCStatusCodeKey), grpcStatusCode)
+}
+
+// RequireElasticsearchClientSemconv verifies that an Elasticsearch client span
+// follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/database/elasticsearch/
+func RequireElasticsearchClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	operationName, index, method, urlPath string,
+	statusCode int64,
+) {
+	RequireAttribute(t, span, string(semconv.DBSystemNameKey), "elasticsearch")
+	RequireAttribute(t, span, string(semconv.DBOperationNameKey), operationName)
+	if index != "" {
+		RequireAttribute(t, span, string(semconv.DBCollectionNameKey), index)
+	}
+	RequireAttribute(t, span, string(semconv.NetworkTransportKey), "tcp")
+	RequireAttribute(t, span, string(semconv.HTTPRequestMethodKey), method)
+	RequireAttribute(t, span, string(semconv.URLPathKey), urlPath)
+	RequireAttribute(t, span, string(semconv.DBResponseStatusCodeKey), strconv.FormatInt(statusCode, 10))
+}
+
+// RequireRedisClientSemconv verifies that a Redis client span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/database/redis/
+func RequireRedisClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	operationName, endpoint, queryText string,
+) {
+	host, portStr, err := net.SplitHostPort(endpoint)
+	if err != nil {
+		host = endpoint
+	}
+
+	RequireAttribute(t, span, string(semconv.DBSystemNameKey), "redis")
+	RequireAttribute(t, span, string(semconv.DBOperationNameKey), operationName)
+	RequireAttribute(t, span, string(semconv.ServerAddressKey), host)
+	RequireAttribute(t, span, string(semconv.NetworkTransportKey), "tcp")
+	RequireAttribute(t, span, string(semconv.DBQueryTextKey), queryText)
+
+	if err == nil {
+		if port, convErr := strconv.Atoi(portStr); convErr == nil && port > 0 {
+			RequireAttribute(t, span, string(semconv.ServerPortKey), int64(port))
+		}
+	}
+}
+
+// RequireGenAIClientSemconv verifies that a GenAI client span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-spans/
+func RequireGenAIClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	system, operationName, requestModel, providerName, serverEndpoint string,
+	responseID, responseModel string,
+	finishReasons []string,
+	inputTokens, outputTokens, totalTokens int64,
+) {
+	serverAddress, portText, err := net.SplitHostPort(serverEndpoint)
+	if err != nil {
+		t.Fatalf("split GenAI server endpoint %q: %v", serverEndpoint, err)
+	}
+	serverPort, err := strconv.ParseInt(portText, 10, 64)
+	if err != nil {
+		t.Fatalf("parse GenAI server port %q: %v", portText, err)
+	}
+
+	// Required attributes
+	RequireAttribute(t, span, "gen_ai.system", system)
+	RequireAttribute(t, span, "gen_ai.operation.name", operationName)
+	RequireAttribute(t, span, "gen_ai.request.model", requestModel)
+	// Recommended attributes
+	RequireAttribute(t, span, "gen_ai.provider.name", providerName)
+	RequireAttribute(t, span, string(semconv.ServerAddressKey), serverAddress)
+	// Conditionally required whenever server.address is set.
+	RequireAttribute(t, span, string(semconv.ServerPortKey), serverPort)
+	RequireAttribute(t, span, "gen_ai.response.id", responseID)
+	RequireAttribute(t, span, "gen_ai.response.model", responseModel)
+	if len(finishReasons) > 0 {
+		RequireAttributeExists(t, span, "gen_ai.response.finish_reasons")
+	}
+	// Usage attributes
+	RequireAttribute(t, span, "gen_ai.usage.input_tokens", inputTokens)
+	RequireAttribute(t, span, "gen_ai.usage.output_tokens", outputTokens)
+	RequireAttribute(t, span, "gen_ai.usage.total_tokens", totalTokens)
+}
+
+// RequireK8SClientSemconv verifies that a K8S informers span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/resource/k8s/
+func RequireK8SClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	podName string,
+	requireNodeName bool,
+) {
+	RequireAttributeExists(t, span, string(semconv.K8SPodUIDKey))
+	RequireAttribute(t, span, string(semconv.K8SPodNameKey), podName)
+	if requireNodeName {
+		RequireAttributeExists(t, span, string(semconv.K8SNodeNameKey))
+	}
+	RequireAttribute(t, span, string(semconv.K8SNamespaceNameKey), "default")
+	RequireAttribute(t, span, "k8s.object.kind", "Pod")
+	RequireAttribute(t, span, "k8s.object.api_version", "v1")
+}
+
+// RequireAWSClientSemconv verifies that an AWS SDK client span follows semantic conventions.
+// Reference: https://opentelemetry.io/docs/specs/semconv/cloud-providers/aws-sdk/
+func RequireAWSClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	requestID string,
+) {
+	// Required attributes
+	RequireAttribute(t, span, "rpc.system.name", "aws-api")
+	// Recommended attributes
+	RequireAttribute(t, span, "aws.request_id", requestID)
+}
+
+// RequireOpenSearchClientSemconv verifies that an OpenSearch client span
+// follows semantic conventions. The database span conventions do not define a
+// separate OpenSearch page, so the generic database client attributes apply
+// with db.system.name=opensearch.
+// Reference: https://opentelemetry.io/docs/specs/semconv/database/database-spans/
+func RequireOpenSearchClientSemconv(
+	t *testing.T,
+	span ptrace.Span,
+	operationName, index, method, urlPath string,
+	statusCode int64,
+) {
+	RequireAttribute(t, span, string(semconv.DBSystemNameKey), "opensearch")
+	RequireAttribute(t, span, string(semconv.DBOperationNameKey), operationName)
+	if index != "" {
+		RequireAttribute(t, span, string(semconv.DBCollectionNameKey), index)
+	}
+	RequireAttribute(t, span, string(semconv.NetworkTransportKey), "tcp")
+	RequireAttribute(t, span, string(semconv.HTTPRequestMethodKey), method)
+	RequireAttribute(t, span, string(semconv.URLPathKey), urlPath)
+	RequireAttribute(t, span, string(semconv.DBResponseStatusCodeKey), strconv.FormatInt(statusCode, 10))
+}

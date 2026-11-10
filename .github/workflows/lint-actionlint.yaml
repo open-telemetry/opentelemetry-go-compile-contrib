@@ -1,0 +1,39 @@
+name: Check GitHub Actions
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+      - ".github/actions/**/action.yml"
+      - ".github/actions/**/action.yaml"
+      - ".tools/go.mod"
+      - ".tools/go.sum"
+      - "Makefile"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+      - ".github/actions/**/action.yml"
+      - ".github/actions/**/action.yaml"
+      - ".tools/go.mod"
+      - ".tools/go.sum"
+      - "Makefile"
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    name: Lint GitHub Actions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - run: make lint/action

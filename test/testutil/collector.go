@@ -1,0 +1,94 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+package testutil
+
+import (
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"sync"
+	"testing"
+
+	"go.opentelemetry.io/collector/pdata/ptrace"
+)
+
+// Collector represents an in-memory OTLP collector for testing.
+type Collector struct {
+	*httptest.Server
+	mu     sync.Mutex
+	traces ptrace.Traces
+}
+
+// GetTraces returns the collected traces with proper synchronization.
+func (c *Collector) GetTraces() ptrace.Traces {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.traces
+}
+
+// SpanCount returns the total number of collected spans under the lock.
+func (c *Collector) SpanCount() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return countSpans(c.traces)
+}
+
+func countSpans(td ptrace.Traces) int {
+	n := 0
+	for i := range td.ResourceSpans().Len() {
+		for j := range td.ResourceSpans().At(i).ScopeSpans().Len() {
+			n += td.ResourceSpans().At(i).ScopeSpans().At(j).Spans().Len()
+		}
+	}
+	return n
+}
+
+// StartCollector starts an in-memory OTLP HTTP server that collects traces
+// drainOK reads and discards the request body, then returns 200 OK. Used for
+// OTLP signals the harness accepts but does not record (metrics, logs), so
+// instrumented apps can export them without receiving a 404.
+func drainOK(w http.ResponseWriter, r *http.Request) {
+	_, _ = io.Copy(io.Discard, r.Body)
+	_ = r.Body.Close()
+	w.WriteHeader(http.StatusOK)
+}
+
+// StartCollector starts an in-memory OTLP HTTP server. Traces are recorded and
+// retrievable via GetTraces. Metrics and logs are accepted (200 OK).
+func StartCollector(t *testing.T) *Collector {
+	c := &Collector{traces: ptrace.NewTraces()}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/traces", func(w http.ResponseWriter, r *http.Request) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("Failed to read request body: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer r.Body.Close()
+
+		var unmarshaler ptrace.ProtoUnmarshaler
+		traces, err := unmarshaler.UnmarshalTraces(body)
+		if err != nil {
+			t.Errorf("Failed to unmarshal OTLP traces: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		c.mu.Lock()
+		traces.ResourceSpans().MoveAndAppendTo(c.traces.ResourceSpans())
+		c.mu.Unlock()
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("/v1/metrics", drainOK)
+	mux.HandleFunc("/v1/logs", drainOK)
+
+	c.Server = httptest.NewServer(mux)
+	t.Cleanup(c.Close)
+
+	return c
+}

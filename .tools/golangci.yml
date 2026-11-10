@@ -259,6 +259,10 @@ linters:
           # Default: true
           skipRecvDeref: false
 
+    gomoddirectives:
+      # Allow local `replace` directives in multi-module repo.
+      replace-local: true
+
     govet:
       # Enable all analyzers.
       # Default: false

@@ -8,7 +8,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 permissions:
-  contents: read # for actions/checkout
+  contents: read  # for actions/checkout
 jobs:
   # This is a required workflow, so it must always run and report a status.
   # We use dorny/paths-filter at the job level instead of workflow-level path filters
@@ -18,14 +18,14 @@ jobs:
     name: Detect Changes
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: read # for dorny/paths-filter to inspect pull request changes
+      pull-requests: read  # for dorny/paths-filter to inspect pull request changes
     outputs:
       code: ${{ steps.filter.outputs.code }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d  # v4.0.3
         id: filter
         with:
           filters: |
@@ -40,7 +40,7 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.code == 'true'
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
       - run: make lint/license-header

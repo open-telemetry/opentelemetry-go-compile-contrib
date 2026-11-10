@@ -2,7 +2,7 @@ module go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/ote
 
 go 1.26.0
 
-require go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-00010101000000-000000000000
+require go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -56,6 +56,4 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-replace (
-	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../pkg/runtime
-)
+replace go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../pkg/runtime
