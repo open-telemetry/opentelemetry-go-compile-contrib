@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"testing"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 // shardConfig reads SHARD_INDEX/SHARD_TOTAL to split the app builds across CI

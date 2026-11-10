@@ -11,8 +11,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"
-
-	"go.opentelemetry.io/otelc/tool/util"
 )
 
 // DiscoverRangedDeps returns the direct, non-replaced third-party requires
@@ -104,7 +102,7 @@ func highestCovered(versions, ranges []string) string {
 			continue
 		}
 		for _, vr := range ranges {
-			if util.VersionInRange(v, vr) {
+			if versionInRange(v, vr) {
 				highest = v
 				break
 			}

@@ -15,7 +15,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestHTTPServerKafkaClient(t *testing.T) {

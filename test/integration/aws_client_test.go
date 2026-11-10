@@ -11,7 +11,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 const awsMockRequestID = "test-request-id-123"

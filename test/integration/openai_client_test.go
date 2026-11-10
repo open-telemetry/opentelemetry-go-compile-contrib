@@ -12,7 +12,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestOpenAIClient(t *testing.T) {

@@ -1,16 +1,6 @@
-module go.opentelemetry.io/otelc/test
+module go.opentelemetry.io/otelc-contrib/test
 
 go 1.26.0
-
-replace go.opentelemetry.io/otelc => ..
-
-replace go.opentelemetry.io/otelc/test/shared/grpcpb => ./shared/grpcpb
-
-replace go.opentelemetry.io/otelc/test/apps/logslog => ./apps/logslog
-
-replace go.opentelemetry.io/otelc/test/apps/logslogrus => ./apps/logslogrus
-
-replace go.opentelemetry.io/otelc/test/apps/logszap => ./apps/logszap
 
 require (
 	github.com/alicebob/miniredis/v2 v2.34.0
@@ -23,8 +13,7 @@ require (
 	go.mongodb.org/mongo-driver v1.17.10
 	go.opentelemetry.io/collector/pdata v1.48.0
 	go.opentelemetry.io/otel v1.44.0
-	go.opentelemetry.io/otelc v0.0.0-00010101000000-000000000000
-	go.opentelemetry.io/otelc/test/shared/grpcpb v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc-contrib/test/shared/grpcpb v0.0.0-20261109153609-3daec576228a
 	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/mod v0.42.0
 	google.golang.org/grpc v1.83.2
@@ -90,4 +79,10 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	software.sslmate.com/src/go-pkcs12 v0.7.3 // indirect
+)
+
+replace (
+	go.opentelemetry.io/otelc-contrib => ../
+	go.opentelemetry.io/otelc-contrib/test/shared/grpcpb => ./shared/grpcpb
+	go.opentelemetry.io/otelc-contrib/test/shared/testdb => ./shared/testdb
 )

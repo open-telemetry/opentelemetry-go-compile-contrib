@@ -15,7 +15,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/kafka"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 // TestKafka is a true cross-process E2E test that verifies trace context

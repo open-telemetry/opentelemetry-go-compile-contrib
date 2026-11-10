@@ -14,7 +14,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/rabbitmq"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestAmqpClient(t *testing.T) {

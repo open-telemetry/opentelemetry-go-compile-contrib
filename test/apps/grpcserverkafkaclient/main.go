@@ -17,8 +17,9 @@ import (
 	"time"
 
 	kafka "github.com/segmentio/kafka-go"
-	"go.opentelemetry.io/otelc/test/shared/grpcpb/pb"
 	"google.golang.org/grpc"
+
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb/pb"
 )
 
 var frontPort = flag.Int("front-port", 50051, "port for gRPC frontend")
@@ -66,7 +67,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 		Value: []byte("test-message"),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to write to kafka: %v", err)
+		return nil, fmt.Errorf("failed to write to kafka: %w", err)
 	}
 
 	return &pb.HelloReply{Message: "frontend produced message to kafka"}, nil

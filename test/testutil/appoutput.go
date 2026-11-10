@@ -6,10 +6,9 @@ package testutil
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strings"
 	"sync"
-
-	"go.opentelemetry.io/otelc/tool/ex"
 )
 
 // AppOutput collects a running application's combined stdout and stderr and
@@ -78,7 +77,7 @@ func (o *AppOutput) WaitFor(ctx context.Context, substr string) error {
 		if !o.removeWaiter(ready) {
 			return nil
 		}
-		return ex.Wrapf(ctx.Err(), "waiting for app output %q", substr)
+		return fmt.Errorf("waiting for app output %q: %w", substr, ctx.Err())
 	}
 }
 

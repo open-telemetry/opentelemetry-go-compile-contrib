@@ -14,10 +14,11 @@ import (
 	"log/slog"
 	"net"
 
-	"go.opentelemetry.io/otelc/test/shared/grpcpb"
-	"go.opentelemetry.io/otelc/test/shared/grpcpb/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
+
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb"
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb/pb"
 )
 
 var port = flag.Int("port", 50051, "The server port")

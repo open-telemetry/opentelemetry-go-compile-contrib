@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	_ "go.opentelemetry.io/otelc/test/shared/testdb"
+	_ "go.opentelemetry.io/otelc-contrib/test/shared/testdb"
 )
 
 var frontPort = flag.Int("front-port", 8080, "port for HTTP frontend")

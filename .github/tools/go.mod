@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/.github/tools
+module go.opentelemetry.io/otelc-contrib/.github/tools
 
 go 1.25.0
 

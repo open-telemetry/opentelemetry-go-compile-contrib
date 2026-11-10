@@ -14,8 +14,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.yaml.in/yaml/v3"
-
-	"go.opentelemetry.io/otelc/tool/util"
 )
 
 // goModJSON is the subset of `go mod edit -json` output we care about.
@@ -45,7 +43,7 @@ func InstrumentedTargets(t *testing.T, rulesRoot string) map[string][]string {
 		if err != nil {
 			return err
 		}
-		if d.IsDir() || !util.IsRuleFile(d.Name()) {
+		if d.IsDir() || !isRuleFile(d.Name()) {
 			return nil
 		}
 		data, readErr := os.ReadFile(path) //nolint:gosec
@@ -141,7 +139,7 @@ func findMatchingVersionRanges(requirePath string, targets map[string][]string) 
 // of the provided version ranges.
 func coversAnyVersionRange(version string, versionRanges map[string]bool) bool {
 	for vr := range versionRanges {
-		if util.VersionInRange(version, vr) {
+		if versionInRange(version, vr) {
 			return true
 		}
 	}

@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 
-	"go.opentelemetry.io/otelc/test/shared/grpcpb/pb"
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb/pb"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestGRPCClient(t *testing.T) {

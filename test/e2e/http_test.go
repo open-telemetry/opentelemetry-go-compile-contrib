@@ -11,7 +11,7 @@ import (
 
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestHttp(t *testing.T) {

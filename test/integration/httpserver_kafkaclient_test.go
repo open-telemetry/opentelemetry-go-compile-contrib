@@ -16,7 +16,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestHTTPServerKafkaClient(t *testing.T) {
@@ -25,7 +25,7 @@ func TestHTTPServerKafkaClient(t *testing.T) {
 	}
 	testcontainers.SkipIfProviderIsNotHealthy(t)
 
-	// Not using t.Parallel() here to prevent CI resource exhaustion 
+	// Not using t.Parallel() here to prevent CI resource exhaustion
 	// from spinning up multiple heavy Kafka testcontainers simultaneously.
 	testutil.Build(t, "", "httpserverkafkaclient", "go", "build", "-a")
 

@@ -9,17 +9,18 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
-	"go.opentelemetry.io/otelc/test/shared/grpcpb"
-	"go.opentelemetry.io/otelc/test/shared/grpcpb/pb"
-	"go.opentelemetry.io/otelc/test/testutil"
-	"go.opentelemetry.io/otelc/tool/util"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb"
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb/pb"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestGRPCServer(t *testing.T) {
@@ -75,7 +76,7 @@ func TestGRPCServer(t *testing.T) {
 		{name: "SIGTERM", sig: syscall.SIGTERM},
 	} {
 		t.Run("telemetry flush on "+tc.name, func(t *testing.T) {
-			if util.IsWindows() {
+			if runtime.GOOS == "windows" {
 				t.Skip("Unix signals are not supported on windows")
 			}
 

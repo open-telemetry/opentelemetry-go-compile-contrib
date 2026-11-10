@@ -15,10 +15,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"go.opentelemetry.io/otelc/test/shared/grpcpb/pb"
 	"google.golang.org/grpc"
 
-	_ "go.opentelemetry.io/otelc/test/shared/testdb"
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb/pb"
+
+	_ "go.opentelemetry.io/otelc-contrib/test/shared/testdb"
 )
 
 var frontPort = flag.Int("front-port", 50051, "port for gRPC frontend")

@@ -14,7 +14,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/cassandra"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestCassandraClient(t *testing.T) {

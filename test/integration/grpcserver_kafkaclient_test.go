@@ -14,11 +14,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	"go.opentelemetry.io/otelc/test/shared/grpcpb/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb/pb"
+
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 func TestGRPCServerKafkaClient(t *testing.T) {
@@ -27,7 +28,7 @@ func TestGRPCServerKafkaClient(t *testing.T) {
 	}
 	testcontainers.SkipIfProviderIsNotHealthy(t)
 
-	// Not using t.Parallel() here to prevent CI resource exhaustion 
+	// Not using t.Parallel() here to prevent CI resource exhaustion
 	// from spinning up multiple heavy Kafka testcontainers simultaneously.
 	testutil.Build(t, "", "grpcserverkafkaclient", "go", "build", "-a")
 

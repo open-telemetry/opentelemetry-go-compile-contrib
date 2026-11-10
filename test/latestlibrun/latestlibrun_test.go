@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 // TestBumpAppsToLatest bumps each test app's instrumented direct dependencies

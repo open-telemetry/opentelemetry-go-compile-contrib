@@ -8,7 +8,7 @@ package test
 import (
 	"testing"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 // TestOtelTraceWithoutSDK verifies that the trace instrumentation can be

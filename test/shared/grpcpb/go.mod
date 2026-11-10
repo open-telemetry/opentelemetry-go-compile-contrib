@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/test/shared/grpcpb
+module go.opentelemetry.io/otelc-contrib/test/shared/grpcpb
 
 go 1.25.0
 

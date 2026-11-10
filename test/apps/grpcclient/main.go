@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"go.opentelemetry.io/otelc/test/shared/grpcpb/pb"
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb/pb"
 )
 
 var (

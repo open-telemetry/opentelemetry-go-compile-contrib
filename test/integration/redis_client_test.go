@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 const redisGoRedisModule = "github.com/redis/go-redis/v9"
@@ -257,13 +257,15 @@ func pinnedRedisClient(t *testing.T, version string) string {
 	require.NoError(t, os.MkdirAll(appDir, 0o755))
 	require.NoError(t, os.CopyFS(appDir, os.DirFS(src)))
 
+	repoRoot := filepath.Dir(filepath.Dir(filepath.Dir(src)))
+	goModPath := filepath.Join(appDir, "go.mod")
+	goModBytes, err := os.ReadFile(goModPath)
+	require.NoError(t, err)
+	goModContent := strings.ReplaceAll(string(goModBytes), "../../../", repoRoot+"/")
+	require.NoError(t, os.WriteFile(goModPath, []byte(goModContent), 0o600))
+
 	// Replace first so tidy cannot MVS up to the instrumentation module pin.
 	goModOffWork(t, appDir, "edit", "-replace="+redisGoRedisModule+"="+redisGoRedisModule+"@"+version)
-	cmd := exec.CommandContext(t.Context(), "go", "get", redisGoRedisModule+"@"+version)
-	cmd.Dir = appDir
-	cmd.Env = goWorkOffEnv()
-	out, err := cmd.CombinedOutput()
-	require.NoError(t, err, "go get %s@%s:\n%s", redisGoRedisModule, version, out)
 	goModOffWork(t, appDir, "tidy")
 	requireRedisModuleVersion(t, appDir, version)
 	return appsDir
@@ -272,7 +274,15 @@ func pinnedRedisClient(t *testing.T, version string) string {
 func requireRedisModuleVersion(t *testing.T, appDir, version string) {
 	t.Helper()
 
-	cmd := exec.CommandContext(t.Context(), "go", "list", "-m", "-f", "{{.Version}}", redisGoRedisModule)
+	cmd := exec.CommandContext(
+		t.Context(),
+		"go",
+		"list",
+		"-m",
+		"-f",
+		"{{with .Replace}}{{.Version}}{{else}}{{.Version}}{{end}}",
+		redisGoRedisModule,
+	)
 	cmd.Dir = appDir
 	cmd.Env = goWorkOffEnv()
 	out, err := cmd.Output()

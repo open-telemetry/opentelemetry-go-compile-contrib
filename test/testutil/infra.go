@@ -8,11 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"go.opentelemetry.io/otelc/tool/util"
 )
 
 const (
@@ -38,23 +37,48 @@ func newCmd(ctx context.Context, dir string, env []string, args ...string) *exec
 	return cmd
 }
 
-// OtelcPath returns the absolute path to the otelc binary, assuming the
-// caller's working directory is a sibling of the repo's otelc output.
-func OtelcPath() (string, error) {
-	binName := otelcBinName
-	if util.IsWindows() {
-		binName += ".exe"
-	}
+// repoRoot returns the repository root directory, looking for .tools/go.mod or walking up.
+func repoRoot() (string, error) {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(pwd, "..", "..", binName), nil
+	dir := pwd
+	for {
+		if _, err := os.Stat(filepath.Join(dir, ".tools", "go.mod")); err == nil {
+			return dir, nil
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return filepath.Join(pwd, "..", ".."), nil
+}
+
+// OtelcPath returns the absolute path to the otelc binary.
+// It checks:
+//  1. os.Getenv("OTELC_PATH")
+//  2. .bin/otelc[.exe] in repo root
+func OtelcPath() (string, error) {
+	if p := os.Getenv("OTELC_PATH"); p != "" {
+		return p, nil
+	}
+	binName := otelcBinName
+	if runtime.GOOS == "windows" {
+		binName += ".exe"
+	}
+	root, err := repoRoot()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(root, ".bin", binName), nil
 }
 
 // appOutputName returns the platform-specific name used for built test binaries.
 func appOutputName() string {
-	if util.IsWindows() {
+	if runtime.GOOS == "windows" {
 		return appBinName + ".exe"
 	}
 	return appBinName
@@ -62,11 +86,15 @@ func appOutputName() string {
 
 // appsPath returns the path to the test apps directory.
 func appsPath() (string, error) {
-	pwd, err := os.Getwd()
+	root, err := repoRoot()
 	if err != nil {
-		return "", err
+		pwd, pwdErr := os.Getwd()
+		if pwdErr != nil {
+			return "", err
+		}
+		return filepath.Join(pwd, "..", "apps"), nil
 	}
-	return filepath.Join(pwd, "..", "apps"), nil
+	return filepath.Join(root, "test", "apps"), nil
 }
 
 // Build builds the application with the instrumentation tool. The built binary
@@ -77,6 +105,7 @@ func appsPath() (string, error) {
 func Build(t *testing.T, appsDir, app string, args ...string) {
 	t.Helper()
 	otelc, err := OtelcPath()
+	require.NotEmpty(t, otelc)
 	require.NoError(t, err)
 
 	standardAppsDir := appsDir == ""
@@ -128,7 +157,7 @@ func Build(t *testing.T, appsDir, app string, args ...string) {
 func Run(t *testing.T, appsDir, app string, env []string, args ...string) string {
 	t.Helper()
 	appName := "./" + appBinName
-	if util.IsWindows() {
+	if runtime.GOOS == "windows" {
 		appName += ".exe"
 	}
 	if appsDir == "" {
@@ -151,7 +180,7 @@ func Run(t *testing.T, appsDir, app string, env []string, args ...string) string
 func Start(t *testing.T, appsDir, app string, env []string, args ...string) (*exec.Cmd, *AppOutput) {
 	t.Helper()
 	appName := "./" + appBinName
-	if util.IsWindows() {
+	if runtime.GOOS == "windows" {
 		appName += ".exe"
 	}
 	if appsDir == "" {
