@@ -59,6 +59,4 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-replace (
-	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../pkg/runtime
-)
+replace go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../pkg/runtime
