@@ -190,7 +190,7 @@ To improve compatibility, this project stores the active span chain in goroutine
 
 The GLS flow is implemented through three parts:
 
-1. Runtime GLS fields and helpers in the instrumented runtime package.
+1. Runtime GLS fields and helpers injected natively into the Go standard library `runtime` package by the compiler (`otelc`).
 2. Injected OTel SDK trace helper file (`otel_trace_context.go`).
 3. Hook rules that add/remove/read spans at key OTel SDK call sites.
 
@@ -204,7 +204,7 @@ At runtime:
 
 ##### 1) Runtime GLS accessors
 
-`instrumentation/runtime/runtime_gls.go` provides low-level accessors:
+The compiler (`otelc`) natively injects `runtime_gls.go` into the Go standard library `runtime` package on every build, providing low-level accessors:
 
 - `GetTraceContextFromGLS()`
 - `SetTraceContextToGLS(interface{})`

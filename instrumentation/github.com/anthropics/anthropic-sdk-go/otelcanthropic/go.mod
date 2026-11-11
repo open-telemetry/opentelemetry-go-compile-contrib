@@ -68,6 +68,6 @@ require (
 )
 
 replace (
-	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../pkg/runtime
 	go.opentelemetry.io/otelc-contrib/pkg/netutil => ../../../../../pkg/netutil
+	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../pkg/runtime
 )

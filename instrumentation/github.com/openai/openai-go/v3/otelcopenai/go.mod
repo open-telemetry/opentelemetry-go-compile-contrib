@@ -70,7 +70,7 @@ require (
 )
 
 replace (
-	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../../pkg/runtime
-	go.opentelemetry.io/otelc-contrib/pkg/netutil => ../../../../../../pkg/netutil
 	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go/internal/streaming => ../../internal/streaming
+	go.opentelemetry.io/otelc-contrib/pkg/netutil => ../../../../../../pkg/netutil
+	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../../pkg/runtime
 )

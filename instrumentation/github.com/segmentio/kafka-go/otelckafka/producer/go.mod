@@ -66,6 +66,6 @@ require (
 )
 
 replace (
-	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../../pkg/runtime
 	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka => ../
+	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../../pkg/runtime
 )

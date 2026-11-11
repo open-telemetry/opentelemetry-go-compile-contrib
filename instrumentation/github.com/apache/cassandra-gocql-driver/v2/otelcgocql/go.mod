@@ -63,6 +63,4 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 )
 
-replace (
-	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../../pkg/runtime
-)
+replace go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../../pkg/runtime
