@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.47.4
-	github.com/aws/smithy-go v1.28.6
+	github.com/aws/smithy-go v1.28.9
 	github.com/stretchr/testify v1.12.1
 	go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws v0.72.0
 	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-00010101000000-000000000000
