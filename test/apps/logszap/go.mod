@@ -8,7 +8,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.47.0
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.uber.org/zap/otelczap v0.0.0-20261109153609-3daec576228a
-	go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime v0.0.0-20261109153609-3daec576228a
 	go.uber.org/zap v1.28.0
 )
 
@@ -66,6 +65,5 @@ require (
 replace (
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.uber.org/zap/otelczap => ../../../instrumentation/go.uber.org/zap/otelczap
-	go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime => ../../../instrumentation/runtime/otelcruntime
 	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../pkg/runtime
 )

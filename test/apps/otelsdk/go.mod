@@ -12,7 +12,6 @@ require (
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/client v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/server v0.0.0-20261109153609-3daec576228a
-	go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime v0.0.0-20261109153609-3daec576228a
 )
 
 require (
@@ -74,7 +73,6 @@ replace (
 	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp => ../../../instrumentation/net/http/otelchttp
 	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/client => ../../../instrumentation/net/http/otelchttp/client
 	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/server => ../../../instrumentation/net/http/otelchttp/server
-	go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime => ../../../instrumentation/runtime/otelcruntime
 	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../pkg/runtime
 )
 

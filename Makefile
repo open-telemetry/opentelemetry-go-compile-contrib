@@ -131,7 +131,7 @@ build/pkg: ## Build all pkg modules to verify compilation
 build/instrumentation: ## Build all instrumentation modules to verify compilation
 	@echo "Building instrumentation modules..."
 	@set -euo pipefail
-	@INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/runtime" | grep -v "instrumentation/database/sql"); \
+	@INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/database/sql"); \
 	for moddir in $$INSTR_MODULES; do \
 		echo "Building $$moddir..."; \
 		(cd $$moddir && go mod tidy && go build ./...); \
@@ -195,7 +195,7 @@ lint/go/instrumentation: $(GOLANGCI_LINT)
 	@set -euo pipefail
 	@BASE_REV=$${LINT_BASE_REV:-origin/main}
 	@CONFIG=$(CURDIR)/.tools/golangci.yml
-	@INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/runtime" | grep -v "instrumentation/database/sql"); \
+	@INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/database/sql"); \
 	for moddir in $$INSTR_MODULES; do \
 		echo "Linting $$moddir..."; \
 		(cd $$moddir && $(GOLANGCI_LINT) run --config $$CONFIG --new-from-rev="$$BASE_REV" ./...); \
@@ -208,7 +208,7 @@ lint/go/instrumentation/fix: $(GOLANGCI_LINT)
 	@set -euo pipefail
 	@BASE_REV=$${LINT_BASE_REV:-origin/main}
 	@CONFIG=$(CURDIR)/.tools/golangci.yml
-	@INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/runtime" | grep -v "instrumentation/database/sql"); \
+	@INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/database/sql"); \
 	for moddir in $$INSTR_MODULES; do \
 		echo "Fixing $$moddir..."; \
 		(cd $$moddir && $(GOLANGCI_LINT) run --config $$CONFIG --new-from-rev="$$BASE_REV" --fix ./...); \
@@ -374,7 +374,6 @@ test-unit/pkg: ## Run unit tests for pkg modules only
 	done
 
 # Notes on test-unit/instrumentation implementation:
-# - Excludes "runtime" entirely (compile-time field injection; no testable subpackages).
 # - "database/sql" root package also needs field injection, so ./... cannot type-check
 #   client.go. Safe subpackages (dsnparse, semconv) are tested explicitly afterwards.
 # - Skips modules without test files to avoid empty test output.
@@ -387,7 +386,7 @@ test-unit/instrumentation: ## Run unit tests for instrumentation modules only
 	@echo "Running instrumentation unit tests..."
 	set -euo pipefail
 	rm -f ./gotest-unit-instrumentation.log
-	INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/runtime" | grep -v "instrumentation/database/sql"); \
+	INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/database/sql"); \
 	for moddir in $$INSTR_MODULES; do \
 		if ! find "$$moddir" -name "*_test.go" -type f | grep -q .; then \
 			echo "Skipping $$moddir (no tests)..."; \
@@ -439,7 +438,7 @@ test-unit/instrumentation/coverage: ## Run unit tests with coverage for instrume
 	@echo "Running instrumentation unit tests with coverage..."
 	set -euo pipefail
 	rm -f ./gotest-unit-instrumentation.log
-	INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/runtime" | grep -v "instrumentation/database/sql"); \
+	INSTR_MODULES=$$(find instrumentation -name "go.mod" -type f -exec dirname {} \; | grep -v "instrumentation/database/sql"); \
 	for moddir in $$INSTR_MODULES; do \
 		if ! find "$$moddir" -name "*_test.go" -type f | grep -q .; then \
 			echo "Skipping $$moddir (no tests)..."; \

@@ -9,7 +9,6 @@ require (
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc-contrib/instrumentation/log/otelclog v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc-contrib/instrumentation/log/slog/otelcslog v0.0.0-20261109153609-3daec576228a
-	go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime v0.0.0-20261109153609-3daec576228a
 )
 
 require (
@@ -67,6 +66,5 @@ replace (
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace
 	go.opentelemetry.io/otelc-contrib/instrumentation/log/otelclog => ../../../instrumentation/log/otelclog
 	go.opentelemetry.io/otelc-contrib/instrumentation/log/slog/otelcslog => ../../../instrumentation/log/slog/otelcslog
-	go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime => ../../../instrumentation/runtime/otelcruntime
 	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../pkg/runtime
 )
