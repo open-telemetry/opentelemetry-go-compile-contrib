@@ -85,10 +85,13 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           FALLBACK_SHA: ${{ github.event.before }}
-      # Instrumentation modules are separate Go modules, invisible to the
-      # root module's `./...` in the job above, and carry substantial
-      # pre-existing lint debt; only new issues introduced by this change
-      # are enforced here.
+      # pkg and instrumentation modules are separate Go modules, invisible to
+      # the root module's `./...` in the job above, and carry pre-existing lint
+      # debt; only new issues introduced by this change are enforced here.
+      - name: Lint pkg modules (new issues only)
+        run: make lint/go/pkg
+        env:
+          LINT_BASE_REV: ${{ steps.base-rev.outputs.sha }}
       - name: Lint instrumentation modules (new issues only)
         run: make lint/go/instrumentation
         env:

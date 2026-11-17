@@ -5,7 +5,7 @@
 SHELL := /bin/bash
 
 .PHONY: all test test-unit test-integration test-e2e format lint build build/pkg build/instrumentation otelc clean \
-        format/go format/yaml lint/go lint/go/fix lint/go/instrumentation lint/go/instrumentation/fix lint/yaml \
+        format/go format/yaml lint/go lint/go/fix lint/go/pkg lint/go/instrumentation lint/go/instrumentation/fix lint/yaml \
         lint/action lint/makefile lint/license-header lint/license-header/fix actionlint yamlfmt gotestfmt ratchet ratchet/pin \
         ratchet/update ratchet/check golangci-lint embedmd checkmake help docs \
         test-unit/race test-unit/pkg test-unit/instrumentation test-unit/helper \
@@ -167,7 +167,7 @@ lint/action: $(ACTIONLINT) ratchet/check
 	$(ACTIONLINT)
 
 lint/go: ## Run golangci-lint on Go code
-lint/go: $(GOLANGCI_LINT)
+lint/go: $(GOLANGCI_LINT) lint/go/pkg
 	@echo "Linting Go code..."
 	$(GOLANGCI_LINT) run --config .tools/golangci.yml
 
@@ -175,6 +175,19 @@ lint/go/fix: ## Run golangci-lint on Go code and fix the issues
 lint/go/fix: $(GOLANGCI_LINT)
 	@echo "Linting Go code..."
 	$(GOLANGCI_LINT) run --config .tools/golangci.yml --fix
+
+lint/go/pkg: ## Lint new issues in pkg modules (golangci-lint only sees the root module via ./...)
+lint/go/pkg: $(GOLANGCI_LINT)
+	@echo "Linting pkg modules (new issues only)..."
+	@set -euo pipefail; \
+	BASE_REV=$${LINT_BASE_REV:-origin/main}; \
+	CONFIG=$(CURDIR)/.tools/golangci.yml; \
+	PKG_MODULES=$$(find pkg -name "go.mod" -type f -exec dirname {} \; | sort); \
+	for moddir in $$PKG_MODULES; do \
+		echo "Linting $$moddir..."; \
+		(cd $$moddir && $(GOLANGCI_LINT) run --config $$CONFIG --new-from-rev="$$BASE_REV" ./...); \
+	done
+	@echo "All pkg modules linted successfully"
 
 lint/go/instrumentation: ## Lint new issues in instrumentation modules (golangci-lint only sees the root module via ./...)
 lint/go/instrumentation: $(GOLANGCI_LINT)
@@ -293,6 +306,10 @@ govulncheck: $(GOVULNCHECK) ## Scan core modules (root, pkg) for known Go vulner
 # Build each integration test app with otelc, then scan the resulting binary.
 # Binary mode sees injected instrumentation (including //go:build ignore sources
 # and field-injection modules like database/sql) that source mode cannot analyze.
+# echoserver uses echo v4.16.3. The upstream advisories list this version as fixed.
+# The Go vulnerability database still marks every echo v4 release as affected.
+# Ignore GO-2026-6872 and GO-2026-6875 for echoserver only.
+# After vuln.go.dev lists v4.16.3 as fixed, delete this ignore. See issue 1744.
 .ONESHELL:
 govulncheck/instrumentation: $(GOVULNCHECK) $(OTELC) build ## Scan instrumented test apps (binary mode) for known Go vulnerabilities
 	@echo "Running govulncheck -mode=binary across $(words $(GOVULNCHECK_TEST_APPS)) instrumented test apps..."
@@ -310,9 +327,20 @@ govulncheck/instrumentation: $(GOVULNCHECK) $(OTELC) build ## Scan instrumented 
 			continue; \
 		fi; \
 		echo "==> govulncheck -mode=binary $$app"; \
-		if ! "$(GOVULNCHECK)" -mode=binary "$$appdir/$$app_bin"; then \
-			status=1; \
+		vuln_log=$$(mktemp); \
+		if "$(GOVULNCHECK)" -mode=binary "$$appdir/$$app_bin" >"$$vuln_log" 2>&1; then \
+			cat "$$vuln_log"; \
+		else \
+			cat "$$vuln_log"; \
+			ids=$$(sed -n 's/^Vulnerability #[0-9][0-9]*:[[:space:]]*//p' "$$vuln_log" | sed 's/[[:space:]]*$$//' | sort -u); \
+			extra=$$(printf '%s\n' "$$ids" | grep -vxF -e 'GO-2026-6872' -e 'GO-2026-6875' || true); \
+			if [ "$$app" = echoserver ] && [ -n "$$ids" ] && [ -z "$$extra" ]; then \
+				echo "govulncheck/instrumentation: ignored GO-2026-6872 and GO-2026-6875 for echoserver. vuln.go.dev still marks echo v4.16.3 as affected. See issue 1744."; \
+			else \
+				status=1; \
+			fi; \
 		fi; \
+		rm -f "$$vuln_log"; \
 		rm -f "$$appdir/$$app_bin"; \
 		(cd "$$appdir" && "$$otelc" cleanup) || true; \
 	done; \

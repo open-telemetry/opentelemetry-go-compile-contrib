@@ -4,10 +4,6 @@
 # Codecov configuration.
 # https://docs.codecov.com/docs/codecov-yaml
 
-# Exclude test helpers from coverage.
-ignore:
-  - "pkg/hook/hooktest"
-
 coverage:
   status:
     project:
@@ -18,3 +14,9 @@ coverage:
         target: 70%
         # informational: false (enforcing). A drop below target blocks the PR.
         informational: false
+      # instrumentation/ module tree
+      instrumentation:
+        flags:
+          - instrumentation
+        # informational: true until baseline unit coverage targets are set.
+        informational: true

@@ -7,6 +7,7 @@ package tools
 
 import (
 	_ "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/init"
+	_ "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/otelcotel"
 	_ "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace"
 	_ "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace"
 	_ "go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/client"

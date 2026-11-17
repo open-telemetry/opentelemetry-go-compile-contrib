@@ -126,11 +126,10 @@ func latestRelease(versions []string) string {
 	return latest
 }
 
-// BumpToVersions runs "go get <dep>@<version>" for each dep in appDir,
-// followed by "go mod tidy", then verifies that each dep resolved to exactly
-// the requested version. A higher resolved version means another module in
-// the build graph requires more than the declared bound, so the bound cannot
-// be exercised as declared and the rule's version range needs fixing.
+// BumpToVersions pins each dep in appDir using "go mod edit -replace" (to
+// prevent MVS from lifting the version back up via instrumentation module
+// requires) followed by "go mod tidy", then verifies that each dep resolved to
+// exactly the requested version.
 // CAUTION: The go.mod and go.sum files in appDir are modified in place.
 func BumpToVersions(t *testing.T, appDir string, depVersions map[string]string) {
 	deps := make([]string, 0, len(depVersions))
@@ -142,10 +141,26 @@ func BumpToVersions(t *testing.T, appDir string, depVersions map[string]string) 
 	for _, dep := range deps {
 		version := depVersions[dep]
 		t.Logf("pinning %s in %s to %s", dep, appDir, version)
-		cmd := exec.CommandContext(t.Context(), "go", "get", dep+"@"+version) //nolint:gosec // input from rule files
+		//nolint:gosec // input from rule files
+		cmd := exec.CommandContext(
+			t.Context(),
+			"go",
+			"mod",
+			"edit",
+			"-replace="+dep+"="+dep+"@"+version,
+		)
 		cmd.Dir = appDir
 		out, err := cmd.CombinedOutput()
-		require.NoError(t, err, "go get %s@%s failed in %s:\n%s", dep, version, appDir, string(out))
+		require.NoError(
+			t,
+			err,
+			"go mod edit -replace %s=%s@%s failed in %s:\n%s",
+			dep,
+			dep,
+			version,
+			appDir,
+			string(out),
+		)
 	}
 
 	tidyCmd := exec.CommandContext(t.Context(), "go", "mod", "tidy")
@@ -155,10 +170,18 @@ func BumpToVersions(t *testing.T, appDir string, depVersions map[string]string) 
 
 	for _, dep := range deps {
 		version := depVersions[dep]
-		cmd := exec.CommandContext(t.Context(), "go", "list", "-m", "-f", "{{.Version}}", dep)
+		cmd := exec.CommandContext(
+			t.Context(),
+			"go",
+			"list",
+			"-m",
+			"-f",
+			"{{with .Replace}}{{.Version}}{{else}}{{.Version}}{{end}}",
+			dep,
+		)
 		cmd.Dir = appDir
 		listOut, listErr := cmd.Output()
-		require.NoError(t, listErr, "go list -m -f {{.Version}} %s failed in %s", dep, appDir)
+		require.NoError(t, listErr, "go list -m %s failed in %s", dep, appDir)
 
 		resolved := strings.TrimSpace(string(listOut))
 		require.Equal(t, version, resolved,

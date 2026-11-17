@@ -39,25 +39,13 @@ This project uses several tools for development. Most tools will be automaticall
    cd opentelemetry-go-compile-contrib
    ```
 
-2. Configure the git merge driver for the instrumentation bundle (run once per clone):
-
-   ```sh
-   make setup-git
-   ```
-
-   `tool/data/otelc-bundle.tgz` is a binary archive generated from `pkg/` and
-   `instrumentation/`, so git cannot merge it and it conflicts on almost every
-   rebase. This registers a merge driver that keeps the current bundle instead
-   of stopping the rebase/merge; you then refresh it with `make package`. See
-   [Keeping the bundle in sync](#keeping-the-bundle-in-sync).
-
-3. Build the project:
+2. Build the project:
 
    ```sh
    make build
    ```
 
-4. Run tests:
+3. Run tests:
 
    ```sh
    make test
@@ -73,10 +61,10 @@ make help
 
 #### Build Targets
 
-- `make build` - Build the instrumentation tool (includes packaging)
-- `make install` - Install the `otelc` binary to `$GOPATH/bin`
-- `make package` - Package the instrumentation code into a binary archive
-- `make build-demo-grpc` - Build gRPC demo server and client
+- `make build` - Build all `pkg` and `instrumentation` modules
+- `make build/pkg` - Build all `pkg` modules
+- `make build/instrumentation` - Build all `instrumentation` modules
+- `make otelc` - Build the `otelc` tool binary into `.bin/`
 
 #### Code Quality
 
@@ -84,7 +72,9 @@ make help
   - `make format/go` - Format Go code only using golangci-lint
   - `make format/yaml` - Format YAML files only using yamlfmt
 - `make lint` - Run all linters (Go, YAML, GitHub Actions, Makefile)
-  - `make lint/go` - Run golangci-lint on Go code
+  - `make lint/go` - Run golangci-lint on root and `pkg` modules
+  - `make lint/go/pkg` - Run golangci-lint on `pkg` modules (new issues only)
+  - `make lint/go/instrumentation` - Run golangci-lint on `instrumentation` modules (new issues only)
   - `make lint/yaml` - Lint YAML formatting
   - `make lint/action` - Lint GitHub Actions workflows
   - `make lint/makefile` - Lint Makefile
@@ -154,43 +144,6 @@ make all
 
 This will run: `build`, `format`, `lint`, and `test` in sequence.
 
-### Keeping the bundle in sync
-
-`tool/data/otelc-bundle.tgz` is a reproducible archive of `pkg/` and
-`instrumentation/` that is embedded into `otelc` via `//go:embed`. It must stay
-committed so that `go install go.opentelemetry.io/otelc/tool/cmd/otelc@latest`
-works, but because it is binary, git cannot 3-way merge it — so any branch that
-touches the sources conflicts with `main` on this file.
-
-To make this painless, run `make setup-git` once per clone (see
-[Getting Started](#getting-started)). It registers a custom merge driver
-(defined in `.gitattributes` + `.github/scripts/merge-bundle.sh`) that keeps the
-current ("ours") bundle on conflict so the rebase/merge runs to completion
-without stopping. You then regenerate the bundle from the fully-merged sources:
-
-```sh
-git fetch origin main
-git rebase origin/main   # no longer halts on the bundle
-make package             # regenerate tool/data/otelc-bundle.tgz from merged sources
-git add tool/data/otelc-bundle.tgz && git commit --amend --no-edit
-git push --force-with-lease
-```
-
-Why the driver doesn't regenerate the bundle for you: when git invokes a merge
-driver it has not yet written the *other* merged source files to the working
-tree, so running `make package` at that moment would embed stale sources and
-miss the incoming changes. Regenerating after the rebase/merge completes is the
-only reliable point, hence the explicit `make package` step above.
-
-Notes:
-
-- GitHub's "This branch has conflicts" indicator is computed server-side and
-  does **not** use your local merge driver. Rebase locally as above and push;
-  the conflict disappears once your branch is up to date.
-- The `verify-bundle` CI guarantees the committed bundle matches the sources, so
-  a forgotten `make package` fails CI rather than shipping a stale bundle.
-  Maintainers can also comment `/regenerate-bundle` on a PR to auto-fix it.
-
 ### Tools
 
 The following development tools are used and will be automatically installed on first use:
@@ -201,29 +154,6 @@ The following development tools are used and will be automatically installed on 
 - **[actionlint](https://github.com/rhysd/actionlint)** - GitHub Actions linter
 - **[ratchet](https://github.com/sethvargo/ratchet)** - GitHub Actions security pinning
 - **[embedmd](https://github.com/campoy/embedmd)** - Embed code in markdown files
-
-### Architecture Decision Records
-
-Significant architectural decisions are documented as Architecture Decision Records (ADRs) in [`docs/adr/`](docs/adr/). Read them to understand *why* the project is structured the way it is.
-
-Create a new ADR when proposing:
-
-- Changes to the instrumentation API or hook model
-- New external dependencies or replacements
-- Changes to the two-phase build process
-- Any decision the SIG discusses and reaches consensus on
-
-To create a new ADR:
-
-```sh
-make adr-new TITLE="Title of Your Decision"
-```
-
-This requires `adr-tools` (`npryce/adr-tools`). Run `make adr-tools` to install it. To list existing ADRs:
-
-```sh
-make adr-list
-```
 
 ## AI Usage
 

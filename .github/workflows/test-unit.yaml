@@ -20,6 +20,7 @@ jobs:
     outputs:
       code: ${{ steps.filter.outputs.code }}
       pkg: ${{ steps.filter.outputs.pkg }}
+      instrumentation: ${{ steps.filter.outputs.instrumentation }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
         with:
@@ -40,6 +41,8 @@ jobs:
               - '.github/workflows/test-unit.yaml'
             pkg:
               - 'pkg/**'
+            instrumentation:
+              - 'instrumentation/**'
 
   test-unit-coverage:
     name: Coverage Unit Tests
@@ -79,6 +82,14 @@ jobs:
           files: coverage-pkg.txt
           disable_search: true
           flags: pkg
+          fail_ci_if_error: true
+      - name: Upload instrumentation coverage report
+        if: needs.changes.outputs.instrumentation == 'true'
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac  # v5.5.5
+        with:
+          files: coverage-instrumentation.txt
+          disable_search: true
+          flags: instrumentation
           fail_ci_if_error: true
 
   test-unit:
