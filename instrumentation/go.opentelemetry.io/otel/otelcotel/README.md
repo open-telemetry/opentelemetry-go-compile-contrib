@@ -47,7 +47,7 @@ Whenever `trace.SpanFromContext` returns, the hook checks whether the returned s
 
 ## Runtime Support
 
-The instrumented runtime (`instrumentation/runtime/runtime_gls.go`) provides the low-level GLS accessors used by the SDK trace instrumentation:
+The compiler (`otelc`) natively injects `runtime_gls.go` into the Go standard library `runtime` package on every build, providing the low-level GLS accessors used by the SDK trace instrumentation:
 
 * `GetTraceContextFromGLS()`
 * `SetTraceContextToGLS(interface{})`

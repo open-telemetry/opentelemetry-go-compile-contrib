@@ -51,7 +51,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bkielbasa/cyclop v1.2.3 // indirect
 	github.com/blizzy78/varnamelen v0.8.0 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.10.3 // indirect
 	github.com/bombsimon/wsl/v4 v4.7.0 // indirect
 	github.com/bombsimon/wsl/v5 v5.9.0 // indirect
 	github.com/braydonk/yaml v0.9.0 // indirect
@@ -181,6 +181,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
@@ -227,7 +228,7 @@ require (
 	github.com/tommy-muehle/go-mnd/v2 v2.5.1 // indirect
 	github.com/ultraware/funlen v0.2.0 // indirect
 	github.com/ultraware/whitespace v0.2.0 // indirect
-	github.com/urfave/cli/v3 v3.12.0 // indirect
+	github.com/urfave/cli/v3 v3.14.0 // indirect
 	github.com/uudashr/gocognit v1.3.0 // indirect
 	github.com/uudashr/iface v1.5.3 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
@@ -245,7 +246,7 @@ require (
 	go.augendre.info/fatcontext v0.10.1 // indirect
 	go.opentelemetry.io/build-tools v0.30.0 // indirect
 	go.opentelemetry.io/build-tools/crosslink v0.30.0 // indirect
-	go.opentelemetry.io/otelc v1.2.0 // indirect
+	go.opentelemetry.io/otelc v1.2.1-0.20261117140633-193deff4fcd3 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect

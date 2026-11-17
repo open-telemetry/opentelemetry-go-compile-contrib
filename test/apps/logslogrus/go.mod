@@ -9,7 +9,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.47.0
 	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/sirupsen/logrus/otelclogrus v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261109153609-3daec576228a
-	go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime v0.0.0-20261109153609-3daec576228a
 )
 
 require (
@@ -66,6 +65,5 @@ require (
 replace (
 	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/sirupsen/logrus/otelclogrus => ../../../instrumentation/github.com/sirupsen/logrus/otelclogrus
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace
-	go.opentelemetry.io/otelc-contrib/instrumentation/runtime/otelcruntime => ../../../instrumentation/runtime/otelcruntime
 	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../pkg/runtime
 )
