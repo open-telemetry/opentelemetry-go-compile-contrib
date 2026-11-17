@@ -6,7 +6,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	go.mongodb.org/mongo-driver v1.17.10
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.72.0
-	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc/pkg v0.1.0
 )
 
@@ -19,7 +19,7 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
-	github.com/klauspost/compress v1.20.1 // indirect
+	github.com/klauspost/compress v1.20.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_golang v1.24.1 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
@@ -71,6 +71,4 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-replace (
-	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../pkg/runtime
-)
+replace go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../../../pkg/runtime
