@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 
-	"example.com/awsinit/early"
+	"go.opentelemetry.io/otelc-contrib/test/apps/awsinit/early"
 )
 
 var endpoint = flag.String("endpoint", "http://localhost:8080", "DynamoDB endpoint URL")

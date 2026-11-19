@@ -9,7 +9,7 @@ package early
 import (
 	"database/sql"
 
-	_ "go.opentelemetry.io/otelc/test/shared/testdb"
+	_ "go.opentelemetry.io/otelc-contrib/test/shared/testdb"
 )
 
 var (

@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	bsonv2 "go.mongodb.org/mongo-driver/v2/bson"
 
-	"example.com/mongoinit/early"
+	"go.opentelemetry.io/otelc-contrib/test/apps/mongoinit/early"
 )
 
 func main() {

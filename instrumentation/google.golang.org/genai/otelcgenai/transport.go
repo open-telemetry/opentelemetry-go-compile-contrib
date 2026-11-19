@@ -18,9 +18,9 @@ import (
 	otelsemconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	"go.opentelemetry.io/otelc/instrumentation/google.golang.org/genai/semconv"
-	"go.opentelemetry.io/otelc/pkg/netutil"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/genai/otelcgenai/semconv"
+	"go.opentelemetry.io/otelc-contrib/pkg/netutil"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
@@ -89,6 +89,7 @@ func classifyOperation(path string) (operationType, string) {
 	}
 }
 
+//nolint:spancheck // the streaming span outlives RoundTrip and ends in streamReader
 func (t *otelTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	op, model := classifyOperation(req.URL.Path)
 	if op == opUnknown {

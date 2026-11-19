@@ -8,7 +8,7 @@ import (
 	"context"
 	"log"
 
-	"example.com/dbopeninit/early"
+	"go.opentelemetry.io/otelc-contrib/test/apps/dbopeninit/early"
 )
 
 func main() {

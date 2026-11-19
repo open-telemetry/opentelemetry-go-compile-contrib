@@ -1,4 +1,4 @@
-module go.opentelemetry.io/otelc/pkg/otelcconv
+module go.opentelemetry.io/otelc-contrib/pkg/otelcconv
 
 go 1.26.0
 

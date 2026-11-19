@@ -17,7 +17,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 // TestMongo verifies MongoDB client spans against a real mongod process

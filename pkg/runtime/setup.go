@@ -37,7 +37,7 @@ var (
 	// ready is set at the end of init. Hooks can run before that: the
 	// trampolines call them through //go:linkname, which does not order this
 	// package or its imports before the instrumented package.
-	ready atomic.Bool
+	ready atomic.Bool //nolint:gochecknoglobals // process-wide readiness flag
 )
 
 func init() {
@@ -424,7 +424,7 @@ func handleShutdownSignal(sigCh chan os.Signal) {
 // signalOwners records which signals the application registered for with
 // signal.Notify. The os/signal rules in instrumentation/go.opentelemetry.io/otel/init
 // report every signal.Notify call through RecordSignalNotify.
-var signalOwners signalRecord
+var signalOwners signalRecord //nolint:gochecknoglobals // process-wide signal ownership
 
 type signalRecord struct {
 	sync.Mutex
@@ -512,6 +512,6 @@ func reraise(sig os.Signal) {
 		err = p.Signal(sig)
 	}
 	if err != nil {
-		logger.Debug("could not re-raise signal", "signal", sig.String(), "error", err)
+		Logger().Debug("could not re-raise signal", "signal", sig.String(), "error", err)
 	}
 }

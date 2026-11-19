@@ -12,8 +12,9 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"k8s.io/client-go/tools/cache"
 
-	"go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/otelcclientgo/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
+	"go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/otelcclientgo/semconv"
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 

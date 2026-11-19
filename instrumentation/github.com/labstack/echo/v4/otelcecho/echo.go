@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Package server enriches the net/http server span with Echo's matched route.
-// See schemas/otelc/groups/echo.yaml for the emission contract.
+// See schemas/otelc-contrib/groups/echo.yaml for the emission contract.
 package server
 
 import (

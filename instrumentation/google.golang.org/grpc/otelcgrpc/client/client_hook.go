@@ -21,8 +21,9 @@ import (
 	"google.golang.org/grpc/stats"
 	"google.golang.org/grpc/status"
 
-	grpcsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
+	grpcsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc/semconv"
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 

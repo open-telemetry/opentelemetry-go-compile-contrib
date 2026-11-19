@@ -27,6 +27,6 @@
 # This file exists so the registry covers every instrumentation in the project
 # (ADR 0006), including the ones whose contract is "emits nothing".
 #
-# See `schemas/otelc/README.md` for the full instrumentation coverage table.
+# See `schemas/otelc-contrib/README.md` for the full instrumentation coverage table.
 # -----------------------------------------------------------------------------
 groups: []

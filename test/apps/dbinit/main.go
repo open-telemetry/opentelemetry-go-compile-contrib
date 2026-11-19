@@ -10,7 +10,7 @@ import (
 	"database/sql"
 	"log"
 
-	_ "example.com/dbinit/early"
+	_ "go.opentelemetry.io/otelc-contrib/test/apps/dbinit/early"
 )
 
 func main() {

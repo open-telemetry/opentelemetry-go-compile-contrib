@@ -951,7 +951,7 @@ func sendSIGTERM() {
 	if err != nil {
 		panic(err)
 	}
-	if err := p.Signal(syscall.SIGTERM); err != nil {
-		panic(err)
+	if sigErr := p.Signal(syscall.SIGTERM); sigErr != nil {
+		panic(sigErr)
 	}
 }

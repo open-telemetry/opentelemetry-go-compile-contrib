@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Generate pkg/otelcconv from the attributes otelc declares itself with `id:`
-# in `schemas/otelc/`, using the templates under `schemas/templates/registry/go`
+# in `schemas/otelc-contrib/`, using the templates under `schemas/templates/registry/go`
 # (see docs/adr/0006-semconv-telemetry-contract-organization.md).
 #
 # weaver exits non-zero when the registry has diagnostics, even after it has

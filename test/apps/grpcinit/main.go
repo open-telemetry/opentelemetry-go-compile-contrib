@@ -12,9 +12,9 @@ import (
 	"log/slog"
 	"time"
 
-	"example.com/grpcinit/early"
+	"go.opentelemetry.io/otelc-contrib/test/apps/grpcinit/early"
 
-	"go.opentelemetry.io/otelc/test/shared/grpcpb/pb"
+	"go.opentelemetry.io/otelc-contrib/test/shared/grpcpb/pb"
 )
 
 func main() {

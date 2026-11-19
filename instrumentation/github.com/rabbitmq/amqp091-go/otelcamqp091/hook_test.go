@@ -18,9 +18,10 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 
-	amqprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/otelcamqp091/internal/propagation"
-	"go.opentelemetry.io/otelc/pkg/hook" 
+	"go.opentelemetry.io/otelc/pkg/hook"
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
+
+	amqprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/otelcamqp091/internal/propagation"
 )
 
 func setupTest(t *testing.T) *tracetest.SpanRecorder {

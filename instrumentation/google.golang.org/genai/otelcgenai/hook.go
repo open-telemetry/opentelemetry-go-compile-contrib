@@ -12,11 +12,12 @@ import (
 	genaisdk "google.golang.org/genai"
 
 	"go.opentelemetry.io/otelc/pkg/hook"
-	"go.opentelemetry.io/otelc/pkg/runtime"
+
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 const (
-	instrumentationName = "go.opentelemetry.io/otelc/instrumentation/google.golang.org/genai"
+	instrumentationName = "go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/genai/otelcgenai"
 	instrumentationKey  = "GEMINI"
 )
 

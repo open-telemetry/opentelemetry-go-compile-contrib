@@ -6,7 +6,7 @@ in this project emit. It is the machine-readable, CI-validated contract of "what
 otelc produces".
 
 ```
-schemas/otelc/
+schemas/otelc-contrib/
 ├── registry_manifest.yaml   # registry metadata + pinned upstream semconv dependency
 ├── groups/                  # one file per instrumentation (metrics, spans, attributes)
 │   ├── http.yaml            # net/http client & server metrics

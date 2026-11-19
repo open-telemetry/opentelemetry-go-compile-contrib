@@ -3,7 +3,7 @@ module go.opentelemetry.io/otelc-contrib/test/apps/awsclient
 go 1.26.0
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.47.8
+	github.com/aws/aws-sdk-go-v2 v1.48.0
 	github.com/aws/aws-sdk-go-v2/config v1.33.17
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.17
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.70.0
@@ -29,7 +29,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.39.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.44.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.51.9 // indirect
-	github.com/aws/smithy-go v1.28.8 // indirect
+	github.com/aws/smithy-go v1.28.9 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -71,6 +71,8 @@ require (
 	go.opentelemetry.io/otel/sdk/log v1.47.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261109153609-3daec576228a // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace v0.0.0-20261109153609-3daec576228a // indirect
 	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a // indirect
 	go.opentelemetry.io/otelc/pkg v0.1.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
@@ -89,3 +91,7 @@ replace (
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/init => ../../../instrumentation/go.opentelemetry.io/otel/init
 	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../pkg/runtime
 )
+
+replace go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/trace/otelctrace
+
+replace go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace

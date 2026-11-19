@@ -33,8 +33,9 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	osemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/opensearch-project/opensearch-go/v5/otelcopensearch/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
+	osemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/opensearch-project/opensearch-go/v5/otelcopensearch/semconv"
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 

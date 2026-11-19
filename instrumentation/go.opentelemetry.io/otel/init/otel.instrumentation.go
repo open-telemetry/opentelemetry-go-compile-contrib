@@ -10,6 +10,6 @@
 package tools
 
 import (
-	_ "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/sdk/trace"
-	_ "go.opentelemetry.io/otelc/instrumentation/go.opentelemetry.io/otel/trace"
+	_ "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace"
+	_ "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace"
 )

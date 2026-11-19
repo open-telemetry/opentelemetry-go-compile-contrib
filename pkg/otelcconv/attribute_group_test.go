@@ -18,7 +18,7 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-const groupsDir = "../../schemas/otelc/groups"
+const groupsDir = "../../schemas/otelc-contrib/groups"
 
 type registryFile struct {
 	Groups []struct {
@@ -40,8 +40,8 @@ func declaredAttributes(t *testing.T) []string {
 
 	var ids []string
 	for _, f := range files {
-		data, err := os.ReadFile(f)
-		require.NoError(t, err)
+		data, readErr := os.ReadFile(f)
+		require.NoError(t, readErr)
 
 		var rf registryFile
 		require.NoError(t, yaml.Unmarshal(data, &rf), f)
@@ -62,25 +62,27 @@ func declaredAttributes(t *testing.T) []string {
 func generatedAttributes(t *testing.T) []string {
 	t.Helper()
 
-	f, err := parser.ParseFile(token.NewFileSet(), "attribute_group.go", nil, 0)
-	require.NoError(t, err)
+	f, parseErr := parser.ParseFile(token.NewFileSet(), "attribute_group.go", nil, 0)
+	require.NoError(t, parseErr)
 
 	var names []string
 	ast.Inspect(f, func(n ast.Node) bool {
-		call, ok := n.(*ast.CallExpr)
-		if !ok || len(call.Args) != 1 {
+		call, isCall := n.(*ast.CallExpr)
+		if !isCall || len(call.Args) != 1 {
 			return true
 		}
-		sel, ok := call.Fun.(*ast.SelectorExpr)
-		if !ok || sel.Sel.Name != "Key" {
+		sel, isSel := call.Fun.(*ast.SelectorExpr)
+		if !isSel || sel.Sel.Name != "Key" {
 			return true
 		}
-		if pkg, ok := sel.X.(*ast.Ident); !ok || pkg.Name != "attribute" {
+		pkg, isIdent := sel.X.(*ast.Ident)
+		if !isIdent || pkg.Name != "attribute" {
 			return true
 		}
-		if lit, ok := call.Args[0].(*ast.BasicLit); ok && lit.Kind == token.STRING {
-			name, err := strconv.Unquote(lit.Value)
-			require.NoError(t, err)
+		lit, isLit := call.Args[0].(*ast.BasicLit)
+		if isLit && lit.Kind == token.STRING {
+			name, unquoteErr := strconv.Unquote(lit.Value)
+			require.NoError(t, unquoteErr)
 			names = append(names, name)
 		}
 		return true

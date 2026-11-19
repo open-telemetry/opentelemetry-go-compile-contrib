@@ -26,8 +26,8 @@ import (
 	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go/internal/streaming"
 	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go/otelcopenai/semconv"
 	"go.opentelemetry.io/otelc-contrib/pkg/netutil"
-	"go.opentelemetry.io/otelc/pkg/otelcconv"
-	"go.opentelemetry.io/otelc-contrib/pkg/runtime" 
+	"go.opentelemetry.io/otelc-contrib/pkg/otelcconv"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 // contentCaptureFromEnv reports whether the given environment-variable value

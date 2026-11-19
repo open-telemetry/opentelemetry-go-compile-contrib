@@ -14,5 +14,5 @@ import (
 	// Keeps the trace API instrumentation module in go.mod.
 	_ "go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace"
 	// Keeps the runtime package in go.mod.
-	_ "go.opentelemetry.io/otelc-contrib/pkg/runtime" 
+	_ "go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )

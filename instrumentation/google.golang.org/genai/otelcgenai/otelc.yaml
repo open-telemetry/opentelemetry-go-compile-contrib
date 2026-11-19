@@ -9,4 +9,4 @@ genai_v1_new_client:
     - inject_hooks:
         before: BeforeNewClient
         after: AfterNewClient
-        path: "go.opentelemetry.io/otelc/instrumentation/google.golang.org/genai"
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/genai/otelcgenai"

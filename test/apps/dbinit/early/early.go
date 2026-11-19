@@ -11,7 +11,7 @@ import (
 	"database/sql"
 	"log"
 
-	_ "go.opentelemetry.io/otelc/test/shared/testdb"
+	_ "go.opentelemetry.io/otelc-contrib/test/shared/testdb"
 )
 
 func init() {

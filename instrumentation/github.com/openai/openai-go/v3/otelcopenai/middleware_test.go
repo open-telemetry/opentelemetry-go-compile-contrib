@@ -36,7 +36,8 @@ func setupTestMeter(t *testing.T) *sdkmetric.ManualReader {
 	otel.SetMeterProvider(mp)
 	var err error
 	operationDuration, err = mp.Meter("test").Float64Histogram(
-		"gen_ai.client.operation.duration", metric.WithUnit("s"))
+		"gen_ai.client.operation.duration", metric.WithUnit("s"),
+	)
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		_ = mp.Shutdown(context.Background())

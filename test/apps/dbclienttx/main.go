@@ -17,7 +17,7 @@ import (
 	_ "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
-	_ "go.opentelemetry.io/otelc/test/shared/testdb"
+	_ "go.opentelemetry.io/otelc-contrib/test/shared/testdb"
 )
 
 var (

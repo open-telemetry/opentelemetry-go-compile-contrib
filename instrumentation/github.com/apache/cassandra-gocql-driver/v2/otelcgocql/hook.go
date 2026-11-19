@@ -17,8 +17,9 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
-	gocqlsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/apache/cassandra-gocql-driver/v2/otelcgocql/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
+	gocqlsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/apache/cassandra-gocql-driver/v2/otelcgocql/semconv"
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 

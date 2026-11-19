@@ -7,7 +7,7 @@ require (
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/sdk v1.47.0
 	go.opentelemetry.io/otel/trace v1.47.0
-	go.opentelemetry.io/otelc/pkg/otelcconv v0.0.0-00010101000000-000000000000
+	go.opentelemetry.io/otelc-contrib/pkg/otelcconv v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -22,4 +22,4 @@ require (
 	golang.org/x/sys v0.48.0 // indirect
 )
 
-replace go.opentelemetry.io/otelc/pkg/otelcconv => ../../../../../../pkg/otelcconv
+replace go.opentelemetry.io/otelc-contrib/pkg/otelcconv => ../../../../../../pkg/otelcconv

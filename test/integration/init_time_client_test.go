@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 // A database call during another package's init() runs the database/sql hooks

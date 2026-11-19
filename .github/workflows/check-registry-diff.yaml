@@ -117,7 +117,7 @@ jobs:
       - name: Check pkg/otelcconv is up to date
         run: |
           # Regenerates pkg/otelcconv from the attributes declared with `id:`
-          # in schemas/otelc/ and fails if the committed file differs.
+          # in schemas/otelc-contrib/ and fails if the committed file differs.
           make generate
           if ! git diff --exit-code -- pkg/otelcconv; then
             echo "::error::pkg/otelcconv is out of date. Run 'make generate' and commit the result."

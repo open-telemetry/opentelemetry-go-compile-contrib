@@ -8,7 +8,7 @@ package main
 import (
 	"context"
 
-	"example.com/redisinit/early"
+	"go.opentelemetry.io/otelc-contrib/test/apps/redisinit/early"
 )
 
 func main() {

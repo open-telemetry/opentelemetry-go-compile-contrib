@@ -10,7 +10,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/otelcclientgo/semconv"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
@@ -19,6 +18,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
+
+	"go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/otelcclientgo/semconv"
 )
 
 func TestGetSpanName(t *testing.T) {

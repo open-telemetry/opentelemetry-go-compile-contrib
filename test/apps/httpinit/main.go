@@ -8,7 +8,7 @@ package main
 import (
 	"log"
 
-	"example.com/httpinit/early"
+	"go.opentelemetry.io/otelc-contrib/test/apps/httpinit/early"
 )
 
 func main() {

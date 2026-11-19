@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 

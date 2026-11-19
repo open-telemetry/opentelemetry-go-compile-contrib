@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"go.opentelemetry.io/otelc/test/testutil"
+	"go.opentelemetry.io/otelc-contrib/test/testutil"
 )
 
 // TestGRPCWithOtelgrpcStatsHandler runs the grpccontrib app with the otelgrpc

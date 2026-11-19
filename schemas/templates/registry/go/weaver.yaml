@@ -1,5 +1,5 @@
 # Generates pkg/otelcconv from the attributes otelc declares itself with `id:`
-# in schemas/otelc/. See docs/adr/0006-semconv-telemetry-contract-organization.md.
+# in schemas/otelc-contrib/. See docs/adr/0006-semconv-telemetry-contract-organization.md.
 #
 # attribute_group.go.j2 and helpers.j2 are vendored from go.opentelemetry.io/otel
 # v1.47.0 (semconv/templates/registry/go). The only local change is the package

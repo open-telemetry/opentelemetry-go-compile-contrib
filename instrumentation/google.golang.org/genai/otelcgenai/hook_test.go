@@ -235,7 +235,8 @@ func TestNewClient_ConcurrentUseOfCallerClientIsRaceFree(t *testing.T) {
 	for range 4 {
 		wg.Go(func() {
 			_, err := buildInstrumentedClient(
-				t.Context(), testClientConfig(genaisdk.BackendGeminiAPI, httpClient))
+				t.Context(), testClientConfig(genaisdk.BackendGeminiAPI, httpClient),
+			)
 			errs <- err
 		})
 	}

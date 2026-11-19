@@ -18,8 +18,9 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 
-	kafkaprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka/internal/propagation"
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
+
+	kafkaprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka/internal/propagation"
 )
 
 // setupTest wires the package-level tracer/propagator to an in-memory span

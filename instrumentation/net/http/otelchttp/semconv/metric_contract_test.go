@@ -22,7 +22,7 @@ func TestHTTPMetricNamesMatchRegistry(t *testing.T) {
 func declaredHTTPMetricNames(t *testing.T) []string {
 	t.Helper()
 
-	data, err := os.ReadFile("../../../../schemas/otelc/groups/http.yaml")
+	data, err := os.ReadFile("../../../../../schemas/otelc-contrib/groups/http.yaml")
 	require.NoError(t, err)
 
 	var registry struct {

@@ -14,7 +14,7 @@ import (
 	otelsemconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	"go.opentelemetry.io/otelc/pkg/runtime"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 // maxStreamEventSize bounds a single server-sent event line. Gemini sends one

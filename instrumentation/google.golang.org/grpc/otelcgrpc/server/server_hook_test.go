@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
+
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 

@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
+
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 

@@ -14,5 +14,5 @@ import (
 // pkg/runtime: pkg/runtime imports os/signal, so an import edge from this
 // injected file would close a cycle.
 //
-//go:linkname otelcRecordNotify go.opentelemetry.io/otelc/pkg/runtime.RecordSignalNotify
+//go:linkname otelcRecordNotify go.opentelemetry.io/otelc-contrib/pkg/runtime.RecordSignalNotify
 func otelcRecordNotify(c chan<- os.Signal, sig []os.Signal)
