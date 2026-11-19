@@ -470,3 +470,48 @@ func TestLegacyParseDSN(t *testing.T) {
 		})
 	}
 }
+
+// TestParseDSN_MySQLParenthesisInQuery covers a parenthesis in a query value.
+// go-sql-driver/mysql looks for the address parentheses only before the last
+// '/', so a DSN without an address still gets its database name.
+func TestParseDSN_MySQLParenthesisInQuery(t *testing.T) {
+	tests := []struct {
+		name     string
+		dsn      string
+		wantHost string
+		wantPort string
+		wantDB   string
+	}{
+		{
+			name:   "no address and a parenthesis in a query value",
+			dsn:    "user:pass@/app?time_zone=(UTC)",
+			wantDB: "app",
+		},
+		{
+			name:   "no address and an unclosed parenthesis in a query value",
+			dsn:    "user:pass@/app?init=(",
+			wantDB: "app",
+		},
+		{
+			name:     "address and a parenthesis in a query value",
+			dsn:      "user:pass@tcp(db.example.com:3307)/app?time_zone=(UTC)",
+			wantHost: "db.example.com",
+			wantPort: "3307",
+			wantDB:   "app",
+		},
+		{
+			name:     "unix socket and a parenthesis in a query value",
+			dsn:      "user:pass@unix(/tmp/mysql.sock)/app?time_zone=(UTC)",
+			wantHost: "/tmp/mysql.sock",
+			wantDB:   "app",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ParseDSN("mysql", tt.dsn)
+			assert.Equal(t, tt.wantHost, got.Host)
+			assert.Equal(t, tt.wantPort, got.Port)
+			assert.Equal(t, tt.wantDB, got.DBName)
+		})
+	}
+}
