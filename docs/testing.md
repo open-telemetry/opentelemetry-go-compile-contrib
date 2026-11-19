@@ -1,17 +1,14 @@
 # Testing
 
-> [!NOTE]
-> **Migration in Progress**: This document describes the post-migration testing layout and categories. Some referenced paths (such as `pkg/`, `tool/`, and `test/`) will be populated as the migration from `opentelemetry-go-compile-instrumentation` progresses (tracked in [#5](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues/5)).
-
 This document describes the testing strategy for the project, the different test categories, and when to use each.
 
 Tests are organized in six categories, each with a distinct purpose and scope.
 
 | Category | Location | Build Tag | Scope |
 | :------- | :------- | :-------- | :---- |
-| Unit | `tool/**/*_test.go`, `pkg/**/*_test.go` | none | Single function or component in isolation. |
+| Unit | `pkg/**/*_test.go`, `instrumentation/**/*_test.go` | none | Single function or component in isolation. |
 | Integration | `test/integration/` | `integration` | Instrumented binary against a local or in-process dependency. |
-| E2E | `test/e2e/` | `e2e` | Multiple processes (e.g. client + server). |
+| E2E | `test/e2e/` | `e2e` | Multiple processes (e.g. client + server), or an instrumented binary against a real external dependency. |
 | LatestLibBuild | `test/latestlibbuild/` | `latestlibbuild` | Compile instrumented app against `@latest` of each instrumented library. |
 | LatestLibRun | `test/latestlibrun/` | `latestlibrun` | Run integration suite after bumping each instrumented library to `@latest`. |
 | VersionMatrix | `test/versionmatrix/` | `versionmatrix` | Run integration suite after pinning each instrumented library to the lower and upper bounds of its declared version ranges. |
@@ -25,12 +22,12 @@ Unit tests live next to the source code they exercise and require no build tags.
 
 There are two main areas:
 
-- **Tool tests** (`tool/`). Cover the compile-time instrumentation pipeline: AST rewriting, import resolution, trampoline generation, package loading, and setup logic. Golden-file tests in `tool/internal/instrument/` snapshot expected output and can be updated with `make test-unit/update-golden`.
-- **Package tests** (`pkg/`). Cover the runtime instrumentation hooks and semantic convention helpers. Each hook package has tests that verify span creation, context propagation, error recording, and the enable/disable mechanism via `OTEL_GO_ENABLED_INSTRUMENTATIONS` / `OTEL_GO_DISABLED_INSTRUMENTATIONS`.
+- **Package tests** (`pkg/`). Cover shared runtime packages and semantic convention helpers (`pkg/runtime`, `pkg/netutil`).
+- **Instrumentation tests** (`instrumentation/`). Cover the runtime instrumentation hooks and semantic convention helpers. Each hook package has tests that verify span creation, context propagation, error recording, and the enable/disable mechanism via `OTEL_GO_ENABLED_INSTRUMENTATIONS` / `OTEL_GO_DISABLED_INSTRUMENTATIONS`.
 
 ### Field-injected packages
 
-Some instrumentations (`database/sql`, `runtime`) inject fields into stdlib types via `add_struct_fields`. The root package of those modules does not type-check against an uninstrumented stdlib, so `go test ./...` on the module fails.
+The `database/sql` instrumentation injects fields into stdlib types via `add_struct_fields`. The root package of that module does not type-check against an uninstrumented stdlib, so `go test ./...` on the module fails.
 
 For `database/sql`, `make test-unit` / `make test-unit/instrumentation` still run the packages that do not touch injected fields:
 
@@ -39,16 +36,6 @@ go test ./dsnparse/... ./semconv/...
 ```
 
 Keep new unit tests for DSN parsing, semconv helpers, and other pure logic in those subpackages. Hook paths that require injected fields stay covered by integration tests under `test/integration/`.
-
-### Golden-test helper packages
-
-A golden testcase directory under `tool/internal/instrument/testdata/golden/<name>/` may contain a `helpers/` subdirectory with one or more Go packages. The test harness automatically discovers each subdirectory, compiles it into a `.a` archive, and registers it in the `importcfg` so the instrumented source can import it at compile time.
-
-Use this convention when a testcase exercises call rules that reference wrapper functions from an external (non-stdlib) package via the `imports:` field. To add a new helper:
-
-1. Create `helpers/<pkgname>/<pkgname>.go` with the wrapper code (package name must match the directory name).
-2. Reference the full import path in `rules.yml` under `imports:`, the path is `<root-module>/tool/internal/instrument/testdata/golden/<testname>/helpers/<pkgname>`.
-3. Create a placeholder for the golden file and run `make test-unit/update-golden` to regenerate the `.golden` snapshot.
 
 ### Fuzz targets
 
@@ -70,10 +57,7 @@ Keep the invariant honest: assert it only where it genuinely holds. Malformed in
 ## Integration Tests
 
 > [!IMPORTANT]
-> **When to write an integration test.**
->
-> - **Tool hook changes.** Any change to the tool's code injection or the `HookContext` interface must be covered by `basic_test.go`. It exercises `demo/app/basic/instrumentation` and validates the foundational hook machinery that all other instrumentations rely on.
-> - **Instrumentation package changes.** Every package in `instrumentation/` must have a corresponding integration test. If you add or modify a hook, there should be an integration test that builds an instrumented binary and asserts on the exported spans for that component.
+> **When to write an integration test.** Every package in `instrumentation/` must have a corresponding integration test. If you add or modify a hook, there should be an integration test that builds an instrumented binary and asserts on the exported spans for that component.
 
 Integration tests build real binaries with the `otelc` tool and run them against **in-process** dependencies (e.g. `httptest.Server`, in-process gRPC server, miniredis, testdb driver).
 
@@ -108,7 +92,7 @@ Shared helpers in `test/testutil/` provide the OTLP collector, build/run wrapper
 ## Running Tests
 
 > [!NOTE]
-> Integration and e2e tests require `make build` (and `make build-demo` for gRPC/HTTP demos) before running.
+> Integration and e2e tests require `make build` and `make otelc` before running.
 
 ```bash
 # All tests
@@ -116,14 +100,14 @@ make test
 
 # Unit tests
 make test-unit              # all unit tests
-make test-unit/tool         # tool only
 make test-unit/pkg          # pkg only
-make test-unit/update-golden # update golden files
+make test-unit/instrumentation # instrumentation only
+make test-unit/helper       # test helpers only
 
 # Integration tests (requires: make build)
 make test-integration
 
-# E2E tests (requires: make build build-demo)
+# E2E tests (requires: make build)
 make test-e2e
 
 # LatestLibBuild tests (requires: make build; mutates test/apps/*/go.mod — run git restore test/apps afterwards)
@@ -144,7 +128,7 @@ make test-e2e/coverage
 ## Coverage
 
 > [!NOTE]
-> The project enforces a **≥68% unit-test coverage** floor for the `tool/` module tree and **≥70%** for the `pkg/` module tree.
+> The project enforces a **≥70% unit-test coverage** floor for the `pkg/` module tree.
 > Codecov checks each tree against its target and **blocks the PR** when coverage drops below it.
 
 Run the same gate locally with:
@@ -153,21 +137,19 @@ Run the same gate locally with:
 make check-coverage
 ```
 
-Set `TOOL_COVERAGE_THRESHOLD` or `PKG_COVERAGE_THRESHOLD` if you need to validate a different floor while experimenting locally.
+Set `PKG_COVERAGE_THRESHOLD` if you need to validate a different floor while experimenting locally.
 
 ### Coverage target rationale
 
-The coverage floors were set to reflect the current unit-test reachability of each module tree.
-The `tool/` flag targets 68% because the remaining build-orchestration paths are exercised through
-integration coverage, while `pkg/` remains at 70%. Coverage is tracked **per module tree** so that
-one area cannot mask regression in the other.
+The coverage floor was set to reflect the current unit-test reachability of each module tree.
+`pkg/` remains at 70%, while `instrumentation/` unit coverage tracking is informational until baseline targets are set. Coverage is tracked **per module tree** so that one area cannot mask regression in the other.
 
 ### CI behaviour
 
 The `test-unit-coverage` job in `.github/workflows/test-unit.yaml`:
 
-1. Runs `make test-unit/coverage` to generate `coverage-tool.txt` and `coverage-pkg.txt`.
-2. Uploads both files to Codecov for historical tracking (flags: `tool`, `pkg`).
+1. Runs `make test-unit/coverage` to generate `coverage-pkg.txt` and `coverage-instrumentation.txt`.
+2. Uploads both files to Codecov for historical tracking (flags: `pkg`, `instrumentation`).
 
 Codecov evaluates each flag against the target defined in `.github/codecov.yml` and posts the result as an
 **enforcing** status check (`informational: false`): a coverage shortfall below the target fails
@@ -221,7 +203,7 @@ A failure means that the latest release of an upstream library introduced a **ru
 
 Bounds are taken **per rule, not per dependency**: a dependency covered by two rules contributes both rules' lower bounds (e.g. `k8s.io/client-go` rules `v0.34.0,v0.36.0` and `v0.35.0,v0.36.0` are tested at `v0.34.0` and `v0.35.0`), so the boundary where one rule hands off to the next is exercised on its own. Version ranges are half-open (`v0.34.0,v0.36.0` supports `>= v0.34.0` and `< v0.36.0`), so the upper bound tested for a capped range is the newest release **below** the cap. An upper bound equal to the latest release (an open-ended range) is dropped, because LatestLibRun already exercises the latest release and a shared failure would otherwise open two issues. Note that a capped range whose library has already released past the cap (e.g. `v0.34.0,v0.36.0` when `@latest` is `v0.36.1`) is skipped by both latest-lib tests, so this test is the only one exercising it at all.
 
-Per [ADR-0004](adr/0004-instrumentation-ownership-and-compatibility.md), the supported window per library is the last two major versions; that policy bounds the matrix this test has to cover.
+Per [ADR-0004](https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/blob/main/docs/adr/0004-instrumentation-ownership-and-compatibility.md), the supported window per library is the last two major versions; that policy bounds the matrix this test has to cover.
 
 ### What a failure means
 
