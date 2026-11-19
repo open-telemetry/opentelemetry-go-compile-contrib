@@ -1,0 +1,82 @@
+name: Check License Headers
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # This is a required workflow, so it must always run and report a status.
+  # We use dorny/paths-filter at the job level instead of workflow-level path filters
+  # to ensure the workflow runs and the "done" job reports success even when no relevant files change.
+  # This prevents PRs from being blocked by missing status checks.
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d  # v4.0.3
+        id: filter
+        with:
+          filters: |
+            code:
+              - "**/*.go"
+              - "**/*.sh"
+              - "Makefile"
+              - ".github/workflows/check-license-headers.yaml"
+
+  check-license-headers:
+    name: Check License Headers
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        with:
+          persist-credentials: false
+      - run: make lint/license-header
+
+  done:
+    name: Done (Check License Headers)
+    runs-on: ubuntu-latest
+    needs: [changes, check-license-headers]
+    if: always()
+    steps:
+      - name: Check result
+        run: |
+          changes_result="${{ needs.changes.result }}"
+          code_changed="${NEEDS_CHANGES_OUTPUTS_CODE}"
+          license_result="${{ needs.check-license-headers.result }}"
+          echo "Changes result: $changes_result"
+          echo "Code changed: $code_changed"
+          echo "License result: $license_result"
+          if [[ "$changes_result" != "success" ]]; then
+            echo "❌ Change detection failed"
+            exit 1
+          fi
+          if [[ "$code_changed" == "false" ]]; then
+            echo "✅ No relevant code changes; license check skipped"
+            exit 0
+          fi
+          if [[ "$code_changed" != "true" ]]; then
+            echo "❌ Unexpected change detection output: $code_changed"
+            exit 1
+          fi
+          if [[ "$license_result" == "success" ]]; then
+            echo "✅ License check passed"
+            exit 0
+          fi
+          echo "❌ License check failed"
+          exit 1
+        env:
+          NEEDS_CHANGES_OUTPUTS_CODE: ${{ needs.changes.outputs.code }}
