@@ -33,8 +33,9 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	osemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/opensearch-project/opensearch-go/v5/otelcopensearch/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
+	osemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/opensearch-project/opensearch-go/v5/otelcopensearch/semconv"
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
@@ -83,6 +84,9 @@ func BeforeRequest(
 	_ *opensearch.Client,
 	req *http.Request,
 ) {
+	if !runtime.Ready() {
+		return
+	}
 	if !enabler.Enable() {
 		logger.Debug("opensearch instrumentation disabled")
 		return
@@ -126,6 +130,10 @@ func BeforeRequest(
 func AfterRequest(ictx hook.HookContext, resp *http.Response, err error) {
 	data, ok := ictx.GetData().(*hookData)
 	if !ok || data == nil || data.span == nil {
+		// The logger is nil for a call skipped during package initialization.
+		if !runtime.Ready() {
+			return
+		}
 		logger.Debug("AfterRequest: no span from before hook")
 		return
 	}

@@ -59,8 +59,11 @@ require (
 	go.opentelemetry.io/otel/sdk/log v1.47.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261109153609-3daec576228a // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace v0.0.0-20261109153609-3daec576228a // indirect
 	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp v0.0.0-20261109153609-3daec576228a // indirect
 	go.opentelemetry.io/otelc-contrib/pkg/netutil v0.0.0-20261109153609-3daec576228a // indirect
+	go.opentelemetry.io/otelc-contrib/pkg/otelcconv v0.0.0-00010101000000-000000000000 // indirect
 	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a // indirect
 	go.opentelemetry.io/otelc/pkg v0.1.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
@@ -85,3 +88,9 @@ replace (
 	go.opentelemetry.io/otelc-contrib/pkg/netutil => ../../../pkg/netutil
 	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../pkg/runtime
 )
+
+replace go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace
+
+replace go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/trace/otelctrace
+
+replace go.opentelemetry.io/otelc-contrib/pkg/otelcconv => ../../../pkg/otelcconv

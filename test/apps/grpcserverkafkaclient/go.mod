@@ -55,6 +55,8 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka v0.0.0-20261109153609-3daec576228a // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261109153609-3daec576228a // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace v0.0.0-20261109153609-3daec576228a // indirect
 	go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc v0.0.0-20261109153609-3daec576228a // indirect
 	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a // indirect
 	go.opentelemetry.io/otelc/pkg v0.1.0 // indirect
@@ -77,3 +79,7 @@ replace (
 	go.opentelemetry.io/otelc-contrib/pkg/runtime => ../../../pkg/runtime
 	go.opentelemetry.io/otelc-contrib/test/shared/grpcpb => ../../shared/grpcpb
 )
+
+replace go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/trace/otelctrace
+
+replace go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace => ../../../instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace

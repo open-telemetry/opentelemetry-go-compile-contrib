@@ -5,11 +5,13 @@ package mongodb
 
 import (
 	"context"
+	"sync"
 
 	"go.mongodb.org/mongo-driver/v2/event"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/v2/mongo/otelmongo"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
@@ -61,6 +63,42 @@ func chainMonitors(userMonitor, otel *event.CommandMonitor) *event.CommandMonito
 	}
 }
 
+// newLazyOtelMonitor returns a CommandMonitor that creates the otelmongo
+// monitor on the first event after pkg/runtime has initialized. A client can
+// be created during package initialization, when otelmongo.NewMonitor would
+// panic reading the global tracer provider and leave the client without a
+// monitor. Events before that are not traced.
+func newLazyOtelMonitor() *event.CommandMonitor {
+	var (
+		once    sync.Once
+		monitor *event.CommandMonitor
+	)
+	get := func() *event.CommandMonitor {
+		if !runtime.Ready() {
+			return nil
+		}
+		once.Do(func() { monitor = otelmongo.NewMonitor() })
+		return monitor
+	}
+	return &event.CommandMonitor{
+		Started: func(ctx context.Context, e *event.CommandStartedEvent) {
+			if m := get(); m != nil && m.Started != nil {
+				m.Started(ctx, e)
+			}
+		},
+		Succeeded: func(ctx context.Context, e *event.CommandSucceededEvent) {
+			if m := get(); m != nil && m.Succeeded != nil {
+				m.Succeeded(ctx, e)
+			}
+		},
+		Failed: func(ctx context.Context, e *event.CommandFailedEvent) {
+			if m := get(); m != nil && m.Failed != nil {
+				m.Failed(ctx, e)
+			}
+		},
+	}
+}
+
 // injectMonitor appends a trailing ClientOptions element carrying the OTel
 // CommandMonitor, chained with any monitor the caller already configured so
 // both keep firing.
@@ -76,7 +114,7 @@ func chainMonitors(userMonitor, otel *event.CommandMonitor) *event.CommandMonito
 // already passed in.
 func injectMonitor(opts []*options.ClientOptions) []*options.ClientOptions {
 	merged := options.MergeClientOptions(opts...)
-	otelMonitor := otelmongo.NewMonitor()
+	otelMonitor := newLazyOtelMonitor()
 	monitor := otelMonitor
 	if merged.Monitor != nil {
 		monitor = chainMonitors(merged.Monitor, otelMonitor)

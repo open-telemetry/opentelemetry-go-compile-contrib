@@ -9,8 +9,10 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	httpsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
+	httpsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/semconv"
+	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 // routeSetKey is stored on the gin.Context to prevent repeated span updates
@@ -34,8 +36,9 @@ const enabledDataKey = "otel.gin.enabled"
 // "METHOD" to "METHOD /route/pattern" and record the http.route attribute.
 func BeforeNext(ictx hook.HookContext, c *gin.Context) {
 	// Next is called once per middleware in the chain, so this runs several
-	// times per request. Keep the disabled path free of logging.
-	enabled := enabler.Enable()
+	// times per request. Keep the disabled path free of logging. A request
+	// served during package initialization is skipped. See runtime.Ready.
+	enabled := runtime.Ready() && enabler.Enable()
 	ictx.SetKeyData(enabledDataKey, enabled)
 	if !enabled {
 		return

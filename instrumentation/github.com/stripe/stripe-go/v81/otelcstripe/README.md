@@ -64,7 +64,7 @@ Stripe-specific attributes: `stripe.request_id` (the `Request-Id` value Stripe
 support keys off), `stripe.error.code`, and `stripe.error.type`.
 
 The full emission contract is in
-[`schemas/otelc/groups/stripe.yaml`](../../../../../schemas/otelc/groups/stripe.yaml).
+[`schemas/otelc-contrib/groups/stripe.yaml`](../../../../../schemas/otelc-contrib/groups/stripe.yaml).
 
 ### Metrics
 

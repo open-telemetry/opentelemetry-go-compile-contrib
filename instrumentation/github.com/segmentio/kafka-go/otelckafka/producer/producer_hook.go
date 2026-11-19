@@ -14,9 +14,10 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 
+	"go.opentelemetry.io/otelc/pkg/hook"
+
 	kafkaprop "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka/internal/propagation"
 	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/segmentio/kafka-go/otelckafka/semconv"
-	"go.opentelemetry.io/otelc/pkg/hook"
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
@@ -87,6 +88,9 @@ func BeforeWriteMessages(
 	ctx context.Context,
 	msgs ...kafka.Message,
 ) {
+	if !runtime.Ready() {
+		return
+	}
 	if !kafkaEnabler.Enable() {
 		logger.Debug("Kafka producer instrumentation disabled")
 		return
@@ -184,8 +188,13 @@ func ensureAsyncFailureLogging(w *kafka.Writer) {
 		original := w.Completion
 		w.Completion = func(msgs []kafka.Message, err error) {
 			if err != nil {
-				logger.Error("kafka async write failed after WriteMessages returned; the producer span(s) for the affected message(s) were already ended without this outcome",
-					"error", err, "messageCount", len(msgs))
+				runtime.Logger().Error(
+					"kafka async write failed after WriteMessages returned; the producer span(s) for the affected message(s) were already ended without this outcome",
+					"error",
+					err,
+					"messageCount",
+					len(msgs),
+				)
 			}
 			if original != nil {
 				original(msgs, err)

@@ -36,8 +36,9 @@ import (
 	otelsemconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2/otelclinodego/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
+	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2/otelclinodego/semconv"
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
@@ -137,6 +138,9 @@ func BeforeDoRequest(
 	_ interface{}, // requestParams
 	_ interface{}, // paginationMutator
 ) {
+	if !runtime.Ready() {
+		return
+	}
 	if !enabler.Enable() {
 		logger.Debug("linodego instrumentation disabled")
 		return
@@ -169,6 +173,10 @@ func BeforeDoRequest(
 func AfterDoRequest(ictx hook.HookContext, err error) {
 	span, ok := ictx.GetKeyData(keySpan).(trace.Span)
 	if !ok || span == nil {
+		// The logger is nil for a call skipped during package initialization.
+		if !runtime.Ready() {
+			return
+		}
 		logger.Debug("AfterDoRequest: no span from before hook")
 		return
 	}

@@ -12,7 +12,7 @@ SHELL := /bin/bash
         test-unit/coverage test-unit/pkg/coverage test-unit/instrumentation/coverage \
         check-coverage test-integration/coverage test-e2e/coverage test-latestlibbuild test-latestlibrun test-versionmatrix \
         weaver-install tidy/test-apps \
-        fetch-upstream-semconv lint-schema \
+        fetch-upstream-semconv lint-schema generate \
         govulncheck govulncheck/instrumentation
 
 # Constant variables
@@ -673,6 +673,11 @@ lint-schema: fetch-upstream-semconv
 # top-level `lint` target; it now validates the project's own registry.
 lint/semantic-conventions: ## Validate the otelc semantic-convention registry (schemas/otelc-contrib/) with OTel Weaver
 lint/semantic-conventions: lint-schema
+
+generate: ## Generate pkg/otelcconv from the attributes declared with `id:` in schemas/otelc-contrib/
+generate: fetch-upstream-semconv
+	@scripts/semconv/generate.sh $(OCI_BIN) $(WEAVER_IMAGE) "$(OTELC_REGISTRY_DIR)" \
+		"$(CURDIR)/schemas/templates/registry" "$(CURDIR)/pkg/otelcconv"
 
 semantic-conventions/diff: ## Generate diff between current version and latest (non-blocking informational check)
 semantic-conventions/diff: weaver-install

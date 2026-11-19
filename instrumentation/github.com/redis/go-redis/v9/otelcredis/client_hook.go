@@ -7,6 +7,7 @@ import (
 	redis "github.com/redis/go-redis/v9"
 
 	"go.opentelemetry.io/otelc/pkg/hook"
+
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 

@@ -8,6 +8,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	gocql "github.com/apache/cassandra-gocql-driver/v2"
@@ -16,8 +17,9 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
-	gocqlsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/apache/cassandra-gocql-driver/v2/otelcgocql/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook"
+
+	gocqlsemconv "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/apache/cassandra-gocql-driver/v2/otelcgocql/semconv"
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
@@ -39,6 +41,7 @@ type otelObserver struct {
 	userBatch   gocql.BatchObserver
 	userConnect gocql.ConnectObserver
 	tracer      trace.Tracer
+	tracerOnce  sync.Once
 }
 
 func newOtelObserver(
@@ -50,12 +53,23 @@ func newOtelObserver(
 		userQuery:   userQuery,
 		userBatch:   userBatch,
 		userConnect: userConnect,
-		tracer:      otel.GetTracerProvider().Tracer(instrumentationName),
 	}
 }
 
+// getTracer returns the observer's tracer, looking it up on first use. A session
+// can be created during package initialization, before the OpenTelemetry API
+// is usable.
+func (o *otelObserver) getTracer() trace.Tracer {
+	o.tracerOnce.Do(func() {
+		if o.tracer == nil {
+			o.tracer = otel.GetTracerProvider().Tracer(instrumentationName)
+		}
+	})
+	return o.tracer
+}
+
 func (o *otelObserver) ObserveQuery(ctx context.Context, q gocql.ObservedQuery) {
-	if enabler.Enable() {
+	if runtime.Ready() && enabler.Enable() {
 		o.recordQuerySpan(ctx, q)
 	}
 	if o.userQuery != nil {
@@ -64,7 +78,7 @@ func (o *otelObserver) ObserveQuery(ctx context.Context, q gocql.ObservedQuery) 
 }
 
 func (o *otelObserver) ObserveBatch(ctx context.Context, b gocql.ObservedBatch) {
-	if enabler.Enable() {
+	if runtime.Ready() && enabler.Enable() {
 		o.recordBatchSpan(ctx, b)
 	}
 	if o.userBatch != nil {
@@ -73,7 +87,7 @@ func (o *otelObserver) ObserveBatch(ctx context.Context, b gocql.ObservedBatch) 
 }
 
 func (o *otelObserver) ObserveConnect(oc gocql.ObservedConnect) {
-	if enabler.Enable() {
+	if runtime.Ready() && enabler.Enable() {
 		o.recordConnectSpan(oc)
 	}
 	if o.userConnect != nil {
@@ -97,7 +111,7 @@ func (o *otelObserver) recordQuerySpan(ctx context.Context, q gocql.ObservedQuer
 		endTime = time.Now()
 	}
 
-	_, span := o.tracer.Start(ctx, spanName,
+	_, span := o.getTracer().Start(ctx, spanName,
 		trace.WithTimestamp(startTime),
 		trace.WithSpanKind(trace.SpanKindClient),
 	)
@@ -135,7 +149,7 @@ func (o *otelObserver) recordBatchSpan(ctx context.Context, b gocql.ObservedBatc
 		endTime = time.Now()
 	}
 
-	_, span := o.tracer.Start(ctx, spanName,
+	_, span := o.getTracer().Start(ctx, spanName,
 		trace.WithTimestamp(startTime),
 		trace.WithSpanKind(trace.SpanKindClient),
 	)
@@ -176,7 +190,7 @@ func (o *otelObserver) recordConnectSpan(oc gocql.ObservedConnect) {
 
 	spanName := connectSpanName(req.Host, req.Port)
 
-	_, span := o.tracer.Start(context.Background(), spanName,
+	_, span := o.getTracer().Start(context.Background(), spanName,
 		trace.WithTimestamp(startTime),
 		trace.WithSpanKind(trace.SpanKindClient),
 	)

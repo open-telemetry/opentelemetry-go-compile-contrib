@@ -25,8 +25,9 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 
-	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/stripe/stripe-go/v82/otelcstripe/semconv"
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
+
+	"go.opentelemetry.io/otelc-contrib/instrumentation/github.com/stripe/stripe-go/v82/otelcstripe/semconv"
 )
 
 func setupTestProviders(t *testing.T) (*tracetest.SpanRecorder, *sdkmetric.ManualReader) {
