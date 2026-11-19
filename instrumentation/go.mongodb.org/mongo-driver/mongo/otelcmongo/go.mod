@@ -6,7 +6,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	go.mongodb.org/mongo-driver v1.17.10
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.72.0
-	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261118183739-77084bb95fe6
 	go.opentelemetry.io/otelc/pkg v0.1.0
 )
 

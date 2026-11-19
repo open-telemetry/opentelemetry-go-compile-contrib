@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	go.opentelemetry.io/otel/trace v1.47.0
-	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261118183739-77084bb95fe6
 	go.opentelemetry.io/otelc/pkg v0.1.0
 )
 
