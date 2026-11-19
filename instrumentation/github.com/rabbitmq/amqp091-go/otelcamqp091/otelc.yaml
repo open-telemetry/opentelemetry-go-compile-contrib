@@ -61,7 +61,8 @@ amqp_hook_publish_with_context:
   do:
     - inject_hooks:
         before: BeforePublishWithContext
-        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/otelcamqp091"
+        after: AfterPublishWithContext
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/otelcamqp091" 
 
 amqp_hook_publish_with_deferred_confirm_with_context:
   target: github.com/rabbitmq/amqp091-go
@@ -72,7 +73,8 @@ amqp_hook_publish_with_deferred_confirm_with_context:
   do:
     - inject_hooks:
         before: BeforePublishWithDeferredConfirmWithContext
-        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/otelcamqp091"
+        after: AfterPublishWithDeferredConfirmWithContext
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/rabbitmq/amqp091-go/otelcamqp091" 
 
 amqp_hook_ack:
   target: github.com/rabbitmq/amqp091-go
