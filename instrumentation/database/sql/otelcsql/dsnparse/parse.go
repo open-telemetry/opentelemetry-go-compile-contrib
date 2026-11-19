@@ -582,8 +582,8 @@ func parseClickHouseDSN(dsn string) DSNInfo {
 	if err != nil {
 		return DSNInfo{}
 	}
-	host := u.Hostname()
-	port := u.Port()
+	ep := clickHouseEndpoint(u)
+	host, port := ep.Host, ep.Port
 	if port == "" {
 		switch u.Scheme {
 		case "http":
@@ -599,6 +599,20 @@ func parseClickHouseDSN(dsn string) DSNInfo {
 		dbName = u.Query().Get("database")
 	}
 	return DSNInfo{Host: host, Port: port, DBName: dbName}
+}
+
+// clickHouseEndpoint returns the first host and port of a ClickHouse URL as a
+// DSNInfo with only those two fields set.
+// clickhouse-go accepts a comma separated host list in the authority
+// (clickhouse://h1:9000,h2:9000/db) and tries the hosts in turn, so the first
+// one is reported. Reading the whole authority at once would put "h1:9000,h2"
+// in the host.
+func clickHouseEndpoint(u *nurl.URL) DSNInfo {
+	first, _, _ := strings.Cut(u.Host, ",")
+	if host, port, err := net.SplitHostPort(first); err == nil {
+		return DSNInfo{Host: host, Port: port}
+	}
+	return DSNInfo{Host: trimHostBrackets(first)}
 }
 
 // ---- Oracle ------------------------------------------------------------------
