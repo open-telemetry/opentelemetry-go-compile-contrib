@@ -7,7 +7,7 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.10.0
 	// this should be updated to a tagged release once one is published by contrib
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/v2/mongo/otelmongo v0.0.0-20261109142617-e9cd3e0f2918
-	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261119084005-f5630b90104d
 	go.opentelemetry.io/otelc/pkg v0.1.0
 )
 

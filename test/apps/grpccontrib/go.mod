@@ -7,7 +7,7 @@ require (
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/init v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc/client v0.0.0-20261109153609-3daec576228a
 	go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc/server v0.0.0-20261109153609-3daec576228a
-	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/client v0.0.0-20261109153609-3daec576228a
+	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/client v0.0.0-20261119084005-f5630b90104d
 	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp/server v0.0.0-20261109153609-3daec576228a
 	google.golang.org/grpc v1.85.0-dev.0.20260825072537-93e31b48545e
 )
@@ -53,11 +53,11 @@ require (
 	go.opentelemetry.io/otel/sdk/log v1.47.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
-	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261109153609-3daec576228a // indirect
-	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace v0.0.0-20261109153609-3daec576228a // indirect
-	go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc v0.0.0-20261109153609-3daec576228a // indirect
-	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp v0.0.0-20261109153609-3daec576228a // indirect
-	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261109153609-3daec576228a // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261119084005-f5630b90104d // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace v0.0.0-20261119084005-f5630b90104d // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/google.golang.org/grpc/otelcgrpc v0.0.0-20261119084005-f5630b90104d // indirect
+	go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp v0.0.0-20261119084005-f5630b90104d // indirect
+	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261119084005-f5630b90104d // indirect
 	go.opentelemetry.io/otelc/pkg v0.1.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
