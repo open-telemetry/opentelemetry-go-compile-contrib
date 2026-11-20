@@ -578,7 +578,7 @@ func sqlServerStripProtocol(val string) string {
 
 // parseClickHouseDSN handles ClickHouse DSNs, which are always URL-formatted.
 func parseClickHouseDSN(dsn string) DSNInfo {
-	u, err := nurl.Parse(dsn)
+	u, err := nurl.Parse(clickHouseFirstHost(dsn))
 	if err != nil {
 		return DSNInfo{}
 	}
@@ -599,6 +599,30 @@ func parseClickHouseDSN(dsn string) DSNInfo {
 		dbName = u.Query().Get("database")
 	}
 	return DSNInfo{Host: host, Port: port, DBName: dbName}
+}
+
+// clickHouseFirstHost keeps only the first entry of a comma separated host
+// list in the authority of a ClickHouse URL. clickhouse-go accepts
+// clickhouse://h1:9000,h2:9000/db and tries the hosts in turn, so the first one
+// is reported. The list is trimmed before url.Parse, which reads the whole
+// authority as one host and, in some Go releases, rejects it as an invalid
+// port.
+func clickHouseFirstHost(dsn string) string {
+	_, afterScheme, ok := strings.Cut(dsn, "://")
+	if !ok {
+		return dsn
+	}
+	authEnd := strings.IndexAny(afterScheme, "/?#")
+	if authEnd < 0 {
+		authEnd = len(afterScheme)
+	}
+	hostStart := strings.LastIndexByte(afterScheme[:authEnd], '@') + 1
+	comma := strings.IndexByte(afterScheme[hostStart:authEnd], ',')
+	if comma < 0 {
+		return dsn
+	}
+	prefixLen := len(dsn) - len(afterScheme)
+	return dsn[:prefixLen+hostStart+comma] + afterScheme[authEnd:]
 }
 
 // ---- Oracle ------------------------------------------------------------------
