@@ -30,7 +30,7 @@ func TestDBClientUsedDuringInit(t *testing.T) {
 	for _, span := range testutil.AllSpans(f.Traces()) {
 		names = append(names, span.Name())
 	}
-	require.ElementsMatch(t, []string{"PING", "INSERT"}, names)
+	require.ElementsMatch(t, []string{"PING testdb", "INSERT testdb"}, names)
 }
 
 // go-redis runs its hooks outside any trampoline, so a command during another
