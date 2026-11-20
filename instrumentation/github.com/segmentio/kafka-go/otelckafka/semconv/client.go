@@ -25,7 +25,9 @@ const (
 // KafkaRequest carries the information needed to build the semantic convention
 // attributes for a single Kafka client operation.
 type KafkaRequest struct {
-	// Endpoint is the broker address in host:port form. It may be empty.
+	// Endpoint is the broker address in host:port form. It may be empty, and
+	// it may hold several comma separated addresses, in which case the first
+	// one is used.
 	Endpoint string
 	// Destination is the Kafka topic.
 	Destination string
@@ -96,10 +98,14 @@ func KafkaRequestTraceAttrs(req KafkaRequest) []attribute.KeyValue {
 		attrs = append(attrs, semconv.MessagingOperationTypeReceive)
 	}
 
-	if req.Endpoint != "" {
-		host, portStr, err := net.SplitHostPort(req.Endpoint)
+	// A kafka.Writer built with several brokers reports them as one
+	// comma separated string. Report the first, since server.address holds a
+	// single host.
+	endpoint, _, _ := strings.Cut(req.Endpoint, ",")
+	if endpoint != "" {
+		host, portStr, err := net.SplitHostPort(endpoint)
 		if err != nil {
-			attrs = append(attrs, semconv.ServerAddress(req.Endpoint))
+			attrs = append(attrs, semconv.ServerAddress(endpoint))
 		} else {
 			attrs = append(attrs, semconv.ServerAddress(host))
 			if port, convErr := strconv.Atoi(portStr); convErr == nil && port > 0 {
