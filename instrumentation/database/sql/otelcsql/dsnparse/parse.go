@@ -501,6 +501,10 @@ func sqliteDBName(dsn string) string {
 //	server=host;port=1433;database=mydb;user id=sa;password=secret
 //	Server=host,1433;Database=mydb;User Id=sa;Password=secret
 func parseSQLServerDSN(dsn string) DSNInfo {
+	// go-mssqldb accepts the ADO.NET pairs behind an "odbc:" prefix.
+	if rest, ok := strings.CutPrefix(dsn, "odbc:"); ok {
+		return parseSQLServerKV(rest)
+	}
 	if strings.Contains(dsn, "://") {
 		if u, err := nurl.Parse(dsn); err == nil {
 			host := u.Hostname()
@@ -508,11 +512,22 @@ func parseSQLServerDSN(dsn string) DSNInfo {
 			if port == "" {
 				port = "1433"
 			}
-			dbName := u.Query().Get("database")
-			return DSNInfo{Host: host, Port: port, DBName: dbName}
+			return DSNInfo{Host: host, Port: port, DBName: sqlServerURLDatabase(u)}
 		}
 	}
 	return parseSQLServerKV(dsn)
+}
+
+// sqlServerURLDatabase returns the database query parameter of a SQL Server
+// URL. go-mssqldb lowercases the parameter names, so "Database" names the
+// database as well.
+func sqlServerURLDatabase(u *nurl.URL) string {
+	for key, values := range u.Query() {
+		if strings.EqualFold(key, "database") && len(values) > 0 {
+			return values[0]
+		}
+	}
+	return ""
 }
 
 // parseSQLServerKV parses the ADO.NET semicolon-delimited key=value format.
