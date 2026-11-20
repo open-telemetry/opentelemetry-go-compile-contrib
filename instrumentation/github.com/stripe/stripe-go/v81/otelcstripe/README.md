@@ -9,7 +9,7 @@ One hook, on one function:
 
 | Layer | Target | Span name | Scope |
 |-------|--------|-----------|--------|
-| Backend request | `(*BackendImplementation).requestWithRetriesAndTelemetry` | `{METHOD} {url.template}` | `go.opentelemetry.io/otelc/instrumentation/github.com/stripe/stripe-go/v81` |
+| Backend request | `(*BackendImplementation).requestWithRetriesAndTelemetry` | `{METHOD} {url.template}` | `go.opentelemetry.io/otelc-contrib/instrumentation/github.com/stripe/stripe-go/v81/otelcstripe` |
 
 stripe-go exposes over 200 per-resource clients and thousands of exported
 methods. Every one of them reaches the network through a single unexported

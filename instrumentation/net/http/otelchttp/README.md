@@ -73,7 +73,7 @@ That's it! All HTTP traffic is now instrumented.
 
 ### Configuration
 
-The instrumentation is configured at compile-time via `instrumentation/net/http/client/otelc.yaml` and `instrumentation/net/http/server/otelc.yaml`:
+The instrumentation is configured at compile-time via `instrumentation/net/http/otelchttp/client/otelc.yaml` and `instrumentation/net/http/otelchttp/server/otelc.yaml`:
 
 ```yaml
 client_hook:
