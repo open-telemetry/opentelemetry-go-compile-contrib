@@ -292,20 +292,20 @@ func (n HTTPServer) MetricAttributes(
 	route string,
 	additionalAttributes []attribute.KeyValue,
 ) []attribute.KeyValue {
-	num := len(additionalAttributes) + 3
-	var host string
-	var p int
-	if server == "" {
-		host, p = SplitHostPort(req.Host)
-	} else {
-		host, p = SplitHostPort(server)
-		if p < 0 {
-			_, p = SplitHostPort(req.Host)
-		}
-	}
-	hostPort := RequiredHTTPPort(req.TLS != nil, p)
-	if hostPort > 0 {
+	num := len(additionalAttributes) + 1 // method
+	num++                                // url.scheme
+	// server.address and server.port are opt-in on the HTTP server metrics. The
+	// request Host is chosen by the client, so using it here would let any caller
+	// create new metric series. Only the configured server name is used.
+	host, p := SplitHostPort(server)
+	hostPort := -1
+	if host != "" {
 		num++
+		// server.port is only reported together with server.address.
+		hostPort = RequiredHTTPPort(req.TLS != nil, p)
+		if hostPort > 0 {
+			num++
+		}
 	}
 	protoName, protoVersion := NetProtocol(req.Proto)
 	if protoName != "" {
@@ -327,9 +327,11 @@ func (n HTTPServer) MetricAttributes(
 	attributes = append(attributes, additionalAttributes...)
 	attributes = append(attributes,
 		semconv.HTTPRequestMethodKey.String(StandardizeHTTPMethod(req.Method)),
-		n.scheme(req.TLS != nil),
-		semconv.ServerAddress(host))
+		n.scheme(req.TLS != nil))
 
+	if host != "" {
+		attributes = append(attributes, semconv.ServerAddress(host))
+	}
 	if hostPort > 0 {
 		attributes = append(attributes, semconv.ServerPort(hostPort))
 	}
