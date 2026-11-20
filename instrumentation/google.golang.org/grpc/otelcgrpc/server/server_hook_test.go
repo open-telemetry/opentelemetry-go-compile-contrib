@@ -18,10 +18,12 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/stats"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
 
@@ -394,14 +396,14 @@ func TestServerStatsHandler_ChainedHandler_EndsOwnSpan(t *testing.T) {
 	otherHandler := &otherLayerStatsHandler{tracer: tp.Tracer("other-layer")}
 	chainedCtx := otherHandler.TagRPC(otelcHandler.TagRPC(t.Context(), info), info)
 
-	// OutHeader must write the peer address to otelc's span, not to the
+	// InHeader must write the peer address to otelc's span, not to the
 	// innermost span. The peer context wraps the chained context, so it
 	// still carries the other layer's span.
 	peerCtx := peer.NewContext(chainedCtx, &peer.Peer{
 		Addr: &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 50051},
 	})
-	otelcHandler.HandleRPC(peerCtx, &stats.OutHeader{})
-	otherHandler.HandleRPC(peerCtx, &stats.OutHeader{})
+	otelcHandler.HandleRPC(peerCtx, &stats.InHeader{})
+	otherHandler.HandleRPC(peerCtx, &stats.InHeader{})
 
 	end := &stats.End{
 		BeginTime: time.Now().Add(-50 * time.Millisecond),
@@ -440,7 +442,7 @@ func TestServerStatsHandler_ChainedHandler_EndsOwnSpan(t *testing.T) {
 			clientAddress = attr.Value.AsString()
 		}
 	}
-	assert.Equal(t, "127.0.0.1", clientAddress, "otelc's span must carry the peer address from OutHeader")
+	assert.Equal(t, "127.0.0.1", clientAddress, "otelc's span must carry the peer address from InHeader")
 
 	// The other layer ends its own span and it must stay clean of otelc data.
 	otherHandler.HandleRPC(chainedCtx, end)
@@ -778,4 +780,65 @@ func TestServerStatsHandler_HandleRPC_UsesStatsEndTime(t *testing.T) {
 			"span EndTime should be set to current time",
 		)
 	})
+}
+
+func TestServerStatsHandler_ClientAddressOnTrailersOnlyResponse(t *testing.T) {
+	t.Setenv("OTEL_GO_ENABLED_INSTRUMENTATIONS", "grpc")
+	initInstrumentation()
+
+	exporter := tracetest.NewInMemoryExporter()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
+	oldTP := otel.GetTracerProvider()
+	otel.SetTracerProvider(tp)
+	t.Cleanup(func() {
+		_ = tp.Shutdown(context.Background())
+		otel.SetTracerProvider(oldTP)
+	})
+	tracer = tp.Tracer(instrumentationName, trace.WithInstrumentationVersion(runtime.ModuleVersion()))
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	srv := grpc.NewServer(grpc.StatsHandler(newServerStatsHandler()))
+	// The handler fails before it sends any header, so the server answers with
+	// a trailers only response.
+	srv.RegisterService(&grpc.ServiceDesc{
+		ServiceName: "test.Service",
+		HandlerType: (*any)(nil),
+		Methods: []grpc.MethodDesc{{
+			MethodName: "Fail",
+			Handler: func(any, context.Context, func(any) error, grpc.UnaryServerInterceptor) (any, error) {
+				return nil, status.Error(codes.Internal, "boom")
+			},
+		}},
+	}, struct{}{})
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	conn, err := grpc.NewClient(lis.Addr().String(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = conn.Close() })
+
+	err = conn.Invoke(t.Context(), "/test.Service/Fail", &emptypb.Empty{}, &emptypb.Empty{})
+	require.Equal(t, codes.Internal, status.Code(err))
+
+	require.Eventually(t, func() bool { return len(exporter.GetSpans()) == 1 }, 5*time.Second, 10*time.Millisecond)
+	attrs := map[string]any{}
+	for _, attr := range exporter.GetSpans()[0].Attributes {
+		attrs[string(attr.Key)] = attr.Value.AsInterface()
+	}
+	assert.Equal(t, "127.0.0.1", attrs["client.address"])
+	assert.Contains(t, attrs, "client.port")
+}
+
+func TestClientAddr(t *testing.T) {
+	remote := &net.TCPAddr{IP: net.ParseIP("10.0.0.7"), Port: 4000}
+	peerAddr := &net.TCPAddr{IP: net.ParseIP("10.0.0.8"), Port: 5000}
+	peerCtx := peer.NewContext(t.Context(), &peer.Peer{Addr: peerAddr})
+
+	assert.Equal(t, "10.0.0.7:4000", clientAddr(peerCtx, &stats.InHeader{RemoteAddr: remote}),
+		"the address on the event wins over the peer")
+	assert.Equal(t, "10.0.0.8:5000", clientAddr(peerCtx, &stats.InHeader{}),
+		"the peer on the context is the fallback")
+	assert.Empty(t, clientAddr(t.Context(), &stats.InHeader{}))
+	assert.Empty(t, clientAddr(peer.NewContext(t.Context(), &peer.Peer{}), &stats.InHeader{}))
 }
