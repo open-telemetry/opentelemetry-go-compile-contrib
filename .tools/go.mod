@@ -246,7 +246,7 @@ require (
 	go.augendre.info/fatcontext v0.10.1 // indirect
 	go.opentelemetry.io/build-tools v0.30.0 // indirect
 	go.opentelemetry.io/build-tools/crosslink v0.30.0 // indirect
-	go.opentelemetry.io/otelc v1.2.1-0.20261117140633-193deff4fcd3 // indirect
+	go.opentelemetry.io/otelc v1.2.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
@@ -274,6 +274,6 @@ require (
 // actionlint v1.7.12 relies on error types from go.yaml.in/yaml/v4 v4.0.0-rc.3;
 // newer release candidates (e.g. rc.6) introduced breaking API changes.
 replace (
-	go.yaml.in/yaml/v3 => go.yaml.in/yaml/v3 v3.0.4
-	go.yaml.in/yaml/v4 => go.yaml.in/yaml/v4 v4.0.0-rc.3
+	go.yaml.in/yaml/v3 => go.yaml.in/yaml/v3 v3.0.6
+	go.yaml.in/yaml/v4 => go.yaml.in/yaml/v4 v4.0.0
 )
