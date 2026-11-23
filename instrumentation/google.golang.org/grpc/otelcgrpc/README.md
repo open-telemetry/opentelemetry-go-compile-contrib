@@ -424,20 +424,10 @@ conn, _ := grpc.NewClient(target)  // Automatically instrumented
 
 ## Related Documentation
 
-- [Implementation Details](../../../docs/api-design-and-project-structure.md)
-- [Semantic Conventions](../../../docs/semantic-conventions.md)
-- [Getting Started](../../../README.md)
-
-## References
-
-- [Upstream otelgrpc](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/main/instrumentation/google.golang.org/grpc/otelgrpc)
-- [OTel RPC Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/rpc/)
-- [gRPC Stats Handler](https://pkg.go.dev/google.golang.org/grpc/stats)
-
-## Contributing
-
-See [CONTRIBUTING.md](../../../CONTRIBUTING.md) for development guidelines.
+- [Semantic Conventions](../../../../docs/semantic-conventions.md)
+- [Getting Started](../../../../README.md#usage)
+- See [CONTRIBUTING.md](../../../../CONTRIBUTING.md) for development guidelines.
 
 ## License
 
-Apache License 2.0 - See [LICENSE](../../../LICENSE) for details.
+Apache License 2.0 - See [LICENSE](../../../../LICENSE) for details.

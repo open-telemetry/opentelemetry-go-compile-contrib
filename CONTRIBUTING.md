@@ -22,16 +22,6 @@ This project uses several tools for development. Most tools will be automaticall
 
 ### Getting Started
 
-> **Windows/WSL contributors:** make sure `core.autocrlf` is `false` before
-> cloning (`git config --global core.autocrlf false`). CI runs on Windows as
-> well as Linux and macOS, and a clone with `core.autocrlf` enabled checks out
-> source files with CRLF line endings. That changes how blank lines are
-> preserved when the AST-based code generator writes output, which then fails
-> to match the (LF) golden files under `testdata/golden`, even though the
-> generated code is correct. If you already cloned with `autocrlf` on, re-clone
-> after changing the setting rather than trying to fix the line endings of an
-> existing checkout.
-
 1. Clone the repository:
 
    ```sh
@@ -64,7 +54,7 @@ make help
 - `make build` - Build all `pkg` and `instrumentation` modules
 - `make build/pkg` - Build all `pkg` modules
 - `make build/instrumentation` - Build all `instrumentation` modules
-- `make otelc` - Build the `otelc` tool binary into `.bin/`
+- `make otelc` - Install the `otelc` compiler tool into `.bin/` (from `.tools`) for testing
 
 #### Code Quality
 
@@ -109,8 +99,9 @@ Test results are saved to `gotest-unit.log` and `gotest-integration.log` for rev
 
 #### Semantic Conventions
 
-- `make weaver-install` - Install OTel Weaver if not present
-- `make lint/semantic-conventions` - Validate semantic convention registry
+- `make generate` - Generate Go constants in `pkg/otelcconv` from the schema registry using Weaver
+- `make lint-schema` - Validate semantic convention registry (`schemas/otelc-contrib/`)
+- `make weaver-install` - Install OTel Weaver CLI if not present
 - `make semantic-conventions/diff` - Generate diff between two versions of semantic convention registry
 - `make semantic-conventions/resolve` - Resolve semantic convention registry schema
 
