@@ -94,7 +94,7 @@ the conventions.
 ## Supported versions
 
 - Module: `github.com/stripe/stripe-go/v82`
-- Rules apply to **v82.0.0+**.
+- Rules apply to **v82.1.0+** (`stripe.V2RawError` introduced in v82.1.0).
 
 Stripe ships a new major version roughly quarterly, each on a new module path.
 [ADR-0004](../../../../../docs/adr/0004-instrumentation-ownership-and-compatibility.md)

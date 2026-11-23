@@ -72,7 +72,7 @@ Instrumentation key: `AMQP` (case-insensitive).
 ## Supported versions
 
 - Module: `github.com/rabbitmq/amqp091-go`
-- Minimum bound: **v1.9.0** (`ConsumeWithContext` landed in v1.9.0).
+- Minimum bound: **v1.10.0** (`Publish` and `PublishWithContext` route through `PublishWithDeferredConfirm` starting in v1.10.0).
 
 ## Tests
 
