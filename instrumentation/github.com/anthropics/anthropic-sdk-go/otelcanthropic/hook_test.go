@@ -58,3 +58,26 @@ func TestBeforeNewClient_SDKOpenTelemetryExplicitlyDisabled(t *testing.T) {
 	assert.Greater(t, ictx.GetParamCount(), 0)
 	assert.Equal(t, "false", os.Getenv(sdkOpenTelemetryEnv))
 }
+
+func TestBeforeNewClientPreV1_81_Disabled(t *testing.T) {
+	t.Setenv("OTEL_GO_DISABLED_INSTRUMENTATIONS", "ANTHROPIC")
+	t.Setenv(sdkOpenTelemetryEnv, "true")
+	ictx := hooktest.NewMockHookContext()
+	BeforeNewClientPreV1_81(ictx)
+	assert.Equal(t, 0, ictx.GetParamCount())
+}
+
+func TestBeforeNewClientPreV1_81_Enabled(t *testing.T) {
+	for _, envVal := range []string{"", "true", "1", "false"} {
+		t.Run("env_"+envVal, func(t *testing.T) {
+			t.Setenv("OTEL_GO_ENABLED_INSTRUMENTATIONS", "ANTHROPIC")
+			t.Setenv(sdkOpenTelemetryEnv, envVal)
+			ictx := hooktest.NewMockHookContext()
+			BeforeNewClientPreV1_81(ictx)
+			// Must inject middleware unconditionally regardless of ANTHROPIC_OPEN_TELEMETRY
+			assert.Positive(t, ictx.GetParamCount())
+			// Must not modify the environment variable
+			assert.Equal(t, envVal, os.Getenv(sdkOpenTelemetryEnv))
+		})
+	}
+}
