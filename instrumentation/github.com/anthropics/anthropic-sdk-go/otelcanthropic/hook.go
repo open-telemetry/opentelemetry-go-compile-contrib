@@ -80,6 +80,22 @@ func disableSDKOpenTelemetry() {
 	}
 }
 
+// BeforeNewClientPreV1_81 is injected into NewClient for anthropic-sdk-go
+// versions < v1.81.0. These earlier versions do not support built-in
+// OpenTelemetry tracing, so otelc's middleware is injected unconditionally
+// without checking ANTHROPIC_OPEN_TELEMETRY.
+func BeforeNewClientPreV1_81(ictx hook.HookContext, opts ...option.RequestOption) {
+	if !enabler.Enable() {
+		return
+	}
+
+	newOpts := make([]option.RequestOption, 0, len(opts)+1)
+	//nolint:bodyclose // returns middleware func
+	newOpts = append(newOpts, option.WithMiddleware(OtelMiddleware()))
+	newOpts = append(newOpts, opts...)
+	ictx.SetParam(0, newOpts)
+}
+
 func BeforeNewClient(ictx hook.HookContext, opts ...option.RequestOption) {
 	if !enabler.Enable() {
 		return
@@ -95,6 +111,7 @@ func BeforeNewClient(ictx hook.HookContext, opts ...option.RequestOption) {
 	// The middleware initializes the instrumentation, so a client created during
 	// package initialization keeps it.
 	newOpts := make([]option.RequestOption, 0, len(opts)+1)
+	//nolint:bodyclose // returns middleware func
 	newOpts = append(newOpts, option.WithMiddleware(OtelMiddleware()))
 	newOpts = append(newOpts, opts...)
 	ictx.SetParam(0, newOpts)
