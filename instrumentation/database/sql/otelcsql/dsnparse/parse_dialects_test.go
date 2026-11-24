@@ -70,6 +70,27 @@ func TestParseDSN_ClickHouse(t *testing.T) {
 			wantDB:   "pathdb",
 		},
 		{
+			name:     "host list reports the first host",
+			dsn:      "clickhouse://user:pass@h1:9440,h2:9441/prod?dial_timeout=200ms",
+			wantHost: "h1",
+			wantPort: "9440",
+			wantDB:   "prod",
+		},
+		{
+			name:     "host list where the first host has no port",
+			dsn:      "clickhouse://h1,h2:9441/prod",
+			wantHost: "h1",
+			wantPort: "9000",
+			wantDB:   "prod",
+		},
+		{
+			name:     "ipv6 host without a port",
+			dsn:      "https://[::1]/prod",
+			wantHost: "::1",
+			wantPort: "8443",
+			wantDB:   "prod",
+		},
+		{
 			name:     "ip host with explicit port",
 			dsn:      "clickhouse://10.0.0.7:9440/prod",
 			wantHost: "10.0.0.7",
