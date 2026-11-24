@@ -520,11 +520,20 @@ func parseSQLServerDSN(dsn string) DSNInfo {
 
 // sqlServerURLDatabase returns the database query parameter of a SQL Server
 // URL. go-mssqldb lowercases the parameter names, so "Database" names the
-// database as well.
+// database as well. The exact spelling wins, then the first differently cased
+// one in the order the URL gives them.
 func sqlServerURLDatabase(u *nurl.URL) string {
-	for key, values := range u.Query() {
-		if strings.EqualFold(key, "database") && len(values) > 0 {
-			return values[0]
+	if values := u.Query()["database"]; len(values) > 0 {
+		return values[0]
+	}
+	for pair := range strings.SplitSeq(u.RawQuery, "&") {
+		key, val, _ := strings.Cut(pair, "=")
+		key, err := nurl.QueryUnescape(key)
+		if err != nil || !strings.EqualFold(key, "database") {
+			continue
+		}
+		if val, err = nurl.QueryUnescape(val); err == nil {
+			return val
 		}
 	}
 	return ""

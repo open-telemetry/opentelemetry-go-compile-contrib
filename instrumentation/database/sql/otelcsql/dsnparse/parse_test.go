@@ -730,3 +730,41 @@ func TestParseDSN_MySQLNoParensUnixSocketWithQueryParam(t *testing.T) {
 	assert.Equal(t, "/tmp/mysql.sock", got.Host)
 	assert.Equal(t, "db", got.DBName)
 }
+
+func TestParseDSN_SQLServerDatabaseParameterCase(t *testing.T) {
+	tests := []struct {
+		name   string
+		dsn    string
+		wantDB string
+	}{
+		{
+			name:   "lowercase before capitalized",
+			dsn:    "sqlserver://user:pass@host:1433?database=first&Database=second",
+			wantDB: "first",
+		},
+		{
+			name:   "capitalized before lowercase",
+			dsn:    "sqlserver://user:pass@host:1433?Database=second&database=first",
+			wantDB: "first",
+		},
+		{
+			name:   "only a mixed case key",
+			dsn:    "sqlserver://user:pass@host:1433?DataBase=mydb",
+			wantDB: "mydb",
+		},
+		{
+			name:   "several mixed case keys use the first",
+			dsn:    "sqlserver://user:pass@host:1433?DATABASE=one&Database=two&DataBase=three",
+			wantDB: "one",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// A map iteration order changes between runs, so repeat the parse.
+			for range 50 {
+				info := ParseDSN("sqlserver", tt.dsn)
+				assert.Equal(t, tt.wantDB, info.DBName)
+			}
+		})
+	}
+}
