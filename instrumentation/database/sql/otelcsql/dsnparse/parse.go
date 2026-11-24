@@ -284,11 +284,14 @@ func firstHostOnly(dsn string) string {
 func postgresURLEndpoint(u *nurl.URL) (host, port string) {
 	host, port = u.Hostname(), u.Port()
 	q := u.Query()
-	if h := firstListItem(q.Get("host")); h != "" {
-		host = h
+	// A key that is present replaces the authority even when its first entry
+	// is empty: an empty host means the socket directory, an empty port the
+	// default.
+	if q.Has("host") {
+		host = firstListItem(q.Get("host"))
 	}
-	if p := firstListItem(q.Get("port")); p != "" {
-		port = p
+	if q.Has("port") {
+		port = firstListItem(q.Get("port"))
 	}
 	return host, port
 }

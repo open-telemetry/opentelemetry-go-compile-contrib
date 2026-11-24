@@ -225,6 +225,20 @@ func TestParseDSN_Postgres(t *testing.T) {
 			wantDB:   "mydb",
 		},
 		{
+			name:     "query port with an empty first entry gives the default port",
+			dsn:      "postgres://primary:6543,standby:6544/db?port=,5433",
+			wantHost: "primary",
+			wantPort: "5432",
+			wantDB:   "db",
+		},
+		{
+			name:     "query host with an empty first entry means no address",
+			dsn:      "postgres://primary:6543/db?host=,standby",
+			wantHost: "",
+			wantPort: "6543",
+			wantDB:   "db",
+		},
+		{
 			name:     "url with query port and authority host",
 			dsn:      "postgres://h1/mydb?port=6543",
 			wantHost: "h1",
