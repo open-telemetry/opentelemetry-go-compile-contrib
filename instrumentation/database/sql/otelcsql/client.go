@@ -285,7 +285,7 @@ func beforeQueryContextInstrumentation(
 }
 
 func afterQueryContextInstrumentation(ictx hook.HookContext, rows *sql.Rows, err error) {
-	instrumentEnd(ictx, err)
+	instrumentQueryEnd(ictx, rows, err)
 }
 
 func beforeTxInstrumentation(ictx hook.HookContext, db *sql.DB, ctx context.Context, opts *sql.TxOptions) {
@@ -459,7 +459,7 @@ func beforeConnQueryContextInstrumentation(
 }
 
 func afterConnQueryContextInstrumentation(ictx hook.HookContext, rows *sql.Rows, err error) {
-	instrumentEnd(ictx, err)
+	instrumentQueryEnd(ictx, rows, err)
 }
 
 func beforeConnTxInstrumentation(ictx hook.HookContext, conn *sql.Conn, ctx context.Context, opts *sql.TxOptions) {
@@ -567,7 +567,7 @@ func beforeTxQueryContextInstrumentation(
 }
 
 func afterTxQueryContextInstrumentation(ictx hook.HookContext, rows *sql.Rows, err error) {
-	instrumentEnd(ictx, err)
+	instrumentQueryEnd(ictx, rows, err)
 }
 
 func beforeTxCommitInstrumentation(ictx hook.HookContext, tx *sql.Tx) {
@@ -652,7 +652,7 @@ func beforeStmtQueryContextInstrumentation(
 }
 
 func afterStmtQueryContextInstrumentation(ictx hook.HookContext, rows *sql.Rows, err error) {
-	instrumentEnd(ictx, err)
+	instrumentQueryEnd(ictx, rows, err)
 }
 
 func instrumentStart(
