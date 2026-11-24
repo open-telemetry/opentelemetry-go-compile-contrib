@@ -245,7 +245,7 @@ func parsePostgresDSN(dsn string) DSNInfo {
 // equals sign is allowed, as in libpq.
 func parseLibpqKV(dsn string) DSNInfo {
 	info := DSNInfo{Host: "localhost", Port: "5432"}
-	rest := strings.TrimSpace(dsn)
+	rest := dsn
 	for len(rest) > 0 {
 		rest = strings.TrimLeft(rest, " \t\n\r")
 		if rest == "" {

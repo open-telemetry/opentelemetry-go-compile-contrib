@@ -145,6 +145,20 @@ func TestParseDSN_Postgres(t *testing.T) {
 			wantPort: "5433",
 			wantDB:   "my db",
 		},
+		{
+			name:     "libpq trailing escaped space is kept",
+			dsn:      "host=localhost dbname=my\\ ",
+			wantHost: "localhost",
+			wantPort: "5432",
+			wantDB:   "my ",
+		},
+		{
+			name:     "libpq trailing unescaped whitespace is ignored",
+			dsn:      "host=localhost dbname=mydb \t\n ",
+			wantHost: "localhost",
+			wantPort: "5432",
+			wantDB:   "mydb",
+		},
 		// pgx uses the same DSN format
 		{
 			name:     "pgx driver url format",
