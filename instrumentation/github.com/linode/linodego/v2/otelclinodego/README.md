@@ -32,7 +32,7 @@ Instrumentation key: `LINODEGO` (case-insensitive).
 
 - Module: `github.com/linode/linodego/v2`
 - Public-method rules are generated against **v2.4.1** and apply to **v2.4.1+** (`version: v2.4.1` minimum bound).
-- `doRequest` is hooked for **v2.0.0+**.
+- `doRequest` and host extractor rules apply to **v2.4.1+**.
 
 When bumping the dependency, regenerate hooks (below) and update:
 
