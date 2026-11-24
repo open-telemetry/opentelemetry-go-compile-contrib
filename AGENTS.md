@@ -48,8 +48,11 @@ This runs `build`, `format`, `lint`, and `test` in sequence.
 
 Additional documentation:
 
-- [docs/testing.md](docs/testing.md) for testing strategy and infrastructure.
-- [docs/semantic-conventions.md](docs/semantic-conventions.md) for semantic convention management.
+- [docs/instrument-guide.md](docs/instrument-guide.md) for adding and modifying instrumentation hooks.
+- [docs/testing.md](docs/testing.md) for testing strategy and test suites.
+- [docs/semantic-conventions.md](docs/semantic-conventions.md) for semantic convention registry management and Weaver generation.
+- [docs/troubleshooting.md](docs/troubleshooting.md) for runtime diagnostics and package initialization order.
+- [Upstream Rule Specification](https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/blob/main/docs/rules.md) for canonical rule engine syntax and selectors.
 
 ## Code Quality Standards
 
