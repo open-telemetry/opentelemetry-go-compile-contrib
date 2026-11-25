@@ -5,12 +5,60 @@ on:
   workflow_dispatch:
 # Declare default permissions as read only.
 permissions: read-all
+# proxy.golang.org and sum.golang.org intermittently reset HTTP/2 streams
+# (INTERNAL_ERROR), which fails module downloads. Force HTTP/1.1 for Go's
+# HTTP client as a workaround. See golang/go#69544.
+env:
+  GODEBUG: http2client=0
 jobs:
-  test-versionmatrix:
-    name: VersionMatrix Tests
+  resolve-otelc:
+    name: Resolve otelc Tiers
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        with:
+          persist-credentials: false
+      - name: Install Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: "**/go.mod"
+      - name: Resolve otelc compiler tiers
+        id: resolve
+        run: |
+          set -euo pipefail
+          log="$(go -C test test -v -count=1 -tags versionmatrix -run '^TestVersionMatrixOtelcTiers$' ./versionmatrix/...)"
+          printf '%s\n' "$log"
+          matrix="$(printf '%s\n' "$log" | grep -oE 'VERSIONMATRIX_OTELC_MATRIX=\[.*\]' | tail -1 | cut -d= -f2-)"
+          if [[ -z "$matrix" ]]; then
+            echo "Failed to resolve otelc matrix" >&2
+            exit 1
+          fi
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
+          if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+            {
+              echo "### Resolved \`otelc\` compiler tiers"
+              echo ""
+              printf '%s\n' "$log" | sed -n 's/.*VERSIONMATRIX_OTELC_SUMMARY=//p'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  test-versionmatrix:
+    name: VersionMatrix Tests (${{ matrix.otelc.tier }} @ ${{ matrix.otelc.version }})
+    needs: [resolve-otelc]
+    if: needs.resolve-otelc.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        otelc: ${{ fromJSON(needs.resolve-otelc.outputs.matrix) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
@@ -26,11 +74,13 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run VersionMatrix tests
+        env:
+          OTELC_VERSION: ${{ matrix.otelc.version }}
         run: make test-versionmatrix
 
   notify-on-failure:
     name: Open or update failure issue
-    needs: [test-versionmatrix]
+    needs: [resolve-otelc, test-versionmatrix]
     if: failure()
     runs-on: ubuntu-latest
     permissions:

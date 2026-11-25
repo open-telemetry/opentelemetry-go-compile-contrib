@@ -205,13 +205,28 @@ Bounds are taken **per rule, not per dependency**: a dependency covered by two r
 
 Per [ADR-0004](https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/blob/main/docs/adr/0004-instrumentation-ownership-and-compatibility.md), the supported window per library is the last two major versions; that policy bounds the matrix this test has to cover.
 
+### Compiler version tiers (`otelc`)
+
+In CI, `VersionMatrix` also fans out across three `otelc` compiler tiers resolved by `TestVersionMatrixOtelcTiers`:
+
+1. **Minimum declared floor (`v1.3.0`)**: The effective minimum `otelc` version compatible with all rule files under `instrumentation/` (floored at `v1.3.0`). Prior to `v1.3.0`, runtime GLS lived in an external `instrumentation/runtime` module; `otelc >= v1.3.0` (`otelc#1747`) embeds GLS directly in the compiler engine, which `compile-contrib` relies on. Until `v1.3.0` is published, this tier is skipped with a workflow summary note.
+2. **Latest stable release**: The newest published non-prerelease tag of `go.opentelemetry.io/otelc` (skipped while newest published releases are below `v1.3.0` or when it matches the minimum tier).
+3. **Latest `@main`**: Built directly from `go.opentelemetry.io/otelc/tool/cmd/otelc@main` to catch compiler/contrib regressions before release.
+
+Locally, you can target any specific `otelc` module version or pseudo-version via `OTELC_VERSION`:
+
+```bash
+OTELC_VERSION=main make test-versionmatrix
+```
+
 ### What a failure means
 
-A failure means a declared version range does **not** actually work at one of its bounds: the bound cannot be installed (another module in the build graph, such as the instrumentation hook's own `go.mod`, forces a newer version), no published release is covered by the range at all, or the integration suite fails against the pinned version. The remediation is:
+A failure means either a declared library version range does **not** work at one of its bounds (cannot be installed because another module in the build graph forces a different version, no published release is covered, or tests fail against the pinned version) or compatibility broke under one of the tested `otelc` compiler tiers. The remediation is:
 
 1. Fix the rule's range in the relevant `instrumentation/.../*.yaml` file: raise the lower bound to the oldest version that actually works, or cap the range below the first version that breaks.
 2. If the wider range should stay supported, split the rule instead and add an implementation covering the versions the current hook cannot handle.
-3. Close the auto-opened `versionmatrix-failure` issue once the fix lands on `main`.
+3. If the failure is specific to an `otelc` compiler tier, raise the rule's minimum top-level `otelc` `version:` or fix the cross-repo incompatibility in `otelc` / `contrib`.
+4. Close the auto-opened `versionmatrix-failure` issue once the fix lands on `main`.
 
 ## Writing New Tests
 

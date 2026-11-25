@@ -6,6 +6,7 @@
 package versionmatrix
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -59,6 +60,56 @@ func TestVersionMatrixTierCount(t *testing.T) {
 		}
 	}
 	t.Logf("VERSIONMATRIX_TIERS=%d", tiers)
+}
+
+type otelcMatrixEntry struct {
+	Tier    string `json:"tier"`
+	Version string `json:"version"`
+}
+
+// TestVersionMatrixOtelcTiers resolves the otelc compiler tiers (minimum
+// declared floor, latest stable release, and @main) and logs a single-line JSON
+// matrix plus markdown summary lines for the VersionMatrix workflow.
+func TestVersionMatrixOtelcTiers(t *testing.T) {
+	rulesRoot := filepath.Join("..", "..", "instrumentation")
+	minFloor, err := testutil.DeclaredMinOtelcVersion(rulesRoot)
+	if err != nil {
+		t.Fatalf("compute declared min otelc version: %v", err)
+	}
+	published, mainVer, err := testutil.QueryOtelcModuleVersions(t.Context())
+	if err != nil {
+		t.Fatalf("query otelc module versions: %v", err)
+	}
+	tiers, err := testutil.ResolveOtelcTiers(minFloor, published, mainVer)
+	if err != nil {
+		t.Fatalf("resolve otelc tiers: %v", err)
+	}
+
+	var entries []otelcMatrixEntry
+	t.Logf("VERSIONMATRIX_OTELC_MIN_FLOOR=%s", minFloor)
+	t.Logf("VERSIONMATRIX_OTELC_SUMMARY=| Tier | Version | Status | Notes |")
+	t.Logf("VERSIONMATRIX_OTELC_SUMMARY=| :--- | :------ | :----- | :---- |")
+	for _, tier := range tiers {
+		status := "skipped"
+		ver := tier.Version
+		if ver == "" {
+			ver = "-"
+		}
+		if tier.Runnable {
+			status = "run"
+			entries = append(entries, otelcMatrixEntry{
+				Tier:    tier.Tier,
+				Version: tier.Version,
+			})
+		}
+		t.Logf("VERSIONMATRIX_OTELC_SUMMARY=| `%s` | `%s` | %s | %s |", tier.Tier, ver, status, tier.Reason)
+	}
+
+	matrixJSON, err := json.Marshal(entries)
+	if err != nil {
+		t.Fatalf("marshal otelc matrix: %v", err)
+	}
+	t.Logf("VERSIONMATRIX_OTELC_MATRIX=%s", string(matrixJSON))
 }
 
 // TestVersionMatrixBump pins each app's instrumented direct dependencies to

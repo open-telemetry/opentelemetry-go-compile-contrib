@@ -19,6 +19,7 @@ SHELL := /bin/bash
 TOOLS_DIR = .tools
 GO_VERSION = 1.26
 INTEGRATION_TEST_RUN ?= .
+OTELC_VERSION ?=
 PKG_COVERAGE_THRESHOLD ?= 70
 RACE ?= 0
 RACE_FLAG := $(if $(filter 1 true,$(RACE)),-race,)
@@ -58,8 +59,22 @@ $(TOOLS)/%: $(TOOLS_DIR)/go.mod | $(TOOLS)
 	cd $(TOOLS_DIR) && \
 	GOWORK=off go build -o $@ $(PACKAGE)
 
+OTELC_PKG = go.opentelemetry.io/otelc/tool/cmd/otelc
+ifeq ($(strip $(OTELC_VERSION)),)
 OTELC = $(TOOLS)/otelc$(EXT)
-$(OTELC): PACKAGE=go.opentelemetry.io/otelc/tool/cmd/otelc
+$(OTELC): PACKAGE=$(OTELC_PKG)
+else
+# Sanitize path-like versions (e.g. branches) so OTELC stays a flat binary under $(TOOLS).
+OTELC = $(TOOLS)/otelc-$(subst /,_,$(OTELC_VERSION))$(EXT)
+export OTELC_PATH := $(OTELC)
+$(OTELC): | $(TOOLS)
+	@echo "Installing $(OTELC_PKG)@$(OTELC_VERSION) to $@..."
+	@set -euo pipefail; \
+	tmpbin=$$(mktemp -d); \
+	trap 'rm -rf "$$tmpbin"' EXIT; \
+	GOWORK=off GOBIN="$$tmpbin" go install $(OTELC_PKG)@$(OTELC_VERSION); \
+	mv "$$tmpbin/otelc$(EXT)" "$@"
+endif
 
 CROSSLINK = $(TOOLS)/crosslink$(EXT)
 $(CROSSLINK): PACKAGE=go.opentelemetry.io/build-tools/crosslink
