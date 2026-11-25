@@ -22,6 +22,8 @@ import (
 	"go.opentelemetry.io/otel"
 	_ "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
+
+	otelcruntime "go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
 var port = flag.String("port", "8989", "The server port")
@@ -187,6 +189,26 @@ func evictionHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("ok"))
 }
 
+// checkNoGLS verifies SpanFromContextWithoutGLS ignores the active goroutine
+// span while still returning a span explicitly attached to the context.
+func checkNoGLS() {
+	_, activeSpan := otel.Tracer("nogls").Start(context.Background(), "active-gls-span")
+	defer activeSpan.End()
+
+	// Ensure GLS actually holds activeSpan before testing bypass.
+	glsValid := trace.SpanFromContext(context.Background()).SpanContext().IsValid()
+	bgValid := otelcruntime.SpanFromContextWithoutGLS(context.Background()).SpanContext().IsValid()
+	type key struct{}
+	valCtx := context.WithValue(context.Background(), key{}, "v")
+	valValid := otelcruntime.SpanFromContextWithoutGLS(valCtx).SpanContext().IsValid()
+	explicitCtx, explicitSpan := otel.Tracer("nogls").Start(context.Background(), "explicit-ctx-span")
+	defer explicitSpan.End()
+	explicitGot := otelcruntime.SpanFromContextWithoutGLS(explicitCtx).SpanContext()
+
+	_, _ = fmt.Printf("OTEL_SDK_NOGLS: gls=%t background=%t valueCtx=%t explicit=%t\n",
+		glsValid, bgValid, valValid, explicitGot.SpanID() == explicitSpan.SpanContext().SpanID())
+}
+
 // requestedPaths returns the endpoints to exercise, controlled by the
 // OTELSDK_PATHS env var (comma-separated). It defaults to the original
 // scenario set. livecap and evict tune OTEL_GLS_MAX_SPANS /
@@ -197,7 +219,7 @@ func requestedPaths() []string {
 	if v := os.Getenv("OTELSDK_PATHS"); v != "" {
 		return strings.Split(v, ",")
 	}
-	return []string{"otel", "worker", "compact"}
+	return []string{"otel", "nogls", "worker", "compact"}
 }
 
 func main() {
@@ -232,6 +254,10 @@ func main() {
 	}()
 
 	for _, path := range requestedPaths() {
+		if path == "nogls" {
+			checkNoGLS()
+			continue
+		}
 		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%s/%s", *port, path))
 		if err != nil {
 			log.Fatalf("request to %s failed: %v", path, err)
