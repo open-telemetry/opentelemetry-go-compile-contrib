@@ -14,7 +14,6 @@ import (
 
 const (
 	minConnectParams       = 2
-	minConnectConfigParams = 2
 	minNewPoolConfigParams = 2
 )
 
@@ -29,23 +28,6 @@ func BeforeConnect(call hook.HookContext) {
 	}
 
 	if call.GetParamCount() < minConnectParams {
-		return
-	}
-	cfg, ok := call.GetParam(1).(*pgx.ConnConfig)
-	if !ok || cfg == nil {
-		return
-	}
-
-	cfg.Tracer = chainTracer(cfg.Tracer, newTracer())
-}
-
-// BeforeConnectConfig hooks pgx.ConnectConfig(ctx, config)
-func BeforeConnectConfig(call hook.HookContext) {
-	if !isEnabled() {
-		return
-	}
-
-	if call.GetParamCount() < minConnectConfigParams {
 		return
 	}
 	cfg, ok := call.GetParam(1).(*pgx.ConnConfig)

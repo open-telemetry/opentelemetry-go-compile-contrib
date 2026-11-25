@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 const rawQueryEnv = "OTEL_GO_INSTRUMENTATION_PGX_RAW_QUERY"
@@ -40,7 +41,11 @@ func skipBlockComment(chars []rune, i int, b *strings.Builder) int {
 	return i
 }
 
-func sanitizeSingleQuote(chars []rune, i int, b *strings.Builder) int {
+// sanitizeSingleQuote sanitizes a single-quoted string literal.
+// In PostgreSQL with standard_conforming_strings=on (default), a backslash inside an
+// ordinary '...' literal is NOT an escape character (only '' escapes single quotes).
+// Backslash escaping is only active inside escape string constants E'...' or e'...'.
+func sanitizeSingleQuote(chars []rune, i int, b *strings.Builder, isEscape bool) int {
 	n := len(chars)
 	b.WriteRune('?')
 	i++
@@ -52,7 +57,7 @@ func sanitizeSingleQuote(chars []rune, i int, b *strings.Builder) int {
 				continue
 			}
 			return i + 1
-		case chars[i] == '\\' && i+1 < n:
+		case isEscape && chars[i] == '\\' && i+1 < n:
 			i += 2
 		default:
 			i++
@@ -94,7 +99,7 @@ func sanitizeDollar(chars []rune, i int, b *strings.Builder) int {
 	rest := string(chars[i:])
 	closeIdx := strings.Index(rest, tag)
 	if closeIdx != -1 {
-		return i + closeIdx + len(tag)
+		return i + utf8.RuneCountInString(rest[:closeIdx]) + utf8.RuneCountInString(tag)
 	}
 	return n
 }
@@ -149,7 +154,9 @@ func sanitizeSQL(query string) string {
 		case c == '/' && i+1 < n && chars[i+1] == '*':
 			i = skipBlockComment(chars, i, &b)
 		case c == '\'':
-			i = sanitizeSingleQuote(chars, i, &b)
+			isEscape := i > 0 && (chars[i-1] == 'E' || chars[i-1] == 'e') &&
+				(i == 1 || (!unicode.IsLetter(chars[i-2]) && !unicode.IsDigit(chars[i-2]) && chars[i-2] != '_'))
+			i = sanitizeSingleQuote(chars, i, &b, isEscape)
 		case c == '$':
 			i = sanitizeDollar(chars, i, &b)
 		case unicode.IsDigit(c):

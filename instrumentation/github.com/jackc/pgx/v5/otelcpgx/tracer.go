@@ -25,7 +25,7 @@ import (
 const (
 	instrumentationName = "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/jackc/pgx/v5/otelcpgx"
 	instrumentationKey  = "PGX"
-	expectedConnAttrs   = 6
+	expectedConnAttrs   = 5
 )
 
 type tracer struct {
@@ -66,9 +66,6 @@ func configAttributes(cfg *pgx.ConnConfig) []attribute.KeyValue {
 
 	if cfg.Database != "" {
 		attrs = append(attrs, semconv.DBNamespace(cfg.Database))
-	}
-	if cfg.User != "" {
-		attrs = append(attrs, attribute.String("db.user", cfg.User))
 	}
 	if cfg.Host != "" {
 		host := cfg.Host
@@ -231,7 +228,7 @@ func (t *tracer) TraceCopyFromStart(
 	attrs := connAttributes(conn)
 	attrs = append(attrs, semconv.DBOperationName("COPY"))
 	if len(data.TableName) > 0 {
-		attrs = append(attrs, attribute.String("db.collection.name", data.TableName.Sanitize()))
+		attrs = append(attrs, semconv.DBCollectionName(data.TableName.Sanitize()))
 	}
 
 	//nolint:spancheck // span is ended in TraceCopyFromEnd
@@ -284,9 +281,6 @@ func (t *tracer) TracePrepareStart(
 	attrs = append(attrs, semconv.DBOperationName("PREPARE"))
 	if data.SQL != "" {
 		attrs = append(attrs, semconv.DBQueryText(sanitizeSQL(data.SQL)))
-	}
-	if data.Name != "" {
-		attrs = append(attrs, attribute.String("db.prepared_statement.name", data.Name))
 	}
 
 	//nolint:spancheck // span is ended in TracePrepareEnd

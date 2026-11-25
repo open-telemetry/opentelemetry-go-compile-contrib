@@ -97,6 +97,16 @@ func TestSanitizeSQL(t *testing.T) {
 			want:  "SELECT ?",
 		},
 		{
+			name:  "standard conforming string with backslash before closing quote",
+			input: "SELECT 'foo\\' FROM test WHERE id = 'secret'",
+			want:  "SELECT ? FROM test WHERE id = ?",
+		},
+		{
+			name:  "escape string literal with escaped quote",
+			input: "SELECT E'foo\\'bar' FROM test WHERE id = 'secret'",
+			want:  "SELECT E? FROM test WHERE id = ?",
+		},
+		{
 			name:  "integer literal",
 			input: "SELECT * FROM users WHERE id = 123",
 			want:  "SELECT * FROM users WHERE id = ?",
@@ -125,6 +135,16 @@ func TestSanitizeSQL(t *testing.T) {
 			name:  "dollar-quoted string",
 			input: "INSERT INTO secrets VALUES ($$supersecret$$)",
 			want:  "INSERT INTO secrets VALUES (?)",
+		},
+		{
+			name:  "dollar-quoted string with multi-byte unicode runes",
+			input: "INSERT INTO secrets VALUES ($$hello 世界$$), ('confidential')",
+			want:  "INSERT INTO secrets VALUES (?), (?)",
+		},
+		{
+			name:  "tagged dollar-quoted string with multi-byte unicode runes",
+			input: "SELECT $tag$こんにちは世界$tag$ FROM test WHERE secret = 'hidden'",
+			want:  "SELECT ? FROM test WHERE secret = ?",
 		},
 		{
 			name:  "preserves line comments",
@@ -168,9 +188,9 @@ func TestConfigAttributes(t *testing.T) {
 
 	assert.Equal(t, "postgresql", attrMap[string(semconv.DBSystemNameKey)])
 	assert.Equal(t, "sampledb", attrMap[string(semconv.DBNamespaceKey)])
-	assert.Equal(t, "myuser", attrMap["db.user"])
 	assert.Equal(t, "example.com", attrMap[string(semconv.ServerAddressKey)])
 	assert.Equal(t, int64(5433), attrMap[string(semconv.ServerPortKey)])
+	assert.NotContains(t, attrMap, "db.user")
 }
 
 func TestTracer_TraceQuery_LiteralSanitization(t *testing.T) {
@@ -257,6 +277,12 @@ func TestTracer_TraceCopyFrom(t *testing.T) {
 	spans := sr.Ended()
 	require.Len(t, spans, 1)
 	assert.Equal(t, "COPY", spans[0].Name())
+
+	attrMap := make(map[string]any)
+	for _, a := range spans[0].Attributes() {
+		attrMap[string(a.Key)] = a.Value.AsInterface()
+	}
+	assert.Equal(t, "\"public\".\"users\"", attrMap[string(semconv.DBCollectionNameKey)])
 }
 
 func TestTracer_TracePrepare(t *testing.T) {
@@ -273,6 +299,12 @@ func TestTracer_TracePrepare(t *testing.T) {
 	spans := sr.Ended()
 	require.Len(t, spans, 1)
 	assert.Equal(t, "PREPARE", spans[0].Name())
+
+	attrMap := make(map[string]any)
+	for _, a := range spans[0].Attributes() {
+		attrMap[string(a.Key)] = a.Value.AsInterface()
+	}
+	assert.NotContains(t, attrMap, "db.prepared_statement.name")
 }
 
 func TestChainTracer(t *testing.T) {
@@ -368,13 +400,6 @@ func TestHooks_InjectTracer(t *testing.T) {
 		cfg := &pgx.ConnConfig{}
 		hctx := hooktest.NewMockHookContext(context.Background(), cfg)
 		BeforeConnect(hctx)
-		assert.NotNil(t, cfg.Tracer)
-	})
-
-	t.Run("BeforeConnectConfig", func(t *testing.T) {
-		cfg := &pgx.ConnConfig{}
-		hctx := hooktest.NewMockHookContext(context.Background(), cfg)
-		BeforeConnectConfig(hctx)
 		assert.NotNil(t, cfg.Tracer)
 	})
 
