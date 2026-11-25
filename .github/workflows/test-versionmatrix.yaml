@@ -32,9 +32,12 @@ jobs:
         id: resolve
         run: |
           set -euo pipefail
-          log="$(go -C test test -v -count=1 -tags versionmatrix -run '^TestVersionMatrixOtelcTiers$' ./versionmatrix/...)"
+          log="$(go -C test test -v -count=1 -tags versionmatrix -run '^TestVersionMatrixOtelcTiers$' ./versionmatrix/... 2>&1)" || {
+            printf '%s\n' "$log"
+            exit 1
+          }
           printf '%s\n' "$log"
-          matrix="$(printf '%s\n' "$log" | grep -oE 'VERSIONMATRIX_OTELC_MATRIX=\[.*\]' | tail -1 | cut -d= -f2-)"
+          matrix="$(printf '%s\n' "$log" | { grep -oE 'VERSIONMATRIX_OTELC_MATRIX=\[.*\]' || true; } | tail -1 | cut -d= -f2-)"
           if [[ -z "$matrix" ]]; then
             echo "Failed to resolve otelc matrix" >&2
             exit 1
