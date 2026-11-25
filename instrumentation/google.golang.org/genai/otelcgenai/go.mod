@@ -7,7 +7,7 @@ require (
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/sdk v1.47.0
 	go.opentelemetry.io/otel/trace v1.47.0
-	go.opentelemetry.io/otelc-contrib/pkg/netutil v0.0.0-20261119084005-f5630b90104d
+	go.opentelemetry.io/otelc-contrib/pkg/netutil v0.0.0-20261124172924-0f960ff2e698
 	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261119084005-f5630b90104d
 	go.opentelemetry.io/otelc/pkg v0.1.0
 	google.golang.org/genai v1.66.0
