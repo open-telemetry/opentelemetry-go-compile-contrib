@@ -3,7 +3,7 @@ module go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/ote
 go 1.26.0
 
 require (
-	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261119084005-f5630b90104d
+	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/sdk/trace/otelctrace v0.0.0-20261124172924-0f960ff2e698
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/trace/otelctrace v0.0.0-20261119084005-f5630b90104d
 	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261119084005-f5630b90104d
 )
