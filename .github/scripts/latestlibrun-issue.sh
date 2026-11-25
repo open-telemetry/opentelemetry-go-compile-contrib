@@ -41,7 +41,7 @@ else
     --body "$(cat <<EOF
 The [LatestLibRun workflow](${RUN_URL}) failed on \`main\`.
 
-This means the latest release of an upstream instrumented library introduced a **runtime behavior change** (removed function, changed signature, dropped instrumentation hook point) that breaks existing integration tests.
+This means the latest release of an upstream instrumented library introduced a **runtime behavior change** (removed function, changed signature, dropped instrumentation hook point) that breaks existing integration or E2E tests.
 
 ## Remediation
 
