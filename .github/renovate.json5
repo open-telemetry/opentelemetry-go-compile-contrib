@@ -26,12 +26,21 @@
         "/^Makefile$/"
       ],
       "matchStrings": [
-        "WEAVER_IMAGE\\s*\\?=\\s*(?<depName>[^:]+):v(?<currentValue>[^\\s]+)"
+        "WEAVER_IMAGE\\s*\\?=\\s*(?<depName>[^:]+):(?<currentValue>v[^\\s]+)"
       ],
       "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
+    {
+      // The WEAVER_IMAGE reference in the Makefile stays tag-only. Renovate's
+      // docker:pinDigests preset (part of config:best-practices) must not
+      // pin it to a digest.
+      "matchDepNames": [
+        "otel/weaver"
+      ],
+      "pinDigests": false
+    },
     {
       // Intra-repository modules are linked via local replace directives and
       // updated together by make crosslink.
@@ -90,7 +99,8 @@
       ],
       "matchUpdateTypes": [
         "major"
-      ]
+      ],
+      "dependencyDashboardApproval": true
     },
     {
       "matchManagers": [
@@ -109,11 +119,11 @@
         "!github.com/stretchr/testify",
         "!go.opentelemetry.io/**"
       ],
+      "matchFileNames": [
+        "instrumentation/**"
+      ],
       "dependencyDashboardApproval": true,
-      "dependencyDashboardCategory": "Instrumentation Targets",
-      "dependencyDashboard": {
-        "header": "The below instrumentation targets are needing a new module directory created."
-      }
+      "dependencyDashboardCategory": "Instrumentation Targets"
     },
     {
       "matchManagers": [
