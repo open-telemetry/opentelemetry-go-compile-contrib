@@ -7,21 +7,17 @@
   "schedule": [
     "* 0-7 1,15 * *"
   ],
-  "automergeSchedule": [
-    "* * 8-14,22-28 * *"
-  ],
   "updateNotScheduled": false,
   "minimumReleaseAge": "7 days",
   "internalChecksFilter": "strict",
-  "platformAutomerge": false,
+  "platformAutomerge": true,
   "postUpdateOptions": [
     "gomodTidyAll",
     "gomodUpdateImportPaths"
   ],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "automerge": true,
-    "automergeSchedule": ["at any time"]
+    "automerge": true
   },
   "customManagers": [
     {
