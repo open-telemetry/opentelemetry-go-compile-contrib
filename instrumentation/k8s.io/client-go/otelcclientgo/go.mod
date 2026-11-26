@@ -9,9 +9,9 @@ require (
 	go.opentelemetry.io/otel/trace v1.47.0
 	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261119084005-f5630b90104d
 	go.opentelemetry.io/otelc/pkg v0.1.0
-	k8s.io/api v0.34.0
-	k8s.io/apimachinery v0.34.0
-	k8s.io/client-go v0.34.0
+	k8s.io/api v0.37.3
+	k8s.io/apimachinery v0.37.3
+	k8s.io/client-go v0.37.3
 )
 
 require (
