@@ -129,6 +129,25 @@
       "dependencyDashboardCategory": "Instrumentation Targets"
     },
     {
+      // Major updates outside instrumentation/ are not new module targets,
+      // but they still wait for dashboard approval.
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchPackageNames": [
+        "!github.com/stretchr/testify",
+        "!go.opentelemetry.io/**"
+      ],
+      "matchFileNames": [
+        "!instrumentation/**"
+      ],
+      "dependencyDashboardApproval": true,
+      "dependencyDashboardCategory": "CI Tooling"
+    },
+    {
       "matchManagers": [
         "gomod"
       ],
