@@ -5,7 +5,6 @@ package pgx
 
 import (
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"go.opentelemetry.io/otelc/pkg/hook"
 
@@ -13,8 +12,7 @@ import (
 )
 
 const (
-	minConnectParams       = 2
-	minNewPoolConfigParams = 2
+	minConnectParams = 2
 )
 
 func isEnabled() bool {
@@ -36,21 +34,4 @@ func BeforeConnect(call hook.HookContext) {
 	}
 
 	cfg.Tracer = chainTracer(cfg.Tracer, newTracer())
-}
-
-// BeforeNewWithConfig hooks pgxpool.NewWithConfig(ctx, config)
-func BeforeNewWithConfig(call hook.HookContext) {
-	if !isEnabled() {
-		return
-	}
-
-	if call.GetParamCount() < minNewPoolConfigParams {
-		return
-	}
-	cfg, ok := call.GetParam(1).(*pgxpool.Config)
-	if !ok || cfg == nil || cfg.ConnConfig == nil {
-		return
-	}
-
-	cfg.ConnConfig.Tracer = chainTracer(cfg.ConnConfig.Tracer, newTracer())
 }

@@ -8,12 +8,3 @@ pgx_hook_connect:
     - inject_hooks:
         before: BeforeConnect
         path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/jackc/pgx/v5/otelcpgx"
-
-pgxpool_hook_new_with_config:
-  target: github.com/jackc/pgx/v5/pgxpool
-  where:
-    func: NewWithConfig
-  do:
-    - inject_hooks:
-        before: BeforeNewWithConfig
-        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/jackc/pgx/v5/otelcpgx"

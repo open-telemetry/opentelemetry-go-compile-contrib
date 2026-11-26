@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
@@ -22,9 +21,12 @@ import (
 	"go.opentelemetry.io/otelc/pkg/hook/hooktest"
 )
 
+type customCtxKey struct{}
+
 type mockCustomTracer struct {
 	queryStartCalled bool
 	queryEndCalled   bool
+	receivedStartCtx bool
 }
 
 func (m *mockCustomTracer) TraceQueryStart(
@@ -33,15 +35,18 @@ func (m *mockCustomTracer) TraceQueryStart(
 	_ pgx.TraceQueryStartData,
 ) context.Context {
 	m.queryStartCalled = true
-	return ctx
+	return context.WithValue(ctx, customCtxKey{}, "custom-value")
 }
 
 func (m *mockCustomTracer) TraceQueryEnd(
-	_ context.Context,
+	ctx context.Context,
 	_ *pgx.Conn,
 	_ pgx.TraceQueryEndData,
 ) {
 	m.queryEndCalled = true
+	if val, ok := ctx.Value(customCtxKey{}).(string); ok && val == "custom-value" {
+		m.receivedStartCtx = true
+	}
 }
 
 func setupTestTracer(t *testing.T) (*tracetest.SpanRecorder, *tracer) {
@@ -324,6 +329,7 @@ func TestChainTracer(t *testing.T) {
 
 	assert.True(t, custom.queryStartCalled)
 	assert.True(t, custom.queryEndCalled)
+	assert.True(t, custom.receivedStartCtx)
 }
 
 func handleMockPostgresConn(c net.Conn) {
@@ -401,12 +407,5 @@ func TestHooks_InjectTracer(t *testing.T) {
 		hctx := hooktest.NewMockHookContext(context.Background(), cfg)
 		BeforeConnect(hctx)
 		assert.NotNil(t, cfg.Tracer)
-	})
-
-	t.Run("BeforeNewWithConfig", func(t *testing.T) {
-		pcfg := &pgxpool.Config{ConnConfig: &pgx.ConnConfig{}}
-		hctx := hooktest.NewMockHookContext(context.Background(), pcfg)
-		BeforeNewWithConfig(hctx)
-		assert.NotNil(t, pcfg.ConnConfig.Tracer)
 	})
 }

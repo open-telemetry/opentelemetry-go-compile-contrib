@@ -10,8 +10,7 @@ This module provides compile-time auto-instrumentation for applications using th
 
 | Target | Hook Point | Description |
 | --- | --- | --- |
-| `github.com/jackc/pgx/v5.connect` | Before | Injects tracer into `*pgx.ConnConfig` before connection construction (covers `pgx.Connect`, `pgx.ConnectConfig`, `pgx.ConnectWithOptions`) |
-| `github.com/jackc/pgx/v5/pgxpool.NewWithConfig` | Before | Injects tracer into `*pgxpool.Config.ConnConfig` before pool creation (covers `pgxpool.New` and `pgxpool.NewWithConfig`) |
+| `github.com/jackc/pgx/v5.connect` | Before | Injects tracer into `*pgx.ConnConfig` before connection construction (covers `pgx.Connect`, `pgx.ConnectConfig`, `pgx.ConnectWithOptions`, and all `pgxpool` connections) |
 
 If user code already configures a custom `pgx.QueryTracer`, the instrumentation preserves it by chaining invocations so that all tracers run seamlessly.
 

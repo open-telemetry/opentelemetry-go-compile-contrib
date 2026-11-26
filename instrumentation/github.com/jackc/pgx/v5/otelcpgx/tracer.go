@@ -350,25 +350,41 @@ func chainTracer(existing, otelTracer pgx.QueryTracer) pgx.QueryTracer {
 	return &chainedTracer{tracers: []pgx.QueryTracer{existing, otelTracer}}
 }
 
+type (
+	queryCtxKey   struct{}
+	batchCtxKey   struct{}
+	copyCtxKey    struct{}
+	prepareCtxKey struct{}
+	connectCtxKey struct{}
+)
+
 func (c *chainedTracer) TraceQueryStart(
 	ctx context.Context,
 	conn *pgx.Conn,
 	data pgx.TraceQueryStartData,
 ) context.Context {
-	for _, tr := range c.tracers {
+	contexts := make([]context.Context, len(c.tracers))
+	for i, tr := range c.tracers {
 		//nolint:fatcontext // nested context chaining across tracers is intentional
 		ctx = tr.TraceQueryStart(ctx, conn, data)
+		contexts[i] = ctx
 	}
-	return ctx
+	return context.WithValue(ctx, queryCtxKey{}, contexts)
 }
 
+//nolint:contextcheck // per-tracer context restored from matching Start call
 func (c *chainedTracer) TraceQueryEnd(
 	ctx context.Context,
 	conn *pgx.Conn,
 	data pgx.TraceQueryEndData,
 ) {
-	for _, tr := range c.tracers {
-		tr.TraceQueryEnd(ctx, conn, data)
+	contexts, _ := ctx.Value(queryCtxKey{}).([]context.Context)
+	for i, tr := range c.tracers {
+		tracerCtx := ctx
+		if i < len(contexts) && contexts[i] != nil {
+			tracerCtx = contexts[i]
+		}
+		tr.TraceQueryEnd(tracerCtx, conn, data)
 	}
 }
 
@@ -377,35 +393,49 @@ func (c *chainedTracer) TraceBatchStart(
 	conn *pgx.Conn,
 	data pgx.TraceBatchStartData,
 ) context.Context {
-	for _, tr := range c.tracers {
+	contexts := make([]context.Context, len(c.tracers))
+	for i, tr := range c.tracers {
 		if bt, ok := tr.(pgx.BatchTracer); ok {
 			//nolint:fatcontext // nested context chaining across tracers is intentional
 			ctx = bt.TraceBatchStart(ctx, conn, data)
 		}
+		contexts[i] = ctx
 	}
-	return ctx
+	return context.WithValue(ctx, batchCtxKey{}, contexts)
 }
 
+//nolint:contextcheck // per-tracer context restored from matching Start call
 func (c *chainedTracer) TraceBatchQuery(
 	ctx context.Context,
 	conn *pgx.Conn,
 	data pgx.TraceBatchQueryData,
 ) {
-	for _, tr := range c.tracers {
+	contexts, _ := ctx.Value(batchCtxKey{}).([]context.Context)
+	for i, tr := range c.tracers {
 		if bt, ok := tr.(pgx.BatchTracer); ok {
-			bt.TraceBatchQuery(ctx, conn, data)
+			tracerCtx := ctx
+			if i < len(contexts) && contexts[i] != nil {
+				tracerCtx = contexts[i]
+			}
+			bt.TraceBatchQuery(tracerCtx, conn, data)
 		}
 	}
 }
 
+//nolint:contextcheck // per-tracer context restored from matching Start call
 func (c *chainedTracer) TraceBatchEnd(
 	ctx context.Context,
 	conn *pgx.Conn,
 	data pgx.TraceBatchEndData,
 ) {
-	for _, tr := range c.tracers {
+	contexts, _ := ctx.Value(batchCtxKey{}).([]context.Context)
+	for i, tr := range c.tracers {
 		if bt, ok := tr.(pgx.BatchTracer); ok {
-			bt.TraceBatchEnd(ctx, conn, data)
+			tracerCtx := ctx
+			if i < len(contexts) && contexts[i] != nil {
+				tracerCtx = contexts[i]
+			}
+			bt.TraceBatchEnd(tracerCtx, conn, data)
 		}
 	}
 }
@@ -415,23 +445,31 @@ func (c *chainedTracer) TraceCopyFromStart(
 	conn *pgx.Conn,
 	data pgx.TraceCopyFromStartData,
 ) context.Context {
-	for _, tr := range c.tracers {
+	contexts := make([]context.Context, len(c.tracers))
+	for i, tr := range c.tracers {
 		if ct, ok := tr.(pgx.CopyFromTracer); ok {
 			//nolint:fatcontext // nested context chaining across tracers is intentional
 			ctx = ct.TraceCopyFromStart(ctx, conn, data)
 		}
+		contexts[i] = ctx
 	}
-	return ctx
+	return context.WithValue(ctx, copyCtxKey{}, contexts)
 }
 
+//nolint:contextcheck // per-tracer context restored from matching Start call
 func (c *chainedTracer) TraceCopyFromEnd(
 	ctx context.Context,
 	conn *pgx.Conn,
 	data pgx.TraceCopyFromEndData,
 ) {
-	for _, tr := range c.tracers {
+	contexts, _ := ctx.Value(copyCtxKey{}).([]context.Context)
+	for i, tr := range c.tracers {
 		if ct, ok := tr.(pgx.CopyFromTracer); ok {
-			ct.TraceCopyFromEnd(ctx, conn, data)
+			tracerCtx := ctx
+			if i < len(contexts) && contexts[i] != nil {
+				tracerCtx = contexts[i]
+			}
+			ct.TraceCopyFromEnd(tracerCtx, conn, data)
 		}
 	}
 }
@@ -441,23 +479,31 @@ func (c *chainedTracer) TracePrepareStart(
 	conn *pgx.Conn,
 	data pgx.TracePrepareStartData,
 ) context.Context {
-	for _, tr := range c.tracers {
+	contexts := make([]context.Context, len(c.tracers))
+	for i, tr := range c.tracers {
 		if pt, ok := tr.(pgx.PrepareTracer); ok {
 			//nolint:fatcontext // nested context chaining across tracers is intentional
 			ctx = pt.TracePrepareStart(ctx, conn, data)
 		}
+		contexts[i] = ctx
 	}
-	return ctx
+	return context.WithValue(ctx, prepareCtxKey{}, contexts)
 }
 
+//nolint:contextcheck // per-tracer context restored from matching Start call
 func (c *chainedTracer) TracePrepareEnd(
 	ctx context.Context,
 	conn *pgx.Conn,
 	data pgx.TracePrepareEndData,
 ) {
-	for _, tr := range c.tracers {
+	contexts, _ := ctx.Value(prepareCtxKey{}).([]context.Context)
+	for i, tr := range c.tracers {
 		if pt, ok := tr.(pgx.PrepareTracer); ok {
-			pt.TracePrepareEnd(ctx, conn, data)
+			tracerCtx := ctx
+			if i < len(contexts) && contexts[i] != nil {
+				tracerCtx = contexts[i]
+			}
+			pt.TracePrepareEnd(tracerCtx, conn, data)
 		}
 	}
 }
@@ -466,22 +512,30 @@ func (c *chainedTracer) TraceConnectStart(
 	ctx context.Context,
 	data pgx.TraceConnectStartData,
 ) context.Context {
-	for _, tr := range c.tracers {
+	contexts := make([]context.Context, len(c.tracers))
+	for i, tr := range c.tracers {
 		if cnt, ok := tr.(pgx.ConnectTracer); ok {
 			//nolint:fatcontext // nested context chaining across tracers is intentional
 			ctx = cnt.TraceConnectStart(ctx, data)
 		}
+		contexts[i] = ctx
 	}
-	return ctx
+	return context.WithValue(ctx, connectCtxKey{}, contexts)
 }
 
+//nolint:contextcheck // per-tracer context restored from matching Start call
 func (c *chainedTracer) TraceConnectEnd(
 	ctx context.Context,
 	data pgx.TraceConnectEndData,
 ) {
-	for _, tr := range c.tracers {
+	contexts, _ := ctx.Value(connectCtxKey{}).([]context.Context)
+	for i, tr := range c.tracers {
 		if cnt, ok := tr.(pgx.ConnectTracer); ok {
-			cnt.TraceConnectEnd(ctx, data)
+			tracerCtx := ctx
+			if i < len(contexts) && contexts[i] != nil {
+				tracerCtx = contexts[i]
+			}
+			cnt.TraceConnectEnd(tracerCtx, data)
 		}
 	}
 }

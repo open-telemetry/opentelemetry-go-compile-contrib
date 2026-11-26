@@ -43,7 +43,7 @@ func skipBlockComment(chars []rune, i int, b *strings.Builder) int {
 
 // sanitizeSingleQuote sanitizes a single-quoted string literal.
 // In PostgreSQL with standard_conforming_strings=on (default), a backslash inside an
-// ordinary '...' literal is NOT an escape character (only '' escapes single quotes).
+// ordinary '...' literal is NOT an escape character (only ” escapes single quotes).
 // Backslash escaping is only active inside escape string constants E'...' or e'...'.
 func sanitizeSingleQuote(chars []rune, i int, b *strings.Builder, isEscape bool) int {
 	n := len(chars)
@@ -97,9 +97,9 @@ func sanitizeDollar(chars []rune, i int, b *strings.Builder) int {
 	b.WriteRune('?')
 	i = tagEnd + 1
 	rest := string(chars[i:])
-	closeIdx := strings.Index(rest, tag)
-	if closeIdx != -1 {
-		return i + utf8.RuneCountInString(rest[:closeIdx]) + utf8.RuneCountInString(tag)
+	before, _, ok := strings.Cut(rest, tag)
+	if ok {
+		return i + utf8.RuneCountInString(before) + utf8.RuneCountInString(tag)
 	}
 	return n
 }
