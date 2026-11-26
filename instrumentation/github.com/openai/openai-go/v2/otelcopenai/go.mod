@@ -10,7 +10,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.47.0
 	go.opentelemetry.io/otel/sdk/metric v1.47.0
 	go.opentelemetry.io/otel/trace v1.47.0
-	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go/internal/streaming v0.0.0-20261119084005-f5630b90104d
+	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/openai/openai-go/internal/streaming v0.0.0-20261126092029-56efa2368ede
 	go.opentelemetry.io/otelc-contrib/pkg/netutil v0.0.0-20261119084005-f5630b90104d
 	go.opentelemetry.io/otelc-contrib/pkg/otelcconv v0.0.0-20261119084005-f5630b90104d
 	go.opentelemetry.io/otelc-contrib/pkg/runtime v0.0.0-20261119084005-f5630b90104d
