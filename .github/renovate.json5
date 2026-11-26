@@ -20,7 +20,8 @@
   ],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "automerge": true
+    "automerge": true,
+    "automergeSchedule": ["at any time"]
   },
   "customManagers": [
     {
