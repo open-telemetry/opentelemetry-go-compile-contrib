@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'release/v*.*.x'
   pull_request:
 
 # Declare default permissions as read only.
@@ -35,6 +36,7 @@ jobs:
               - '**/go.mod'
               - '**/go.sum'
               - 'Makefile'
+              - 'versions.yaml'
               - '.github/workflows/check-consistency.yaml'
 
   check-mod-tidy:
@@ -52,6 +54,8 @@ jobs:
         with:
           go-version-file: go.mod
           cache-dependency-path: "**/go.mod"
+      - name: Verify versions.yaml
+        run: make verify-versions
       - name: Run go mod tidy
         run: make go-mod-tidy
       - name: Check for uncommitted go.mod/go.sum changes

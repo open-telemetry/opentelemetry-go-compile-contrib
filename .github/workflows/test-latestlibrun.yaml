@@ -1,5 +1,9 @@
 name: LatestLibRun Tests
 on:
+  pull_request:
+    branches:
+      - main
+      - 'release/v*.*.x'
   schedule:
     - cron: "45 5 * * 1"
   workflow_dispatch:
@@ -8,6 +12,7 @@ permissions: read-all
 jobs:
   test-latestlibrun:
     name: LatestLibRun Tests
+    if: github.event_name != 'pull_request' || (startsWith(github.head_ref, 'release/') && !endsWith(github.head_ref, '.x'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,7 +36,7 @@ jobs:
   notify-on-failure:
     name: Open or update failure issue
     needs: [test-latestlibrun]
-    if: failure()
+    if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
       contents: read

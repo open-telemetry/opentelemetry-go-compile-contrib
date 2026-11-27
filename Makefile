@@ -8,9 +8,10 @@ SHELL := /bin/bash
         format/go format/yaml lint/go lint/go/fix lint/go/pkg lint/go/instrumentation lint/go/instrumentation/fix lint/yaml \
         lint/action lint/makefile lint/license-header lint/license-header/fix actionlint yamlfmt gotestfmt ratchet ratchet/pin \
         ratchet/update ratchet/check golangci-lint embedmd checkmake help docs \
+        multimod verify-versions prerelease release-notes \
         test-unit/race test-unit/pkg test-unit/instrumentation test-unit/helper \
         test-unit/coverage test-unit/pkg/coverage test-unit/instrumentation/coverage \
-        check-coverage test-integration/coverage test-e2e/coverage test-latestlibbuild test-latestlibrun test-versionmatrix \
+        check-coverage test-integration/coverage test-e2e/coverage test-latestlibbuild test-latestlibrun test-versionmatrix test-workflows \
         weaver-install tidy/test-apps \
         fetch-upstream-semconv lint-schema generate \
         govulncheck govulncheck/instrumentation
@@ -64,6 +65,9 @@ $(OTELC): PACKAGE=go.opentelemetry.io/otelc/tool/cmd/otelc
 CROSSLINK = $(TOOLS)/crosslink$(EXT)
 $(CROSSLINK): PACKAGE=go.opentelemetry.io/build-tools/crosslink
 
+MULTIMOD = $(TOOLS)/multimod$(EXT)
+$(MULTIMOD): PACKAGE=go.opentelemetry.io/build-tools/multimod
+
 # Go tools built from .tools module (pinned versions in .tools/go.mod)
 GOTESTFMT = $(TOOLS)/gotestfmt$(EXT)
 $(GOTESTFMT): PACKAGE=github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt
@@ -98,6 +102,7 @@ yamlfmt: $(YAMLFMT) ## Build yamlfmt from .tools
 ratchet: $(RATCHET) ## Build ratchet from .tools
 embedmd: $(EMBEDMD) ## Build embedmd from .tools
 checkmake: $(CHECKMAKE) ## Build checkmake from .tools
+multimod: $(MULTIMOD) ## Build multimod from .tools
 
 # Dynamic variables
 ALL_GO_MOD_DIRS := $(shell find . -type f -name 'go.mod' -exec dirname {} \; | sort)
@@ -165,6 +170,10 @@ lint/action: ## Lint GitHub Actions workflows
 lint/action: $(ACTIONLINT) ratchet/check
 	@echo "Linting GitHub Actions workflows..."
 	$(ACTIONLINT)
+
+test-workflows: ## Run unit tests for GitHub Actions workflows
+	@echo "Running GitHub Actions workflow tests..."
+	go test -C .github/tools -v -count=1 ./workflows/...
 
 lint/go: ## Run golangci-lint on Go code
 lint/go: $(GOLANGCI_LINT) lint/go/pkg
@@ -571,6 +580,44 @@ go-mod-tidy/%: crosslink
 	@echo "Running go mod tidy in $(DIR)" \
 		&& cd $(DIR) \
 		&& go mod tidy
+
+##@ Release
+
+MODSET ?=
+RELEASE_REPO ?= open-telemetry/opentelemetry-go-compile-contrib
+
+.PHONY: verify-versions
+verify-versions: $(MULTIMOD) ## Verify module versioning configuration in versions.yaml
+	$(MULTIMOD) verify
+
+.PHONY: prerelease
+prerelease: $(MULTIMOD) ## Update module versions and go.mod files for a release
+	$(MULTIMOD) verify
+	$(MULTIMOD) prerelease $(if $(MODSET),-m $(MODSET),) --skip-go-mod-tidy --commit-to-different-branch=false
+	$(MAKE) go-mod-tidy
+
+.PHONY: release-notes
+release-notes: ## Generate and curate .github/release-notes.md (requires authenticated gh CLI)
+	@set -euo pipefail; \
+	if ! command -v gh >/dev/null 2>&1; then \
+		echo "Error: 'gh' CLI is required for release-notes."; \
+		exit 1; \
+	fi; \
+	remote_tags=$$(mktemp); \
+	trap 'rm -f "$$remote_tags"' EXIT; \
+	git ls-remote --tags origin > "$$remote_tags" 2>/dev/null || true; \
+	target="$${TARGET_COMMITISH:-$$(git merge-base HEAD origin/main 2>/dev/null || git rev-parse HEAD)}"; \
+	tag="$${TAG:-$$(go -C .github/tools run ./releasetags -versions-file "$(CURDIR)/versions.yaml" -remote-tags-file "$$remote_tags" -print-tags | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$$' | head -n1 || true)}"; \
+	if [ -z "$$tag" ]; then \
+		tag="$$(go -C .github/tools run ./releasetags -versions-file "$(CURDIR)/versions.yaml" -remote-tags-file "$$remote_tags" -print-tags | head -n1)"; \
+	fi; \
+	prev="$$(git tag --list --merged "$$target" 'v[0-9]*' --sort=-v:refname 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$$' | head -n1 || true)"; \
+	api_args=(-f "tag_name=$$tag" -f "target_commitish=$$target"); \
+	if [ -n "$$prev" ]; then \
+		api_args+=(-f "previous_tag_name=$$prev"); \
+	fi; \
+	gh api "repos/$(RELEASE_REPO)/releases/generate-notes" "$${api_args[@]}" --jq '.body' > .github/release-notes.md; \
+	GH_TOKEN="$$(gh auth token)" go -C .github/tools run ./releasesummary -file "$(CURDIR)/.github/release-notes.md" -repo "$(RELEASE_REPO)"
 
 ##@ Utilities
 

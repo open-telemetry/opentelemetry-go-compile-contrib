@@ -152,7 +152,6 @@ This project welcomes the use of AI tools. Please read the [AI Usage Policy](doc
 contributing. The critical rule is: **you must understand every line of code you submit.**
 Contributors using AI tools are held to the same quality standards as any other contribution.
 
-
 ## Pull Requests
 
 ### Conventional Commits
@@ -199,7 +198,7 @@ Here are some examples for the various supported commit types:
   - :white_check_mark: `docs: explain proper use of the -log-level flag`
   - :x: `docs: improve documentation`
 - `feat`:
-  - :information_source:  What feature is being introduced specifically? A user might decide if this
+  - :information_source: What feature is being introduced specifically? A user might decide if this
     is useful to them or not based on this.
   - :white_check_mark: `feat(cmd/otelc): -log-level flag to configure log verbosity`
   - :x: `feat: logging`
@@ -319,12 +318,14 @@ A PR is considered **ready to merge** when:
 
 Any [Maintainer] can merge the PR once the above criteria have been met.
 
-[^1]: A qualified approval is a GitHub Pull Request review with "Approve"
-  status from an OpenTelemetry Go Compile Instrumentation [Approver] or [Maintainer].
-[^2]: Trivial changes include: typo corrections, cosmetic non-substantive
-  changes, documentation corrections or updates, dependency updates, etc.
+[^1]:
+    A qualified approval is a GitHub Pull Request review with "Approve"
+    status from an OpenTelemetry Go Compile Instrumentation [Approver] or [Maintainer].
+
+[^2]:
+    Trivial changes include: typo corrections, cosmetic non-substantive
+    changes, documentation corrections or updates, dependency updates, etc.
 
 ## Release Process
 
-The release process and cadence for `opentelemetry-go-compile-contrib` will be documented
-once established (tracked in [#7](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues/7)).
+See [docs/RELEASE.md](docs/RELEASE.md) for the `multimod`-based release process and workflow details.
