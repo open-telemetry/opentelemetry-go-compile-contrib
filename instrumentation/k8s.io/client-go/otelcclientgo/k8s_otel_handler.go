@@ -22,11 +22,10 @@ import (
 
 type k8SOtelEventHandler struct {
 	handler cache.ResourceEventHandler
-	ctx     context.Context
 }
 
-func newK8SOtelEventHandler(handler cache.ResourceEventHandler, ctx context.Context) *k8SOtelEventHandler {
-	return &k8SOtelEventHandler{handler, ctx}
+func newK8SOtelEventHandler(handler cache.ResourceEventHandler) *k8SOtelEventHandler {
+	return &k8SOtelEventHandler{handler}
 }
 
 func (h k8SOtelEventHandler) OnAdd(obj any, isInInitialList bool) {
@@ -34,7 +33,10 @@ func (h k8SOtelEventHandler) OnAdd(obj any, isInInitialList bool) {
 	attrs := semconv.K8SObjectInfoTraceAttrs(objInfo)
 
 	spanName := getSpanName(objInfo.Kind, "add")
-	_, span := tracer.Start(h.ctx,
+	// No caller context carries meaningful tracing intent here: a listener
+	// delivers this notification from its own goroutine, independently of
+	// whatever happened at AddEventHandlerWithOptions registration time.
+	_, span := tracer.Start(context.Background(),
 		spanName,
 		trace.WithSpanKind(trace.SpanKindInternal),
 		trace.WithAttributes(attrs...),
@@ -49,7 +51,7 @@ func (h k8SOtelEventHandler) OnUpdate(oldObj, newObj any) {
 	attrs := semconv.K8SObjectInfoTraceAttrs(objInfo)
 
 	spanName := getSpanName(objInfo.Kind, "update")
-	_, span := tracer.Start(h.ctx,
+	_, span := tracer.Start(context.Background(),
 		spanName,
 		trace.WithSpanKind(trace.SpanKindInternal),
 		trace.WithAttributes(attrs...),
@@ -75,7 +77,7 @@ func (h k8SOtelEventHandler) OnDelete(obj any) {
 	attrs := semconv.K8SObjectInfoTraceAttrs(objInfo)
 
 	spanName := getSpanName(objInfo.Kind, "delete")
-	_, span := tracer.Start(h.ctx,
+	_, span := tracer.Start(context.Background(),
 		spanName,
 		trace.WithSpanKind(trace.SpanKindInternal),
 		trace.WithAttributes(attrs...),

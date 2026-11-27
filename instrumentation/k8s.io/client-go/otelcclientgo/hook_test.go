@@ -8,6 +8,7 @@ import (
 	"errors"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -138,16 +139,19 @@ func TestBeforeProcessDeltas(t *testing.T) {
 				false,
 			)
 
-			handlerUpdated := mockCtx.GetParam(0).(cache.ResourceEventHandler)
-			handlerUpdated.OnAdd(&corev1.Pod{}, false)
+			// The handler argument is no longer wrapped here: client-go's own
+			// processDeltas never receives the real per-listener handler (see
+			// beforeAddEventHandlerWithOptions), so wrapping it at this layer
+			// was never actually measuring a real handler's execution.
+			unchanged, ok := mockCtx.GetParam(0).(cache.ResourceEventHandlerFuncs)
+			require.True(t, ok)
+			assert.Equal(t, handler, unchanged)
 
 			startedSpans := sr.Started()
-			endedSpans := sr.Ended()
 			if tt.expectSpans {
-				require.Len(t, startedSpans, 2, "should have started two spans")
-				require.Len(t, endedSpans, 1, "only the span from handler.OnAdd should have ended")
+				require.Len(t, startedSpans, 1, "should have started the objects.process span only")
 			} else {
-				require.Len(t, endedSpans, 0, "no spans should be emitted")
+				require.Len(t, startedSpans, 0, "no spans should be emitted")
 			}
 		})
 	}
@@ -298,16 +302,15 @@ func TestBeforeProcessDeltasInBatch(t *testing.T) {
 				false,
 			)
 
-			handlerUpdated := mockCtx.GetParam(0).(cache.ResourceEventHandler)
-			handlerUpdated.OnAdd(&corev1.Pod{}, false)
+			unchanged, ok := mockCtx.GetParam(0).(cache.ResourceEventHandlerFuncs)
+			require.True(t, ok)
+			assert.Equal(t, handler, unchanged)
 
 			startedSpans := sr.Started()
-			endedSpans := sr.Ended()
 			if tt.expectSpans {
-				require.Len(t, startedSpans, 2, "should have started two spans")
-				require.Len(t, endedSpans, 1, "only the span from handler.OnAdd should have ended")
+				require.Len(t, startedSpans, 1, "should have started the objects.process span only")
 			} else {
-				require.Len(t, endedSpans, 0, "no spans should be emitted")
+				require.Len(t, startedSpans, 0, "no spans should be emitted")
 			}
 		})
 	}
@@ -418,4 +421,84 @@ func TestAfterProcessDeltasInBatch(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestBeforeAddEventHandlerWithOptions verifies the handler argument is
+// wrapped at registration time, and that the wrapper's span genuinely
+// reflects the wrapped handler's own execution — the gap #80/#1183 reported
+// against the processDeltas-level wrapping this replaces.
+func TestBeforeAddEventHandlerWithOptions(t *testing.T) {
+	for _, tt := range []struct {
+		name       string
+		setupEnv   func(t *testing.T)
+		expectWrap bool
+	}{
+		{
+			name: "instrumentation enabled",
+			setupEnv: func(t *testing.T) {
+				t.Setenv("OTEL_GO_ENABLED_INSTRUMENTATIONS", "k8s_client_go")
+			},
+			expectWrap: true,
+		},
+		{
+			name: "instrumentation disabled",
+			setupEnv: func(t *testing.T) {
+				t.Setenv("OTEL_GO_DISABLED_INSTRUMENTATIONS", "k8s_client_go")
+			},
+			expectWrap: false,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			initOnce = *new(sync.Once)
+
+			tt.setupEnv(t)
+			_, _ = setupTestTracer(t)
+
+			handler := cache.ResourceEventHandlerFuncs{}
+			options := cache.HandlerOptions{}
+
+			mockCtx := hooktest.NewMockHookContext(nil, handler, options)
+			beforeAddEventHandlerWithOptions(mockCtx, nil, handler, options)
+
+			param := mockCtx.GetParam(1)
+			if tt.expectWrap {
+				wrapped, ok := param.(*k8SOtelEventHandler)
+				require.True(t, ok, "handler should be wrapped when enabled")
+				assert.Equal(t, handler, wrapped.handler)
+			} else {
+				assert.Equal(t, handler, param, "handler should be untouched when disabled")
+			}
+		})
+	}
+}
+
+// TestBeforeAddEventHandlerWithOptions_SpanReflectsRealHandlerDuration is the
+// direct regression test for #80/#1183: the span created for a dispatched
+// event must cover the actual registered handler's execution time, not just
+// the time client-go's own dispatch machinery takes to enqueue it.
+func TestBeforeAddEventHandlerWithOptions_SpanReflectsRealHandlerDuration(t *testing.T) {
+	initOnce = *new(sync.Once)
+	t.Setenv("OTEL_GO_ENABLED_INSTRUMENTATIONS", "k8s_client_go")
+	sr, _ := setupTestTracer(t)
+
+	const handlerDelay = 20 * time.Millisecond
+	real := cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj any) {
+			time.Sleep(handlerDelay)
+		},
+	}
+
+	mockCtx := hooktest.NewMockHookContext(nil, real, cache.HandlerOptions{})
+	beforeAddEventHandlerWithOptions(mockCtx, nil, real, cache.HandlerOptions{})
+
+	wrapped, ok := mockCtx.GetParam(1).(*k8SOtelEventHandler)
+	require.True(t, ok)
+
+	wrapped.OnAdd(&corev1.Pod{}, false)
+
+	spans := sr.Ended()
+	require.Len(t, spans, 1)
+	duration := spans[0].EndTime().Sub(spans[0].StartTime())
+	assert.GreaterOrEqual(t, duration, handlerDelay,
+		"span duration should reflect the handler's own execution time, not just dispatch")
 }

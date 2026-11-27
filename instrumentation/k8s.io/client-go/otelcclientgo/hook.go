@@ -50,7 +50,7 @@ func initInstrumentation() {
 
 func beforeProcessDeltas(
 	ictx hook.HookContext,
-	handler cache.ResourceEventHandler,
+	_ cache.ResourceEventHandler,
 	_ cache.Store,
 	deltas cache.Deltas,
 	isInInitialList bool,
@@ -70,14 +70,21 @@ func beforeProcessDeltas(
 	}
 	attrs := semconv.K8SObjectsInfoTraceAttrs(objsInfo)
 
+	// This span covers the cache-mutation dispatch itself (Store.Update/
+	// Add/Delete for this batch), not any registered handler's own
+	// execution: the handler argument here is the shared informer's
+	// internal processor, which only enqueues notifications onto each
+	// listener's channel and returns almost immediately. Each listener's
+	// own handler is wrapped separately, at AddEventHandlerWithOptions
+	// registration time (see beforeAddEventHandlerWithOptions), so its
+	// span reflects the handler's real, later, asynchronous execution.
 	spanName := "k8s.informer.objects.process"
-	ctx, span := tracer.Start(context.Background(),
+	_, span := tracer.Start(context.Background(),
 		spanName,
 		trace.WithSpanKind(trace.SpanKindInternal),
 		trace.WithAttributes(attrs...),
 	)
 
-	ictx.SetParam(0, newK8SOtelEventHandler(handler, ctx))
 	ictx.SetKeyData("span", span)
 }
 
@@ -101,7 +108,7 @@ func afterProcessDeltas(ictx hook.HookContext, err error) {
 
 func beforeProcessDeltasInBatch(
 	ictx hook.HookContext,
-	handler cache.ResourceEventHandler,
+	_ cache.ResourceEventHandler,
 	_ cache.Store,
 	deltas []cache.Delta,
 	isInInitialList bool,
@@ -121,14 +128,15 @@ func beforeProcessDeltasInBatch(
 	}
 	attrs := semconv.K8SObjectsInfoTraceAttrs(objsInfo)
 
+	// See beforeProcessDeltas: this span covers cache-mutation dispatch
+	// only, not any registered handler's own execution.
 	spanName := "k8s.informer.objects.process"
-	ctx, span := tracer.Start(context.Background(),
+	_, span := tracer.Start(context.Background(),
 		spanName,
 		trace.WithSpanKind(trace.SpanKindInternal),
 		trace.WithAttributes(attrs...),
 	)
 
-	ictx.SetParam(0, newK8SOtelEventHandler(handler, ctx))
 	ictx.SetKeyData("span", span)
 }
 
@@ -148,4 +156,31 @@ func afterProcessDeltasInBatch(ictx hook.HookContext, err error) {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 	}
+}
+
+// beforeAddEventHandlerWithOptions wraps a caller's handler at the point
+// where it actually gets registered with a *sharedIndexInformer, so the
+// wrapper's OnAdd/OnUpdate/OnDelete run exactly where and when client-go
+// invokes the real handler: inside that listener's own dispatch goroutine,
+// not inside processDeltas/processDeltasInBatch (see beforeProcessDeltas).
+// AddEventHandler and AddEventHandlerWithResyncPeriod both delegate to
+// AddEventHandlerWithOptions internally, so this one hook covers every
+// registration path. The receiver type is unexported in client-go, so it is
+// received as any and otherwise unused.
+func beforeAddEventHandlerWithOptions(
+	ictx hook.HookContext,
+	_ any,
+	handler cache.ResourceEventHandler,
+	_ cache.HandlerOptions,
+) {
+	if !runtime.Ready() {
+		return
+	}
+	if !k8SEnabler.Enable() {
+		logger.Debug("K8S client-go instrumentation disabled")
+		return
+	}
+	initInstrumentation()
+
+	ictx.SetParam(1, newK8SOtelEventHandler(handler))
 }

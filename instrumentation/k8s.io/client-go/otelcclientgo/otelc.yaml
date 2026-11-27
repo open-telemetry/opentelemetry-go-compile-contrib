@@ -21,3 +21,14 @@ k8s_hook_processdeltasinbatch:
         before: beforeProcessDeltasInBatch
         after: afterProcessDeltasInBatch
         path: "go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/otelcclientgo"
+
+k8s_hook_addeventhandlerwithoptions:
+  target: k8s.io/client-go/tools/cache
+  version: "v0.34.0,v0.36.0"
+  where:
+    func: AddEventHandlerWithOptions
+    recv: "*sharedIndexInformer"
+  do:
+    - inject_hooks:
+        before: beforeAddEventHandlerWithOptions
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/otelcclientgo"
