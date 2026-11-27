@@ -125,7 +125,13 @@ No permanent release or maintenance branches are kept. Critical bug fixes should
    git push origin release/v0.1.x
    ```
 
-   Then prepare a `release/v0.1.1` branch from `release/v0.1.x`, open the `release: v0.1.1` PR targeting `release/v0.1.x`, review and merge it, publish the draft release, and delete the temporary `release/v0.1.x` branch once verified.
+   Then prepare a `release/v0.1.1` branch from `release/v0.1.x`, and generate release notes against `release/v0.1.x` (since `merge-base` with `origin/main` points to `v0.1.0` and would miss the cherry-picked fix):
+
+   ```sh
+   TARGET_COMMITISH=release/v0.1.x make release-notes
+   ```
+
+   Open the `release: v0.1.1` PR targeting `release/v0.1.x`, review and merge it, publish the draft release, and delete the temporary `release/v0.1.x` branch once verified.
 
 ## Post-Release
 

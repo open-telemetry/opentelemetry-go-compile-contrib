@@ -12,9 +12,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type concurrencyConfig struct {
+	Group            string `yaml:"group"`
+	CancelInProgress *bool  `yaml:"cancel-in-progress"`
+}
+
 type workflowDoc struct {
-	On   yaml.Node            `yaml:"on"`
-	Jobs map[string]jobConfig `yaml:"jobs"`
+	On          yaml.Node            `yaml:"on"`
+	Concurrency *concurrencyConfig   `yaml:"concurrency"`
+	Jobs        map[string]jobConfig `yaml:"jobs"`
 }
 
 type jobConfig struct {
@@ -64,11 +70,28 @@ func findReleaseStep(t *testing.T, nameOrID string) stepConfig {
 
 func TestReleaseWorkflowExists(t *testing.T) {
 	doc := loadWorkflow(t, "release.yml")
-	if _, ok := doc.Jobs["release"]; !ok {
+	job, ok := doc.Jobs["release"]
+	if !ok {
 		t.Fatal("release.yml: missing job release")
+	}
+	if !strings.Contains(job.If, "startsWith(github.event.pull_request.head.ref, 'release/v')") {
+		t.Errorf("release.yml: job release if=%q must require release/v branch prefix", job.If)
+	}
+	if doc.Concurrency == nil || doc.Concurrency.Group == "" {
+		t.Fatal("release.yml: must define workflow-level concurrency group")
+	}
+	if doc.Concurrency.CancelInProgress == nil || *doc.Concurrency.CancelInProgress {
+		t.Fatalf("release.yml: concurrency cancel-in-progress = %v, want false", doc.Concurrency.CancelInProgress)
 	}
 	_ = findReleaseStep(t, "app-token")
 	_ = findReleaseStep(t, "plan")
+	verifyStep := findReleaseStep(t, "Verify release branch and notes")
+	if !strings.Contains(verifyStep.Run, `if [ "${RELEASE_TAG}" != "${branch_version}" ]`) {
+		t.Error("Verify release branch and notes must fail when release_tag does not match branch version")
+	}
+	if !strings.Contains(verifyStep.Run, ".github/release-notes.md") {
+		t.Error("Verify release branch and notes must check .github/release-notes.md before tagging")
+	}
 }
 
 func TestAppTokenFailureSurfacesWarning(t *testing.T) {
@@ -107,10 +130,19 @@ func TestReleaseTagPushUsesExplicitTokenAndServerURL(t *testing.T) {
 	if !strings.Contains(step.Run, "${APP_TOKEN:-${GITHUB_TOKEN}}") {
 		t.Error("Create and push tags must fall back from APP_TOKEN to GITHUB_TOKEN")
 	}
+	if !strings.Contains(step.Run, "git push --atomic") {
+		t.Error("Create and push tags must push tags atomically with --atomic")
+	}
+	if !strings.Contains(step.Run, "refs/tags/${tag}") {
+		t.Error("Create and push tags must use full refs/tags/<tag> refspecs")
+	}
 }
 
 func TestReleaseCreatesDraftRelease(t *testing.T) {
 	step := findReleaseStep(t, "Create GitHub release")
+	if !strings.Contains(step.Run, `gh release view "${RELEASE_TAG}"`) {
+		t.Error("Create GitHub release must check gh release view before creating")
+	}
 	if !strings.Contains(step.Run, "--draft") {
 		t.Error("Create GitHub release must create a draft release")
 	}

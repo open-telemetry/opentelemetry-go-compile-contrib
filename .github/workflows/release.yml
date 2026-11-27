@@ -10,12 +10,16 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Tag and Release
     runs-on: ubuntu-latest
     if: >
-      github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/') && !endsWith(github.event.pull_request.head.ref,
+      github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v') && !endsWith(github.event.pull_request.head.ref,
       '.x')
     permissions:
       contents: write
@@ -81,6 +85,21 @@ jobs:
             -print-tags > "${RUNNER_TEMP}/release-tags.txt"
           rm -rf .bin
 
+      - name: Verify release branch and notes
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          RELEASE_TAG: ${{ steps.plan.outputs.release_tag }}
+        run: |
+          branch_version="${HEAD_REF#release/}"
+          if [ "${RELEASE_TAG}" != "${branch_version}" ]; then
+            echo "::error::Planned release_tag '${RELEASE_TAG}' does not match branch '${HEAD_REF}' (expected '${branch_version}')."
+            exit 1
+          fi
+          if [ ! -s .github/release-notes.md ]; then
+            echo "::error::Missing or empty .github/release-notes.md."
+            exit 1
+          fi
+
       - name: Create and push tags
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -119,13 +138,13 @@ jobs:
               fi
             else
               git tag -a "${tag}" -m "Release ${tag}"
-              tags_to_push+=("${tag}")
+              tags_to_push+=("refs/tags/${tag}")
             fi
           done < "${RUNNER_TEMP}/release-tags.txt"
 
           if [ "${#tags_to_push[@]}" -gt 0 ]; then
             echo "Pushing ${#tags_to_push[@]} tag(s)..."
-            git push "${remote_url}" "${tags_to_push[@]}"
+            git push --atomic "${remote_url}" "${tags_to_push[@]}"
           else
             echo "All tags already exist on remote."
           fi
@@ -137,6 +156,10 @@ jobs:
           RELEASE_TITLE: ${{ steps.plan.outputs.release_title }}
           IS_PRERELEASE: ${{ steps.plan.outputs.is_prerelease }}
         run: |
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "Release '${RELEASE_TAG}' already exists. Skipping creation."
+            exit 0
+          fi
           RELEASE_FLAGS=()
           if [ "${IS_PRERELEASE}" = "true" ]; then
             RELEASE_FLAGS+=(--prerelease)
