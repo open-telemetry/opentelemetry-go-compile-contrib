@@ -552,6 +552,45 @@ func TestOtelMiddleware_StreamingResponse(t *testing.T) {
 	assertInt64Attribute(t, attrs, "gen_ai.usage.total_tokens", 7)
 }
 
+func TestOtelMiddleware_StreamingResponse_MixedCaseContentType(t *testing.T) {
+	sr := setupTestTracer(t)
+
+	middleware := OtelMiddleware()
+
+	reqBody := `{"model":"gpt-4","stream":true}`
+	req, _ := http.NewRequest(
+		http.MethodPost,
+		"http://api.openai.com/v1/chat/completions",
+		io.NopCloser(bytes.NewReader([]byte(reqBody))),
+	)
+
+	// HTTP media types are case-insensitive (RFC 9110 §8.3.1); some
+	// OpenAI-compatible servers send "Text/Event-Stream".
+	streamData := "data: {\"id\":\"chatcmpl-stream\",\"model\":\"gpt-4\",\"choices\":[{\"delta\":{\"content\":\"Hi\"},\"finish_reason\":null}]}\n\ndata: [DONE]\n\n"
+	next := func(r *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     http.Header{"Content-Type": []string{"Text/Event-Stream; charset=utf-8"}},
+			Body:       io.NopCloser(bytes.NewReader([]byte(streamData))),
+		}, nil
+	}
+
+	resp, err := middleware(req, next)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Contains(t, string(body), "Hi")
+	_ = resp.Body.Close()
+
+	spans := sr.Ended()
+	require.Len(t, spans, 1)
+
+	assertAttribute(t, spans[0].Attributes(), "gen_ai.request.is_stream", "true")
+	assertAttribute(t, spans[0].Attributes(), "gen_ai.response.id", "chatcmpl-stream")
+}
+
 // TestOtelMiddleware_ResponseBodyTruncated covers Issue #1309: a response
 // larger than maxResponseBodySize (e.g. a large batch embeddings call) must
 // not produce a span that silently looks fully successful. The span should
