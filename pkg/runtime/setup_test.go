@@ -573,7 +573,22 @@ func TestForceFlushCanceledContext(t *testing.T) {
 // restoreProviders resets the global providers after a test that configures them.
 func restoreProviders(t *testing.T) {
 	origTracer, origMeter, origLogger := tracerProvider, meterProvider, loggerProvider
-	t.Cleanup(func() { tracerProvider, meterProvider, loggerProvider = origTracer, origMeter, origLogger })
+	origGlobalTracer := otel.GetTracerProvider()
+	t.Cleanup(func() {
+		if tracerProvider != nil && tracerProvider != origTracer {
+			_ = tracerProvider.Shutdown(context.Background())
+		}
+		if meterProvider != nil && meterProvider != origMeter {
+			_ = meterProvider.Shutdown(context.Background())
+		}
+		if loggerProvider != nil && loggerProvider != origLogger {
+			_ = loggerProvider.Shutdown(context.Background())
+		}
+		if current := otel.GetTracerProvider(); current != origGlobalTracer {
+			otel.SetTracerProvider(origGlobalTracer)
+		}
+		tracerProvider, meterProvider, loggerProvider = origTracer, origMeter, origLogger
+	})
 }
 
 func TestNewResourceIncludesTelemetrySDK(t *testing.T) {
@@ -627,13 +642,17 @@ func TestNewResourceIncludesService(t *testing.T) {
 }
 
 func TestNewResourceServiceNameFromEnv(t *testing.T) {
+	resetResourceDetectors(t)
 	t.Setenv("OTEL_RESOURCE_ATTRIBUTES", "")
 	t.Setenv("OTEL_SERVICE_NAME", "checkout")
 
+	require.True(t, RegisterResourceDetector("service", staticDetector(
+		attribute.String("service.name", "from-detector"),
+	)))
+
 	res := newResource(context.Background())
-	name, ok := res.Set().Value(attribute.Key("service.name"))
-	require.True(t, ok)
-	assert.Equal(t, "checkout", name.AsString())
+	assert.Equal(t, "checkout", resourceValue(t, res, "service.name"),
+		"OTEL_SERVICE_NAME overrides the built-in and registered detectors")
 }
 
 func TestNewResourceKeepsDetectedAttributesOnError(t *testing.T) {
