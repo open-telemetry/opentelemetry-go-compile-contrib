@@ -10,10 +10,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: false
-
 jobs:
   release:
     name: Tag and Release
@@ -21,6 +17,9 @@ jobs:
     if: >
       github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v') && !endsWith(github.event.pull_request.head.ref,
       '.x')
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:

@@ -18,15 +18,15 @@ type concurrencyConfig struct {
 }
 
 type workflowDoc struct {
-	On          yaml.Node            `yaml:"on"`
-	Concurrency *concurrencyConfig   `yaml:"concurrency"`
-	Jobs        map[string]jobConfig `yaml:"jobs"`
+	On   yaml.Node            `yaml:"on"`
+	Jobs map[string]jobConfig `yaml:"jobs"`
 }
 
 type jobConfig struct {
-	If          string            `yaml:"if"`
-	Permissions map[string]string `yaml:"permissions"`
-	Steps       []stepConfig      `yaml:"steps"`
+	If          string             `yaml:"if"`
+	Concurrency *concurrencyConfig `yaml:"concurrency"`
+	Permissions map[string]string  `yaml:"permissions"`
+	Steps       []stepConfig       `yaml:"steps"`
 }
 
 type stepConfig struct {
@@ -77,11 +77,11 @@ func TestReleaseWorkflowExists(t *testing.T) {
 	if !strings.Contains(job.If, "startsWith(github.event.pull_request.head.ref, 'release/v')") {
 		t.Errorf("release.yml: job release if=%q must require release/v branch prefix", job.If)
 	}
-	if doc.Concurrency == nil || doc.Concurrency.Group == "" {
-		t.Fatal("release.yml: must define workflow-level concurrency group")
+	if job.Concurrency == nil || job.Concurrency.Group == "" {
+		t.Fatal("release.yml: job release must define concurrency group")
 	}
-	if doc.Concurrency.CancelInProgress == nil || *doc.Concurrency.CancelInProgress {
-		t.Fatalf("release.yml: concurrency cancel-in-progress = %v, want false", doc.Concurrency.CancelInProgress)
+	if job.Concurrency.CancelInProgress == nil || *job.Concurrency.CancelInProgress {
+		t.Fatalf("release.yml: concurrency cancel-in-progress = %v, want false", job.Concurrency.CancelInProgress)
 	}
 	_ = findReleaseStep(t, "app-token")
 	_ = findReleaseStep(t, "plan")
