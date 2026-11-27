@@ -83,6 +83,8 @@ func TestOtelSDKSpanFromContext(t *testing.T) {
 		"SpanFromContext(context.Background()) should return a valid span from GLS")
 	require.Contains(t, output, "traceID=")
 	require.Contains(t, output, "spanID=")
+	require.Contains(t, output, "OTEL_SDK_NOGLS: gls=true background=false valueCtx=false explicit=true",
+		"SpanFromContextWithoutGLS must ignore the active GLS span and read only explicit context spans")
 	require.Contains(t, output, "OTEL_SDK_WORKER: stale span=false")
 	require.Contains(t, output, "OTEL_SDK_COMPACT: admitted=true",
 		"ended spans below the active span should not consume the GLS limit")

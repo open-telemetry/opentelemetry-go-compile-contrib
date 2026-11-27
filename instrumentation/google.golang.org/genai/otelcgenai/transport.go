@@ -48,6 +48,13 @@ type otelTransport struct {
 	system   string
 }
 
+// isSSEContentType reports whether ct names the SSE media type. HTTP media
+// types are case-insensitive and may carry parameters per RFC 9110 §8.3.1.
+func isSSEContentType(ct string) bool {
+	mediaType, _, _ := strings.Cut(ct, ";")
+	return strings.EqualFold(strings.TrimSpace(mediaType), "text/event-stream")
+}
+
 func (t *otelTransport) roundTripper() http.RoundTripper {
 	if t.base != nil {
 		return t.base
@@ -158,7 +165,7 @@ func (t *otelTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// answers with SSE anyway gets a span without response attributes rather
 	// than a blocked read on a body this path does not accumulate. The
 	// Anthropic instrumentation keeps the same guard.
-	if strings.HasPrefix(resp.Header.Get("Content-Type"), "text/event-stream") {
+	if isSSEContentType(resp.Header.Get("Content-Type")) {
 		span.SetAttributes(semconv.GenAIRequestIsStream(true))
 		return resp, nil
 	}

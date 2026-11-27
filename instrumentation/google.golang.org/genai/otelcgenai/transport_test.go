@@ -385,6 +385,40 @@ func TestRoundTrip_SSEResponseMarkedAsStream(t *testing.T) {
 	assert.NotContains(t, attrs, attribute.Key("gen_ai.usage.input_tokens"))
 }
 
+func TestRoundTrip_SSEResponseMarkedAsStream_MixedCase(t *testing.T) {
+	span, _ := roundTripThrough(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "Text/Event-Stream; charset=utf-8")
+		_, _ = io.WriteString(w, "data: {}\n\n")
+	}, `{}`)
+
+	attrs := attrsOf(t, span)
+	assert.True(t, attrs["gen_ai.request.is_stream"].AsBool())
+	assert.NotContains(t, attrs, attribute.Key("gen_ai.usage.input_tokens"))
+}
+
+func TestIsSSEContentType(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		want        bool
+	}{
+		{"lowercase", "text/event-stream", true},
+		{"mixed case", "Text/Event-Stream", true},
+		{"uppercase with parameter", "TEXT/EVENT-STREAM; charset=utf-8", true},
+		{"whitespace around media type", "  Text/Event-Stream ; charset=utf-8", true},
+		{"malformed parameter", "text/event-stream; ::", true},
+		{"json", "application/json", false},
+		{"empty", "", false},
+		{"prefix only", "text/event-streamx", false},
+		{"non-streaming with sse prefix", "text/event-streaming", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, isSSEContentType(tt.contentType))
+		})
+	}
+}
+
 func TestRoundTrip_TransportErrorRecorded(t *testing.T) {
 	recorder := newRecordingTracer(t)
 

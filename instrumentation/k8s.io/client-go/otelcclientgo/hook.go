@@ -70,6 +70,8 @@ func beforeProcessDeltas(
 	}
 	attrs := semconv.K8SObjectsInfoTraceAttrs(objsInfo)
 
+	// This span covers the cache-mutation dispatch itself (Store.Update/
+	// Add/Delete for this batch).
 	spanName := "k8s.informer.objects.process"
 	ctx, span := tracer.Start(context.Background(),
 		spanName,
@@ -77,7 +79,20 @@ func beforeProcessDeltas(
 		trace.WithAttributes(attrs...),
 	)
 
-	ictx.SetParam(0, newK8SOtelEventHandler(handler, ctx))
+	// A *sharedIndexInformer passes itself as handler here, only to fan the
+	// notification out to its own listeners; each listener is already
+	// wrapped individually, at AddEventHandlerWithOptions registration time
+	// (see beforeAddEventHandlerWithOptions), so it must not be wrapped
+	// again here. A non-shared informer (NewInformer, NewIndexerInformer,
+	// ...) passes the real user handler straight into processDeltas though,
+	// and never goes through AddEventHandlerWithOptions at all, so it still
+	// needs wrapping here to get any k8s.informer.<kind>.* spans.
+	if _, isSharedInformer := handler.(cache.SharedInformer); !isSharedInformer {
+		if _, alreadyWrapped := handler.(*k8SOtelEventHandler); !alreadyWrapped {
+			ictx.SetParam(0, newK8SOtelEventHandler(handler, ctx))
+		}
+	}
+
 	ictx.SetKeyData("span", span)
 }
 
@@ -121,6 +136,8 @@ func beforeProcessDeltasInBatch(
 	}
 	attrs := semconv.K8SObjectsInfoTraceAttrs(objsInfo)
 
+	// See beforeProcessDeltas: this span covers cache-mutation dispatch
+	// only, and handler is wrapped here only for non-shared informers.
 	spanName := "k8s.informer.objects.process"
 	ctx, span := tracer.Start(context.Background(),
 		spanName,
@@ -128,7 +145,12 @@ func beforeProcessDeltasInBatch(
 		trace.WithAttributes(attrs...),
 	)
 
-	ictx.SetParam(0, newK8SOtelEventHandler(handler, ctx))
+	if _, isSharedInformer := handler.(cache.SharedInformer); !isSharedInformer {
+		if _, alreadyWrapped := handler.(*k8SOtelEventHandler); !alreadyWrapped {
+			ictx.SetParam(0, newK8SOtelEventHandler(handler, ctx))
+		}
+	}
+
 	ictx.SetKeyData("span", span)
 }
 
@@ -148,4 +170,38 @@ func afterProcessDeltasInBatch(ictx hook.HookContext, err error) {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 	}
+}
+
+// beforeAddEventHandlerWithOptions wraps a caller's handler at the point
+// where it actually gets registered with a *sharedIndexInformer, so the
+// wrapper's OnAdd/OnUpdate/OnDelete run exactly where and when client-go
+// invokes the real handler: inside that listener's own dispatch goroutine,
+// not inside processDeltas/processDeltasInBatch (see beforeProcessDeltas,
+// which wraps the handler directly only for non-shared informers, since
+// those never reach this hook at all). AddEventHandler and
+// AddEventHandlerWithResyncPeriod both delegate to AddEventHandlerWithOptions
+// internally, so this one hook covers every shared-informer registration
+// path. The receiver type is unexported in client-go, so it is received as
+// any and otherwise unused.
+func beforeAddEventHandlerWithOptions(
+	ictx hook.HookContext,
+	_ any,
+	handler cache.ResourceEventHandler,
+	_ cache.HandlerOptions,
+) {
+	if handler == nil {
+		return
+	}
+	if !runtime.Ready() {
+		return
+	}
+	if !k8SEnabler.Enable() {
+		return
+	}
+	initInstrumentation()
+
+	// No caller context carries meaningful tracing intent here: a listener
+	// delivers this notification from its own goroutine, independently of
+	// whatever happened at AddEventHandlerWithOptions registration time.
+	ictx.SetParam(1, newK8SOtelEventHandler(handler, context.Background()))
 }

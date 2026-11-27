@@ -20,13 +20,19 @@ import (
 	"go.opentelemetry.io/otelc-contrib/instrumentation/k8s.io/client-go/otelcclientgo/semconv"
 )
 
+// k8SOtelEventHandler wraps a real cache.ResourceEventHandler so each
+// OnAdd/OnUpdate/OnDelete gets its own span. ctx is the parent to start that
+// span under: the dispatching caller's ctx when the call is synchronous with
+// an already-open span (see beforeProcessDeltas), or context.Background()
+// when there is no such caller to parent it to (see
+// beforeAddEventHandlerWithOptions).
 type k8SOtelEventHandler struct {
 	handler cache.ResourceEventHandler
 	ctx     context.Context
 }
 
 func newK8SOtelEventHandler(handler cache.ResourceEventHandler, ctx context.Context) *k8SOtelEventHandler {
-	return &k8SOtelEventHandler{handler, ctx}
+	return &k8SOtelEventHandler{handler: handler, ctx: ctx}
 }
 
 func (h k8SOtelEventHandler) OnAdd(obj any, isInInitialList bool) {
