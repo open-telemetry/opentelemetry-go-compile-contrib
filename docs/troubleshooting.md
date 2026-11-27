@@ -34,6 +34,26 @@ OTEL_GO_DISABLED_INSTRUMENTATIONS=nethttp ./myapp
 > [!NOTE]
 > These variables only gate instrumentations already compiled into the binary. To control what is compiled in, use `otel.instrumentation.go` (see [Usage in README](../README.md#usage)).
 
+## Duplicate Spans with `otelhttp`, `otelgin` and `otelgrpc`
+
+An application can use wrappers from [opentelemetry-go-contrib](https://github.com/open-telemetry/opentelemetry-go-contrib) and also be built with `otelc`. Both layers can then record the same request. The result depends on the path:
+
+| Path | Result |
+| --- | --- |
+| `http.Client` with `otelhttp.NewTransport` over `*http.Transport` | One CLIENT span. `otelhttp` owns the span. `otelc` steps aside when the request context carries a recording `otelhttp` CLIENT span. |
+| `net/http` server with `otelhttp.NewHandler`, or gin with `otelgin.Middleware` | Two SERVER spans per request. `otelc` starts its span at the outer `net/http` layer, outside the app handler. The wrapper then starts a second SERVER span. See below for how the two relate. |
+| gRPC server or client with `otelgrpc` stats handlers | Two SERVER spans or two CLIENT spans per hop. Both are exported. On the client, `otelc`'s span is the parent of `otelgrpc`'s span. On the server, the two spans nest like the HTTP server spans. |
+
+On the server side, for HTTP and gRPC, the relation between the two SERVER spans depends on the incoming request. Without an incoming `traceparent`, the wrapper's span is a child of `otelc`'s span. With an incoming `traceparent` in the HTTP headers or the gRPC metadata, the wrapper extracts it again and starts its span from the remote parent. The two spans are then siblings.
+
+For the server paths and gRPC, remove the contrib wrapper and rely on `otelc` for that path. This gives one span per hop.
+
+If you must keep the wrapper, disable `otelc` for that protocol with `OTEL_GO_DISABLED_INSTRUMENTATIONS`. The `net/http` client and server instrumentation share the key `nethttp`, and gRPC uses `grpc`. Each key covers the client and the server side, so it also disables `otelc` for calls that the wrapper does not cover. See [Runtime Selection](#runtime-selection).
+
+Disabling the `gin` key does not remove a span. The gin instrumentation does not start a span. It only renames the `net/http` server span to `METHOD /route`, sets `http.route`, and records gin errors on that span.
+
+The `net/http` server hook and the gRPC hooks have no step-aside logic yet. [Issue #69](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues/69) tracks the open design question.
+
 ## Hook and Instrumentation Limitations
 
 The following constraints apply to all hook implementations. They come from the compile-time injection model and cannot be worked around.
