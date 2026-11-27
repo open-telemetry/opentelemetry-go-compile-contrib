@@ -153,7 +153,8 @@ func TestRootFiltering(t *testing.T) {
 			f.Run("dbclient", "-op=ping")
 
 			span := f.RequireSingleSpan()
-			require.Equal(t, "PING", span.Name())
+			require.Equal(t, ptrace.SpanKindClient, span.Kind())
+			require.True(t, span.ParentSpanID().IsEmpty())
 		})
 	})
 }
