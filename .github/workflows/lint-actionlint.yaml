@@ -7,6 +7,9 @@ on:
       - ".github/workflows/*.yaml"
       - ".github/actions/**/action.yml"
       - ".github/actions/**/action.yaml"
+      - ".github/tools/workflows/**"
+      - ".github/tools/go.mod"
+      - ".github/tools/go.sum"
       - ".tools/go.mod"
       - ".tools/go.sum"
       - "Makefile"
@@ -17,6 +20,9 @@ on:
       - ".github/workflows/*.yaml"
       - ".github/actions/**/action.yml"
       - ".github/actions/**/action.yaml"
+      - ".github/tools/workflows/**"
+      - ".github/tools/go.mod"
+      - ".github/tools/go.sum"
       - ".tools/go.mod"
       - ".tools/go.sum"
       - "Makefile"
@@ -37,3 +43,4 @@ jobs:
           go-version-file: go.mod
           cache: false
       - run: make lint/action
+      - run: make test-workflows

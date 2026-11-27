@@ -11,7 +11,7 @@ SHELL := /bin/bash
         multimod verify-versions prerelease release-notes \
         test-unit/race test-unit/pkg test-unit/instrumentation test-unit/helper \
         test-unit/coverage test-unit/pkg/coverage test-unit/instrumentation/coverage \
-        check-coverage test-integration/coverage test-e2e/coverage test-latestlibbuild test-latestlibrun test-versionmatrix \
+        check-coverage test-integration/coverage test-e2e/coverage test-latestlibbuild test-latestlibrun test-versionmatrix test-workflows \
         weaver-install tidy/test-apps \
         fetch-upstream-semconv lint-schema generate \
         govulncheck govulncheck/instrumentation
@@ -170,6 +170,10 @@ lint/action: ## Lint GitHub Actions workflows
 lint/action: $(ACTIONLINT) ratchet/check
 	@echo "Linting GitHub Actions workflows..."
 	$(ACTIONLINT)
+
+test-workflows: ## Run unit tests for GitHub Actions workflows
+	@echo "Running GitHub Actions workflow tests..."
+	go test -C .github/tools -v -count=1 ./workflows/...
 
 lint/go: ## Run golangci-lint on Go code
 lint/go: $(GOLANGCI_LINT) lint/go/pkg
