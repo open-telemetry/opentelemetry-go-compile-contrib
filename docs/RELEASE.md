@@ -28,7 +28,7 @@ If you are interested in volunteering to shepherd an upcoming release, please cr
 
 - Maintainer permissions on `open-telemetry/opentelemetry-go-compile-contrib`.
 - Authenticated [GitHub CLI (`gh`)](https://cli.github.com/) (`gh auth login`): required by `make release-notes` to call GitHub's `generate-notes` API and fetch PR labels in `.github/tools/releasesummary`.
-- 
+
 ## Before You Release
 
 1. **Create a [Version Release](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues/new?template=version_release.md) checklist issue** to track progress. Fill in the version number in the title.
@@ -53,24 +53,32 @@ If you are interested in volunteering to shepherd an upcoming release, please cr
 ### 1. Prepare the Release Branch Locally
 
 1. Create a `release/<version>` branch from `main` (or from `release/v<MAJOR>.<MINOR>.x` for a hotfix):
+
    ```sh
    git checkout -b release/v0.1.0
    ```
+
 2. Update the target version(s) in `versions.yaml` and commit that change (required because `multimod prerelease` checks for a clean working tree):
+
    ```sh
    git add versions.yaml
    git commit -m "chore: bump versions.yaml for v0.1.0"
    ```
+
    *(Skip this commit if `versions.yaml` already has the target version.)*
 3. Update all `go.mod` / `go.sum` files and `version.go` references across the repository:
+
    ```sh
    make prerelease
    ```
+
    *(This runs `multimod verify`, `multimod prerelease --skip-go-mod-tidy --commit-to-different-branch=false`, and `make go-mod-tidy` across all modules.)*
 4. Generate and curate `.github/release-notes.md` (requires authenticated `gh` CLI):
+
    ```sh
    make release-notes
    ```
+
    The generated file contains a curated summary (`Breaking Changes`, `Added`, `Fixed`, `Changed`) above GitHub's complete `What's Changed` list. Routine maintenance, test, and dependency PRs remain listed under `What's Changed`.
 5. Review and edit `.github/release-notes.md` to add context, reword entries, or highlight important changes, then commit and push the `release/<version>` branch.
 
@@ -109,12 +117,14 @@ No permanent release or maintenance branches are kept. Critical bug fixes should
 
 1. **If no unrelated changes have landed on `main`** since the last release, create `release/v<MAJOR>.<MINOR>.<PATCH>` directly from `main` and follow the standard release steps.
 2. **If `main` has moved on** with changes that should not be included, create a temporary hotfix branch `release/v<MAJOR>.<MINOR>.x` from the previous release tag and cherry-pick the fix commit from `main`:
+
    ```sh
    git fetch origin --tags
    git checkout -b release/v0.1.x v0.1.0
    git cherry-pick <fix-commit-from-main>
    git push origin release/v0.1.x
    ```
+
    Then prepare a `release/v0.1.1` branch from `release/v0.1.x`, open the `release: v0.1.1` PR targeting `release/v0.1.x`, review and merge it, publish the draft release, and delete the temporary `release/v0.1.x` branch once verified.
 
 ## Post-Release
@@ -122,9 +132,11 @@ No permanent release or maintenance branches are kept. Critical bug fixes should
 After publishing the draft release:
 
 1. **Verify Go module proxy indexing** for the published modules:
+
    ```sh
    GOPROXY=https://proxy.golang.org go list -m go.opentelemetry.io/otelc-contrib/instrumentation/net/http/otelchttp@v0.1.0
    ```
+
 2. **Announce the release** in the [#otel-go-compt-instr-sig](https://cloud-native.slack.com/archives/C088D8GSSSF) Slack channel with a link to the release notes.
 3. **Clean up temporary branches** (`release/<version>` and, if used, `release/v<MAJOR>.<MINOR>.x`).
 4. **Close the release checklist issue.**
