@@ -4,6 +4,7 @@
 package trace
 
 import (
+	"context"
 	_ "unsafe"
 
 	"go.opentelemetry.io/otel/trace"
@@ -15,6 +16,9 @@ import (
 
 func afterSpanFromContext(ictx hook.HookContext, span trace.Span) {
 	if !span.SpanContext().IsValid() {
+		if ctx, ok := ictx.GetParam(0).(context.Context); ok && runtime.IsGLSFallbackDisabled(ctx) {
+			return
+		}
 		glsSpan := runtime.GetSpanFromGLS()
 		if glsSpan != nil {
 			ictx.SetReturnVal(0, glsSpan)
