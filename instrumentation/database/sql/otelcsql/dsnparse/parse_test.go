@@ -124,6 +124,41 @@ func TestParseDSN_Postgres(t *testing.T) {
 			wantPort: "5432",
 			wantDB:   "my db",
 		},
+		{
+			name:     "libpq spaces around the equals sign",
+			dsn:      "host = replica.internal port = 5433 dbname = analytics",
+			wantHost: "replica.internal",
+			wantPort: "5433",
+			wantDB:   "analytics",
+		},
+		{
+			name:     "libpq quoted value after spaces around the equals sign",
+			dsn:      "host = localhost dbname = 'my db'",
+			wantHost: "localhost",
+			wantPort: "5432",
+			wantDB:   "my db",
+		},
+		{
+			name:     "libpq escaped space in an unquoted value",
+			dsn:      "host=localhost dbname=my\\ db port=5433",
+			wantHost: "localhost",
+			wantPort: "5433",
+			wantDB:   "my db",
+		},
+		{
+			name:     "libpq trailing escaped space is kept",
+			dsn:      "host=localhost dbname=my\\ ",
+			wantHost: "localhost",
+			wantPort: "5432",
+			wantDB:   "my ",
+		},
+		{
+			name:     "libpq trailing unescaped whitespace is ignored",
+			dsn:      "host=localhost dbname=mydb \t\n ",
+			wantHost: "localhost",
+			wantPort: "5432",
+			wantDB:   "mydb",
+		},
 		// pgx uses the same DSN format
 		{
 			name:     "pgx driver url format",
@@ -398,6 +433,34 @@ func TestParseDSN_SQLServer(t *testing.T) {
 			name:     "sqlserver url",
 			dsn:      "sqlserver://user:pass@host:1433?database=mydb",
 			wantHost: "host",
+			wantPort: "1433",
+			wantDB:   "mydb",
+		},
+		{
+			name:     "sqlserver url with a capitalized database parameter",
+			dsn:      "sqlserver://user:pass@host:1444?Database=mydb&app+name=x",
+			wantHost: "host",
+			wantPort: "1444",
+			wantDB:   "mydb",
+		},
+		{
+			name:     "odbc prefix",
+			dsn:      "odbc:server=db.example.com,1444;database=mydb;user id=sa;password=secret",
+			wantHost: "db.example.com",
+			wantPort: "1444",
+			wantDB:   "mydb",
+		},
+		{
+			name:     "odbc prefix default port",
+			dsn:      "odbc:Server=db.example.com;Database=mydb",
+			wantHost: "db.example.com",
+			wantPort: "1433",
+			wantDB:   "mydb",
+		},
+		{
+			name:     "odbc prefix with a url in the password",
+			dsn:      "odbc:server=db.example.com;password=a://b;database=mydb",
+			wantHost: "db.example.com",
 			wantPort: "1433",
 			wantDB:   "mydb",
 		},
@@ -701,4 +764,42 @@ func TestParseDSN_MySQLNoParensUnixSocketWithQueryParam(t *testing.T) {
 	got := ParseDSN("mysql", "unix:/tmp/mysql.sock/db?tls=a/b")
 	assert.Equal(t, "/tmp/mysql.sock", got.Host)
 	assert.Equal(t, "db", got.DBName)
+}
+
+func TestParseDSN_SQLServerDatabaseParameterCase(t *testing.T) {
+	tests := []struct {
+		name   string
+		dsn    string
+		wantDB string
+	}{
+		{
+			name:   "lowercase before capitalized",
+			dsn:    "sqlserver://user:pass@host:1433?database=first&Database=second",
+			wantDB: "first",
+		},
+		{
+			name:   "capitalized before lowercase",
+			dsn:    "sqlserver://user:pass@host:1433?Database=second&database=first",
+			wantDB: "first",
+		},
+		{
+			name:   "only a mixed case key",
+			dsn:    "sqlserver://user:pass@host:1433?DataBase=mydb",
+			wantDB: "mydb",
+		},
+		{
+			name:   "several mixed case keys use the first",
+			dsn:    "sqlserver://user:pass@host:1433?DATABASE=one&Database=two&DataBase=three",
+			wantDB: "one",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// A map iteration order changes between runs, so repeat the parse.
+			for range 50 {
+				info := ParseDSN("sqlserver", tt.dsn)
+				assert.Equal(t, tt.wantDB, info.DBName)
+			}
+		})
+	}
 }
