@@ -41,6 +41,28 @@ func skipBlockComment(chars []rune, i int, b *strings.Builder) int {
 	return i
 }
 
+// skipDoubleQuotedIdentifier preserves a double-quoted SQL identifier (e.g. "table", "o'brien", "col""name")
+// verbatim in the output so that apostrophes or other characters inside it are not treated as string literals.
+func skipDoubleQuotedIdentifier(chars []rune, i int, b *strings.Builder) int {
+	n := len(chars)
+	b.WriteRune('"')
+	i++
+	for i < n {
+		if chars[i] == '"' {
+			b.WriteRune('"')
+			if i+1 < n && chars[i+1] == '"' {
+				b.WriteRune('"')
+				i += 2
+				continue
+			}
+			return i + 1
+		}
+		b.WriteRune(chars[i])
+		i++
+	}
+	return i
+}
+
 // sanitizeSingleQuote sanitizes a single-quoted string literal.
 // In PostgreSQL with standard_conforming_strings=on (default), a backslash inside an
 // ordinary '...' literal is NOT an escape character (only ” escapes single quotes).
@@ -153,6 +175,8 @@ func sanitizeSQL(query string) string {
 			i = skipLineComment(chars, i, &b)
 		case c == '/' && i+1 < n && chars[i+1] == '*':
 			i = skipBlockComment(chars, i, &b)
+		case c == '"':
+			i = skipDoubleQuotedIdentifier(chars, i, &b)
 		case c == '\'':
 			isEscape := i > 0 && (chars[i-1] == 'E' || chars[i-1] == 'e') &&
 				(i == 1 || (!unicode.IsLetter(chars[i-2]) && !unicode.IsDigit(chars[i-2]) && chars[i-2] != '_'))

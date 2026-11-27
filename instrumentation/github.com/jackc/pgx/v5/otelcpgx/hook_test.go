@@ -152,6 +152,16 @@ func TestSanitizeSQL(t *testing.T) {
 			want:  "SELECT ? FROM test WHERE secret = ?",
 		},
 		{
+			name:  "double-quoted identifier containing apostrophe",
+			input: `SELECT "o'brien" FROM t WHERE secret = 'hunter2'`,
+			want:  `SELECT "o'brien" FROM t WHERE secret = ?`,
+		},
+		{
+			name:  "double-quoted identifier with escaped quotes and spaces",
+			input: `SELECT "col""name", "user name" FROM "my""table" WHERE id = 'secret'`,
+			want:  `SELECT "col""name", "user name" FROM "my""table" WHERE id = ?`,
+		},
+		{
 			name:  "preserves line comments",
 			input: "-- get user\nSELECT * FROM users WHERE id = 1",
 			want:  "-- get user\nSELECT * FROM users WHERE id = ?",
@@ -389,7 +399,7 @@ func TestConnect_MockServer(t *testing.T) {
 
 	// Simulate BeforeConnect hook setting the tracer
 	hctx := hooktest.NewMockHookContext(context.Background(), cfg)
-	BeforeConnect(hctx)
+	BeforeConnect(hctx, context.Background(), cfg)
 	require.NotNil(t, cfg.Tracer)
 
 	conn, err := pgx.ConnectConfig(context.Background(), cfg)
@@ -405,7 +415,7 @@ func TestHooks_InjectTracer(t *testing.T) {
 	t.Run("BeforeConnect", func(t *testing.T) {
 		cfg := &pgx.ConnConfig{}
 		hctx := hooktest.NewMockHookContext(context.Background(), cfg)
-		BeforeConnect(hctx)
+		BeforeConnect(hctx, context.Background(), cfg)
 		assert.NotNil(t, cfg.Tracer)
 	})
 }

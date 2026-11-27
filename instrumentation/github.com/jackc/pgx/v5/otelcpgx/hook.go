@@ -4,6 +4,8 @@
 package pgx
 
 import (
+	"context"
+
 	"github.com/jackc/pgx/v5"
 
 	"go.opentelemetry.io/otelc/pkg/hook"
@@ -11,25 +13,19 @@ import (
 	"go.opentelemetry.io/otelc-contrib/pkg/runtime"
 )
 
-const (
-	minConnectParams = 2
-)
-
 func isEnabled() bool {
 	return runtime.Instrumented(instrumentationKey)
 }
 
-// BeforeConnect hooks pgx.connect(ctx, config)
-func BeforeConnect(call hook.HookContext) {
+// BeforeConnect hooks pgx.connect(ctx, config).
+//
+//nolint:revive // the parameters must mirror pgx.connect(ctx, config), which follow the HookContext
+func BeforeConnect(_ hook.HookContext, _ context.Context, cfg *pgx.ConnConfig) {
 	if !isEnabled() {
 		return
 	}
 
-	if call.GetParamCount() < minConnectParams {
-		return
-	}
-	cfg, ok := call.GetParam(1).(*pgx.ConnConfig)
-	if !ok || cfg == nil {
+	if cfg == nil {
 		return
 	}
 
