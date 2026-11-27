@@ -165,3 +165,33 @@ func TestKafkaRequestTraceAttrs_EndpointWithoutPort(t *testing.T) {
 	_, hasPort := m["server.port"]
 	assert.False(t, hasPort)
 }
+
+func TestKafkaRequestTraceAttrs_MultipleBrokers(t *testing.T) {
+	tests := []struct {
+		name     string
+		endpoint string
+		host     string
+		port     int64
+	}{
+		{"host and port", "broker-1:9092,broker-2:9093", "broker-1", 9092},
+		{"IPv6", "[2001:db8::1]:9092,[2001:db8::2]:9092", "2001:db8::1", 9092},
+		{"no port", "broker-1,broker-2", "broker-1", 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := attrMap(KafkaRequestTraceAttrs(KafkaRequest{
+				Endpoint:    tt.endpoint,
+				Destination: "orders",
+				Operation:   KafkaOperationSend,
+			}))
+
+			assert.Equal(t, tt.host, m["server.address"].AsString())
+			if tt.port == 0 {
+				_, hasPort := m["server.port"]
+				assert.False(t, hasPort)
+				return
+			}
+			assert.Equal(t, tt.port, m["server.port"].AsInt64())
+		})
+	}
+}

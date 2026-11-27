@@ -7,7 +7,7 @@ Compile-time OpenTelemetry instrumentation for
 
 | Layer | Target | Span name | Scope |
 |-------|--------|-----------|--------|
-| Public API | Exported `*Client` methods with `(context.Context, …) (…, error)` | `linodego.<Method>` | `go.opentelemetry.io/otelc/instrumentation/github.com/linode/linodego/v2` |
+| Public API | Exported `*Client` methods with `(context.Context, …) (…, error)` | `linodego.<Method>` | `go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2/otelclinodego` |
 | HTTP request | `(*Client).doRequest` | `{METHOD} {endpoint}` | same |
 
 Client configuration helpers (`SetToken`, `SetBaseURL`, …) are not instrumented.
@@ -32,7 +32,7 @@ Instrumentation key: `LINODEGO` (case-insensitive).
 
 - Module: `github.com/linode/linodego/v2`
 - Public-method rules are generated against **v2.4.1** and apply to **v2.4.1+** (`version: v2.4.1` minimum bound).
-- `doRequest` is hooked for **v2.0.0+**.
+- `doRequest` and host extractor rules apply to **v2.4.1+**.
 
 When bumping the dependency, regenerate hooks (below) and update:
 
@@ -43,7 +43,7 @@ When bumping the dependency, regenerate hooks (below) and update:
 ## Regenerating public-method hooks
 
 ```bash
-cd instrumentation/github.com/linode/linodego/v2
+cd instrumentation/github.com/linode/linodego/v2/otelclinodego
 go run ./gen -version v2.4.1   # or: go generate ./...
 go test ./...
 ```

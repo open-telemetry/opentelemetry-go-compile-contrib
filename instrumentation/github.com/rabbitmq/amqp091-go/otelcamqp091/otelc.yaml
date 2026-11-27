@@ -1,10 +1,11 @@
 version: "v1.2.0"
 
 # Publish, PublishWithContext, and PublishWithDeferredConfirmWithContext all
-# call PublishWithDeferredConfirm. Hook that one path so a publish is one span.
+# call PublishWithDeferredConfirm (starting in v1.10.0). Hook that one path so
+# a publish is one span.
 amqp_hook_publish:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: PublishWithDeferredConfirm
     recv: "*Channel"
@@ -16,7 +17,7 @@ amqp_hook_publish:
 
 amqp_hook_consume:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: Consume
     recv: "*Channel"
@@ -28,7 +29,7 @@ amqp_hook_consume:
 
 amqp_hook_consume_with_context:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: ConsumeWithContext
     recv: "*Channel"
@@ -40,7 +41,7 @@ amqp_hook_consume_with_context:
 
 amqp_hook_get:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: Get
     recv: "*Channel"
@@ -54,7 +55,7 @@ amqp_hook_get:
 # so the send span parents from the API context, not only GLS.
 amqp_hook_publish_with_context:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: PublishWithContext
     recv: "*Channel"
@@ -66,7 +67,7 @@ amqp_hook_publish_with_context:
 
 amqp_hook_publish_with_deferred_confirm_with_context:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: PublishWithDeferredConfirmWithContext
     recv: "*Channel"
@@ -78,7 +79,7 @@ amqp_hook_publish_with_deferred_confirm_with_context:
 
 amqp_hook_ack:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: Ack
     recv: "*Channel"
@@ -90,7 +91,7 @@ amqp_hook_ack:
 
 amqp_hook_nack:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: Nack
     recv: "*Channel"
@@ -102,7 +103,7 @@ amqp_hook_nack:
 
 amqp_hook_reject:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: Reject
     recv: "*Channel"
@@ -115,7 +116,7 @@ amqp_hook_reject:
 # Hooked on shutdown, not Close; see the README's hook table for why.
 amqp_hook_shutdown:
   target: github.com/rabbitmq/amqp091-go
-  version: v1.9.0
+  version: v1.10.0
   where:
     func: shutdown
     recv: "*Channel"

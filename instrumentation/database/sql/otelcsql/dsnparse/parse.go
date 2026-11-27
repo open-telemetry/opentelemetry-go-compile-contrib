@@ -348,40 +348,57 @@ func parseMySQLDSN(dsn string) DSNInfo {
 
 	var addrStr, dbPart string
 
-	if lp := strings.IndexByte(rest, '('); lp >= 0 {
+	// The driver looks for the address parentheses only before dbSep, so a
+	// parenthesis in a query value, as in user@/db?time_zone=(UTC), is not one.
+	addrZone := rest[:dbSep-addressStart]
+	if lp := strings.IndexByte(addrZone, '('); lp >= 0 {
 		// Standard parenthesised address: proto(host:port)/dbname
 		if rp := strings.IndexByte(rest[lp:], ')'); rp >= 0 {
 			addrStr = rest[lp+1 : lp+rp]
 			dbPart = rest[lp+rp+1:]
 		}
 	} else {
-		// Non-standard: no parentheses around the address.
-		// Locate the '/' that separates the address from the database name.
-		// A unix-socket address is itself an absolute filesystem path and so
-		// contains '/' before the database name does, meaning the first '/'
-		// belongs to the address, not the separator. Every other form here
-		// (tcp, bare host, bare port) has no '/' in the address at all, so
-		// using the last '/' there gives the same split as the first.
-		sep := strings.IndexByte
-		searchIn := rest
-		if isMySQLUnixAddr(rest) {
-			sep = strings.LastIndexByte
-			if q := strings.IndexByte(rest, '?'); q >= 0 {
-				searchIn = rest[:q]
-			}
-		}
-		if sl := sep(searchIn, '/'); sl >= 0 {
-			addrStr = rest[:sl]
-			dbPart = rest[sl:]
-		} else {
-			addrStr = rest
-		}
-		addrStr = mysqlStripProtocol(addrStr)
+		split := mysqlSplitUnparenthesized(rest)
+		addrStr, dbPart = split.addr, split.db
 	}
 
 	host, port := mysqlSplitAddr(addrStr)
 	dbName := mysqlDBName(dbPart)
 	return DSNInfo{Host: host, Port: port, DBName: dbName}
+}
+
+// mysqlAddrSplit holds the address and the database part of a MySQL DSN.
+type mysqlAddrSplit struct {
+	addr, db string
+}
+
+// mysqlSplitUnparenthesized splits a MySQL address that has no parentheses
+// from the database part that follows it.
+func mysqlSplitUnparenthesized(rest string) mysqlAddrSplit {
+	var addrStr, dbPart string
+	// Non-standard: no parentheses around the address.
+	// Locate the '/' that separates the address from the database name.
+	// A unix-socket address is itself an absolute filesystem path and so
+	// contains '/' before the database name does, meaning the first '/'
+	// belongs to the address, not the separator. Every other form here
+	// (tcp, bare host, bare port) has no '/' in the address at all, so
+	// using the last '/' there gives the same split as the first.
+	sep := strings.IndexByte
+	searchIn := rest
+	if isMySQLUnixAddr(rest) {
+		sep = strings.LastIndexByte
+		if before, _, ok := strings.Cut(rest, "?"); ok {
+			searchIn = before
+		}
+	}
+	if sl := sep(searchIn, '/'); sl >= 0 {
+		addrStr = rest[:sl]
+		dbPart = rest[sl:]
+	} else {
+		addrStr = rest
+	}
+	addrStr = mysqlStripProtocol(addrStr)
+	return mysqlAddrSplit{addr: addrStr, db: dbPart}
 }
 
 // isMySQLUnixAddr reports whether a non-parenthesized MySQL address begins
@@ -597,7 +614,7 @@ func sqlServerStripProtocol(val string) string {
 
 // parseClickHouseDSN handles ClickHouse DSNs, which are always URL-formatted.
 func parseClickHouseDSN(dsn string) DSNInfo {
-	u, err := nurl.Parse(dsn)
+	u, err := nurl.Parse(clickHouseFirstHost(dsn))
 	if err != nil {
 		return DSNInfo{}
 	}
@@ -620,12 +637,48 @@ func parseClickHouseDSN(dsn string) DSNInfo {
 	return DSNInfo{Host: host, Port: port, DBName: dbName}
 }
 
+// clickHouseFirstHost keeps only the first entry of a comma separated host
+// list in the authority of a ClickHouse URL. clickhouse-go accepts
+// clickhouse://h1:9000,h2:9000/db and tries the hosts in turn, so the first one
+// is reported. The list is trimmed before url.Parse, which reads the whole
+// authority as one host and, in some Go releases, rejects it as an invalid
+// port.
+func clickHouseFirstHost(dsn string) string {
+	_, afterScheme, ok := strings.Cut(dsn, "://")
+	if !ok {
+		return dsn
+	}
+	authEnd := strings.IndexAny(afterScheme, "/?#")
+	if authEnd < 0 {
+		authEnd = len(afterScheme)
+	}
+	hostStart := strings.LastIndexByte(afterScheme[:authEnd], '@') + 1
+	comma := strings.IndexByte(afterScheme[hostStart:authEnd], ',')
+	if comma < 0 {
+		return dsn
+	}
+	prefixLen := len(dsn) - len(afterScheme)
+	return dsn[:prefixLen+hostStart+comma] + afterScheme[authEnd:]
+}
+
 // ---- Oracle ------------------------------------------------------------------
 
 // parseOracleDSN handles Oracle DSNs in URL format or the traditional
 // user/pass@host:port/service notation, which may also carry an Easy Connect
-// Plus protocol prefix: user/pass@[protocol://]host:port/service.
+// Plus protocol prefix: user/pass@[protocol://]host:port/service. godror also
+// accepts a logfmt form (user=scott password=... connectString=host:port/svc),
+// which is what its ConnectionParams.StringWithPassword writes.
 func parseOracleDSN(dsn string) DSNInfo {
+	if oracleIsLogfmt(dsn) {
+		addr := oracleLogfmtValue(dsn, "connectString")
+		if addr == "" {
+			return DSNInfo{}
+		}
+		return oracleParseAddress(addr)
+	}
+	if len(dsn) >= len(oracleURLPrefix) && strings.EqualFold(dsn[:len(oracleURLPrefix)], oracleURLPrefix) {
+		return oracleParseURL(dsn[len(oracleURLPrefix):], dsn)
+	}
 	if strings.Contains(dsn, "://") {
 		if u, err := nurl.Parse(dsn); err == nil && u.Host != "" {
 			host := u.Hostname()
@@ -637,11 +690,19 @@ func parseOracleDSN(dsn string) DSNInfo {
 			return DSNInfo{Host: host, Port: port, DBName: dbName}
 		}
 	}
-	atIdx := strings.IndexByte(dsn, '@')
+	atIdx := oracleCredentialsEnd(dsn)
 	if atIdx < 0 {
 		return DSNInfo{}
 	}
-	connStr := oracleStripProtocol(dsn[atIdx+1:])
+	return oracleParseAddress(dsn[atIdx+1:])
+}
+
+const oracleURLPrefix = "oracle://"
+
+// oracleParseAddress parses the address part of an Easy Connect string, that is
+// everything after the credentials: [protocol://]host[:port][/service][?params].
+func oracleParseAddress(addr string) DSNInfo {
+	connStr := oracleStripProtocol(addr)
 	// Easy Connect parameters start at '?' and are not part of the address.
 	if q := strings.IndexByte(connStr, '?'); q >= 0 {
 		connStr = connStr[:q]
@@ -655,6 +716,117 @@ func parseOracleDSN(dsn string) DSNInfo {
 	}
 	host, port := oracleSplitHostPort(hostPort)
 	return DSNInfo{Host: host, Port: port, DBName: dbName}
+}
+
+// oracleParseURL handles oracle://user:password@host:port/service, where rest
+// is the DSN after the scheme. go-oci8 does not parse this with net/url: it
+// strips the scheme and splits on the last '@', so a password may hold a raw
+// '@', '/' or ':'. go-ora and godror use net/url and expect those characters
+// percent-encoded, which leaves a single '@', so splitting on the last '@'
+// gives the same result for them.
+//
+// When a query string is present, we only trust the split if the last '@'
+// before the query is also the last '@' in the string. If they differ, or if
+// the only '@' comes after the query, the DSN is ambiguous (the '?' could be
+// inside an unquoted password or the '@' could be inside a query parameter)
+// and we return a zero-value DSNInfo rather than risk leaking password fragments.
+func oracleParseURL(rest, dsn string) DSNInfo {
+	q := strings.IndexByte(rest, '?')
+	if lastAt := strings.LastIndexByte(rest, '@'); lastAt >= 0 {
+		if q >= 0 && strings.LastIndexByte(rest[:q], '@') != lastAt {
+			return DSNInfo{}
+		}
+		info := oracleParseAddress(rest[lastAt+1:])
+		if info.Port == "" {
+			info.Port = "1521"
+		}
+		return info
+	}
+	u, err := nurl.Parse(dsn)
+	if err != nil || u.Host == "" {
+		return DSNInfo{}
+	}
+	port := u.Port()
+	if port == "" {
+		port = "1521"
+	}
+	return DSNInfo{
+		Host:   u.Hostname(),
+		Port:   port,
+		DBName: oracleServiceName(strings.TrimPrefix(u.Path, "/")),
+	}
+}
+
+// oracleIsLogfmt reports whether godror would read dsn as logfmt rather than
+// as an Easy Connect string, which it does when the DSN has a newline or a
+// connectString key.
+func oracleIsLogfmt(dsn string) bool {
+	return strings.Contains(dsn, "\n") || strings.Contains(dsn, "connectString=")
+}
+
+// oracleLogfmtValue returns the value of the last key in a logfmt DSN, or ""
+// when the key is absent. Values are bare words ending at whitespace or
+// double-quoted strings in which a backslash escapes the next character. A
+// quoted value that is never closed is dropped, so nothing after its opening
+// quote, such as a password, is read as an address.
+func oracleLogfmtValue(dsn, key string) string {
+	var found string
+	i := 0
+	for i < len(dsn) {
+		for i < len(dsn) && oracleIsSpace(dsn[i]) {
+			i++
+		}
+		keyStart := i
+		for i < len(dsn) && dsn[i] != '=' && !oracleIsSpace(dsn[i]) {
+			i++
+		}
+		k := dsn[keyStart:i]
+		if i >= len(dsn) || dsn[i] != '=' {
+			continue
+		}
+		var val string
+		var ok bool
+		val, i, ok = oracleLogfmtRead(dsn, i+1)
+		if !ok {
+			return ""
+		}
+		if k == key {
+			found = val
+		}
+	}
+	return found
+}
+
+// oracleLogfmtRead reads one logfmt value starting at dsn[i] and returns it
+// with the index after it. The bool is false for a quoted value that is never
+// closed.
+func oracleLogfmtRead(dsn string, i int) (string, int, bool) {
+	if i >= len(dsn) || dsn[i] != '"' {
+		start := i
+		for i < len(dsn) && !oracleIsSpace(dsn[i]) {
+			i++
+		}
+		return dsn[start:i], i, true
+	}
+	var out []byte
+	for i++; i < len(dsn); i++ {
+		switch c := dsn[i]; c {
+		case '"':
+			return string(out), i + 1, true
+		case '\\':
+			if i+1 < len(dsn) {
+				i++
+				out = append(out, dsn[i])
+			}
+		default:
+			out = append(out, c)
+		}
+	}
+	return "", i, false
+}
+
+func oracleIsSpace(c byte) bool {
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
 
 // Easy Connect Plus transport keywords, which may precede the "//" separator.
@@ -684,6 +856,36 @@ func oracleServiceName(s string) string {
 		return s[:end]
 	}
 	return s
+}
+
+// oracleCredentialsEnd returns the index of the '@' that separates the
+// credentials from the address, or -1. An address does not normally contain
+// '@', so the separator is taken to be the last '@' outside double quotes: an
+// '@' inside a quoted password, or one written as \@ or left bare in an
+// unquoted password, stays on the credentials side. A quote that is never
+// closed returns -1, so no part of the password can be taken for the address.
+//
+// The trade-off is an '@' after the separator, such as an email address in the
+// ssl_server_cert_dn Easy Connect Plus parameter. Such a DSN is read with that
+// later '@' as the separator and reports the wrong host, but never a part of
+// the password.
+func oracleCredentialsEnd(dsn string) int {
+	inQuotes := false
+	last := -1
+	for i := range len(dsn) {
+		switch dsn[i] {
+		case '"':
+			inQuotes = !inQuotes
+		case '@':
+			if !inQuotes {
+				last = i
+			}
+		}
+	}
+	if inQuotes {
+		return -1
+	}
+	return last
 }
 
 func oracleSplitHostPort(hp string) (host, port string) {

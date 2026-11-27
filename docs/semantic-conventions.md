@@ -1,8 +1,5 @@
 # Semantic Conventions Management
 
-> [!NOTE]
-> **Migration in Progress**: This document describes the post-migration semantic conventions and registry layout. Schema files and instrumentation paths will be populated as the migration from `opentelemetry-go-compile-instrumentation` progresses (tracked in [#5](https://github.com/open-telemetry/opentelemetry-go-compile-contrib/issues/5)).
-
 This document describes the tooling and workflow for managing [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) in the compile-instrumentation project.
 
 ## Overview
@@ -51,13 +48,18 @@ schemas/otelc-contrib/
 │   ├── database-sql.yaml    # database/sql client spans
 │   ├── redis.yaml           # redis/go-redis (v9) client spans
 │   ├── kafka.yaml           # segmentio/kafka-go producer & consumer spans
+│   ├── rabbitmq.yaml        # rabbitmq/amqp091-go producer & consumer spans
 │   ├── k8s.yaml             # k8s.io/client-go informer spans
 │   ├── openai.yaml          # openai/openai-go GenAI client spans
 │   ├── anthropic.yaml       # anthropics/anthropic-sdk-go GenAI client spans
+│   ├── gemini.yaml          # google.golang.org/genai GenAI client spans
 │   ├── mongo.yaml           # go.mongodb.org/mongo-driver client spans
+│   ├── elasticsearch.yaml   # olivere/elastic (v7) client spans
 │   ├── gin.yaml             # gin-gonic/gin server-span enrichment
+│   ├── fiber.yaml           # gofiber/fiber (v2) server spans
+│   ├── echo.yaml            # labstack/echo/v4 server-span enrichment
 │   ├── otel-sdk.yaml        # go.opentelemetry.io/otel* — Go runtime metrics
-│   └── logs.yaml            # log, log/slog, logrus — no telemetry (correlation only)
+│   └── logs.yaml            # log, log/slog, logrus, zap — no telemetry (correlation only)
 └── .deps/                   # pre-fetched upstream semconv (git-ignored, generated)
 ```
 
@@ -112,6 +114,26 @@ This command:
 - **This check is blocking** — violations will fail CI
 
 **When to use**: Run this before committing changes to `schemas/otelc-contrib/**`, `instrumentation/**/semconv/`, or `.semconv-version`.
+
+### Generate Go Code for Local Attributes
+
+Attributes otelc declares itself with `id:` are generated into the
+`pkg/otelcconv` module (see [ADR-0006](https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/blob/main/docs/adr/0006-semconv-telemetry-contract-organization.md)):
+
+```bash
+make generate
+```
+
+This command:
+
+- Runs `weaver registry generate` (from the `otel/weaver` OCI image) with the templates in `schemas/templates/registry/go/`, vendored from `go.opentelemetry.io/otel`
+- Selects only the locally declared attributes, using weaver's lineage output
+- Writes and `gofmt`s `pkg/otelcconv/attribute_group.go`
+
+CI regenerates the file and fails if it differs from the committed one, so run
+`make generate` and commit the result whenever you add or change an `id:`
+attribute. Attributes that upstream defines are imported from
+`go.opentelemetry.io/otel/semconv` and are never generated.
 
 ### Generate Registry Diff
 
@@ -400,7 +422,6 @@ When updating semantic conventions:
 After modifying semantic conventions:
 
 - Run all tests: `make test`
-- Test with demo applications: `make build-demo`
 - Verify instrumentation still works correctly
 
 ## Troubleshooting

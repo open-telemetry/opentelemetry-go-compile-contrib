@@ -9,7 +9,7 @@ One hook, on one function:
 
 | Layer | Target | Span name | Scope |
 |-------|--------|-----------|--------|
-| Backend request | `(*BackendImplementation).requestWithRetriesAndTelemetry` | `{METHOD} {url.template}` | `go.opentelemetry.io/otelc/instrumentation/github.com/stripe/stripe-go/v81` |
+| Backend request | `(*BackendImplementation).requestWithRetriesAndTelemetry` | `{METHOD} {url.template}` | `go.opentelemetry.io/otelc-contrib/instrumentation/github.com/stripe/stripe-go/v81/otelcstripe` |
 
 stripe-go exposes over 200 per-resource clients and thousands of exported
 methods. Every one of them reaches the network through a single unexported
@@ -64,7 +64,7 @@ Stripe-specific attributes: `stripe.request_id` (the `Request-Id` value Stripe
 support keys off), `stripe.error.code`, and `stripe.error.type`.
 
 The full emission contract is in
-[`schemas/otelc-contrib/groups/stripe.yaml`](../../../../../schemas/otelc-contrib/groups/stripe.yaml).
+[`schemas/otelc-contrib/groups/stripe.yaml`](../../../../../../schemas/otelc-contrib/groups/stripe.yaml).
 
 ### Metrics
 
@@ -99,7 +99,7 @@ differ.
 - Rules apply to **v81.0.0+**.
 
 This is the previous major, kept under
-[ADR-0004](../../../../../docs/adr/0004-instrumentation-ownership-and-compatibility.md)'s
+[ADR-0004](https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/blob/main/docs/adr/0004-instrumentation-ownership-and-compatibility.md)'s
 last-two-majors policy. It is a copy of the sibling `v82` directory with the
 import path re-pointed, and the chokepoint has the same signature in both.
 Following the `openai-go/v2`, `v3` precedent, each major carries its own copy of

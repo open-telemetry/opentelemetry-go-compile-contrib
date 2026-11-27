@@ -31,11 +31,13 @@ func TestDBOpenedDuringInit(t *testing.T) {
 		testutil.HasAttribute(string(semconv.DBOperationNameKey), "PING"),
 		testutil.HasAttribute(string(semconv.DBNamespaceKey), "testdb"),
 	)
+	require.Equal(t, "PING testdb", pingSpan.Name())
 	testutil.RequireDBClientSemconv(t, pingSpan, "PING", "ping", "unknown", 0, "testdb")
 	execSpan := testutil.RequireSpan(t, f.Traces(),
 		testutil.IsClient,
 		testutil.HasAttribute(string(semconv.DBOperationNameKey), "INSERT"),
 	)
+	require.Equal(t, "INSERT testdb", execSpan.Name())
 	testutil.RequireDBClientSemconv(t, execSpan,
 		"INSERT", "INSERT INTO users (name) VALUES ('x')", "unknown", 0, "testdb")
 	mysqlSpan := testutil.RequireSpan(t, f.Traces(),
@@ -43,6 +45,7 @@ func TestDBOpenedDuringInit(t *testing.T) {
 		testutil.HasAttribute(string(semconv.DBOperationNameKey), "PING"),
 		testutil.HasAttribute(string(semconv.DBNamespaceKey), "inventory"),
 	)
+	require.Equal(t, "PING inventory", mysqlSpan.Name())
 	testutil.RequireDBClientSemconv(t, mysqlSpan, "PING", "ping", "localhost", 3306, "inventory")
 	testutil.RequireAttribute(t, mysqlSpan, "db.system.name", "mysql")
 }
