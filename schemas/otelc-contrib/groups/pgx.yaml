@@ -1,0 +1,29 @@
+groups:
+  # ---------------------------------------------------------------------------
+  # jackc/pgx (v5) instrumentation emission contract.
+  #
+  # Source of truth for this file:
+  #   instrumentation/github.com/jackc/pgx/v5/otelcpgx/tracer.go (span lifecycle)
+  #
+  # The pgx instrumentation is trace-only: it creates one client span per query,
+  # batch, copy from, and prepare operation, and records no metrics.
+  # Every attribute is standard upstream OpenTelemetry database telemetry,
+  # referenced with `ref:`. `db.system.name` is always `postgresql`.
+  # `db.namespace` is emitted when configured, `server.address` and `server.port`
+  # when known, and `db.collection.name` during COPY operations.
+  # ---------------------------------------------------------------------------
+
+  - id: span.otelc.db.pgx.client
+    type: span
+    span_kind: client
+    stability: development
+    brief: pgx client span, one per database operation (query, batch, copy, prepare).
+    attributes:
+      - ref: db.system.name
+      - ref: db.operation.name
+      - ref: db.namespace
+      - ref: db.query.text
+      - ref: db.collection.name
+      - ref: network.transport
+      - ref: server.address
+      - ref: server.port

@@ -1,0 +1,10 @@
+version: "v1.2.0"
+
+pgx_hook_connect:
+  target: github.com/jackc/pgx/v5
+  where:
+    func: connect
+  do:
+    - inject_hooks:
+        before: BeforeConnect
+        path: "go.opentelemetry.io/otelc-contrib/instrumentation/github.com/jackc/pgx/v5/otelcpgx"
