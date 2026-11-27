@@ -13,6 +13,7 @@ module-sets:
       - go.opentelemetry.io/otelc-contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelcaws
       - go.opentelemetry.io/otelc-contrib/instrumentation/github.com/gin-gonic/gin/otelcgin
       - go.opentelemetry.io/otelc-contrib/instrumentation/github.com/gofiber/fiber/v2/otelcfiber
+      - go.opentelemetry.io/otelc-contrib/instrumentation/github.com/jackc/pgx/v5/otelcpgx
       - go.opentelemetry.io/otelc-contrib/instrumentation/github.com/labstack/echo/v4/otelcecho
       - go.opentelemetry.io/otelc-contrib/instrumentation/github.com/linode/linodego/v2/otelclinodego
       - go.opentelemetry.io/otelc-contrib/instrumentation/github.com/olivere/elastic/v7/otelcelastic
@@ -100,6 +101,7 @@ excluded-modules:
   - go.opentelemetry.io/otelc-contrib/test/apps/otelnoimport
   - go.opentelemetry.io/otelc-contrib/test/apps/otelsdk
   - go.opentelemetry.io/otelc-contrib/test/apps/oteltrace
+  - go.opentelemetry.io/otelc-contrib/test/apps/pgxclient
   - go.opentelemetry.io/otelc-contrib/test/apps/redisclient
   - go.opentelemetry.io/otelc-contrib/test/apps/redisinit
   - go.opentelemetry.io/otelc-contrib/test/apps/stripeclient
