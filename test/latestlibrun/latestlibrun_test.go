@@ -14,12 +14,12 @@ import (
 )
 
 // TestBumpAppsToLatest bumps each test app's instrumented direct dependencies
-// to @latest so that the subsequent integration suite (phase 2 of
-// make test-latestlibrun) exercises the bumped go.mod files.
+// to @latest so that the subsequent integration and E2E suites (phases 2 and 3
+// of make test-latestlibrun) exercise the bumped go.mod files.
 //
 // This test intentionally performs no build or run step, it only mutates
-// test/apps/*/go.mod. The integration suite's existing f.BuildAndStart(...)
-// calls rebuild every app after the bump.
+// test/apps/*/go.mod. The integration and E2E suites rebuild every app after
+// the bump.
 func TestBumpAppsToLatest(t *testing.T) {
 	appsRoot := filepath.Join("..", "apps")
 	rulesRoot := filepath.Join("..", "..", "instrumentation")

@@ -41,7 +41,7 @@ else
     --body "$(cat <<EOF
 The [VersionMatrix workflow](${RUN_URL}) failed on \`main\`.
 
-This means a declared version range in \`instrumentation/.../*.yaml\` does **not** work at one of its bounds: either the instrumented library version cannot be installed (another module in the build graph forces a different version) or the integration suite fails against it.
+This means a declared version range in \`instrumentation/.../*.yaml\` does **not** work at one of its bounds: either the instrumented library version cannot be installed (another module in the build graph forces a different version) or the integration or E2E suite fails against it.
 
 ## Remediation
 

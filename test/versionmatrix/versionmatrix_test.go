@@ -63,12 +63,12 @@ func TestVersionMatrixTierCount(t *testing.T) {
 
 // TestVersionMatrixBump pins each app's instrumented direct dependencies to
 // their VERSIONMATRIX_TIER-th per-rule boundary version, so the subsequent
-// integration suite (phase 2 of make test-versionmatrix) exercises that tier.
+// integration and E2E suites (in make test-versionmatrix) exercise that tier.
 // A dependency with fewer boundary versions than the tier index is left as it
-// is; the integration suite still runs against it.
+// is; the integration and E2E suites still run against it.
 //
 // This test only mutates test/apps/*/go.mod; the integration suite's TestMain
-// pre-build rebuilds every app after the pin.
+// pre-build and the E2E suite rebuild every app after the pin.
 func TestVersionMatrixBump(t *testing.T) {
 	tier, err := strconv.Atoi(os.Getenv("VERSIONMATRIX_TIER"))
 	if err != nil {

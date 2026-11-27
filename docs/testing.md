@@ -10,8 +10,8 @@ Tests are organized in six categories, each with a distinct purpose and scope.
 | Integration | `test/integration/` | `integration` | Instrumented binary against a local or in-process dependency. |
 | E2E | `test/e2e/` | `e2e` | Multiple processes (e.g. client + server), or an instrumented binary against a real external dependency. |
 | LatestLibBuild | `test/latestlibbuild/` | `latestlibbuild` | Compile instrumented app against `@latest` of each instrumented library. |
-| LatestLibRun | `test/latestlibrun/` | `latestlibrun` | Run integration suite after bumping each instrumented library to `@latest`. |
-| VersionMatrix | `test/versionmatrix/` | `versionmatrix` | Run integration suite after pinning each instrumented library to the lower and upper bounds of its declared version ranges. |
+| LatestLibRun | `test/latestlibrun/` | `latestlibrun` | Run integration and E2E suites after bumping each instrumented library to `@latest`. |
+| VersionMatrix | `test/versionmatrix/` | `versionmatrix` | Run integration and E2E suites after pinning each instrumented library to the lower and upper bounds of its declared version ranges. |
 
 ## Unit Tests
 
@@ -178,11 +178,11 @@ A failure means that the latest release of an upstream library introduced a **co
 ## LatestLibRun Tests
 
 > [!IMPORTANT]
-> **What this test does.** For each app under `test/apps/`, the test bumps the app's instrumented direct dependencies to `@latest` (same mutation as LatestLibBuild), then runs the full integration suite against those bumped modules. It is a **compile + run + span-assertion** check. It runs on a weekly schedule and on demand via `workflow_dispatch`. When it fails on `main`, the CI workflow automatically opens or updates a GitHub issue labelled `latestlibrun-failure`.
+> **What this test does.** For each app under `test/apps/`, the test bumps the app's instrumented direct dependencies to `@latest` (same mutation as LatestLibBuild), then runs the full integration and E2E suites against those bumped modules. It is a **compile + run + span-assertion** check. It runs on a weekly schedule and on demand via `workflow_dispatch`. When it fails on `main`, the CI workflow automatically opens or updates a GitHub issue labelled `latestlibrun-failure`.
 
 | Category | Location | Build Tag | Scope |
 | :------- | :------- | :-------- | :---- |
-| LatestLibRun | `test/latestlibrun/` | `latestlibrun` | Run integration suite after bumping each library to `@latest`. |
+| LatestLibRun | `test/latestlibrun/` | `latestlibrun` | Run integration and E2E suites after bumping each library to `@latest`. |
 
 ### What a failure means
 
@@ -195,11 +195,11 @@ A failure means that the latest release of an upstream library introduced a **ru
 ## VersionMatrix Tests
 
 > [!IMPORTANT]
-> **What this test does.** While LatestLibBuild and LatestLibRun verify forward compatibility against `@latest`, nothing else exercises the rest of a declared version range — the ranges are assumed correct rather than verified. For every instrumentation rule, this test collects the **lower and upper bound of each rule's `version:` range**, pins the matching test app's dependency to one of those bounds, and runs the full integration suite against it — repeating once per distinct bound version (a "tier"), so the number of runs grows with the number of rules. It runs on a weekly schedule and on demand via `workflow_dispatch`. When it fails on `main`, the CI workflow automatically opens or updates a GitHub issue labelled `versionmatrix-failure`.
+> **What this test does.** While LatestLibBuild and LatestLibRun verify forward compatibility against `@latest`, nothing else exercises the rest of a declared version range — the ranges are assumed correct rather than verified. For every instrumentation rule, this test collects the **lower and upper bound of each rule's `version:` range**, pins the matching test app's dependency to one of those bounds, and runs the full integration and E2E suites against it — repeating once per distinct bound version (a "tier"), so the number of runs grows with the number of rules. It runs on a weekly schedule and on demand via `workflow_dispatch`. When it fails on `main`, the CI workflow automatically opens or updates a GitHub issue labelled `versionmatrix-failure`.
 
 | Category | Location | Build Tag | Scope |
 | :------- | :------- | :-------- | :---- |
-| VersionMatrix | `test/versionmatrix/` | `versionmatrix` | Run integration suite at the lower and upper bound of each instrumentation rule's version range. |
+| VersionMatrix | `test/versionmatrix/` | `versionmatrix` | Run integration and E2E suites at the lower and upper bound of each instrumentation rule's version range. |
 
 Bounds are taken **per rule, not per dependency**: a dependency covered by two rules contributes both rules' lower bounds (e.g. `k8s.io/client-go` rules `v0.34.0,v0.36.0` and `v0.35.0,v0.36.0` are tested at `v0.34.0` and `v0.35.0`), so the boundary where one rule hands off to the next is exercised on its own. Version ranges are half-open (`v0.34.0,v0.36.0` supports `>= v0.34.0` and `< v0.36.0`), so the upper bound tested for a capped range is the newest release **below** the cap. An upper bound equal to the latest release (an open-ended range) is dropped, because LatestLibRun already exercises the latest release and a shared failure would otherwise open two issues. Note that a capped range whose library has already released past the cap (e.g. `v0.34.0,v0.36.0` when `@latest` is `v0.36.1`) is skipped by both latest-lib tests, so this test is the only one exercising it at all.
 

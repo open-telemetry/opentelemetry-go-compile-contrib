@@ -19,6 +19,7 @@ SHELL := /bin/bash
 TOOLS_DIR = .tools
 GO_VERSION = 1.26
 INTEGRATION_TEST_RUN ?= .
+E2E_TEST_RUN ?= .
 PKG_COVERAGE_THRESHOLD ?= 70
 RACE ?= 0
 RACE_FLAG := $(if $(filter 1 true,$(RACE)),-race,)
@@ -494,7 +495,7 @@ test-latestlibbuild: build $(OTELC) ## Run LatestLibBuild tests
 	go -C "test" test -json -v -shuffle=on -timeout=20m -count=1 -tags latestlibbuild ./latestlibbuild/... 2>&1 | tee ./gotest-latestlibbuild.log
 
 .ONESHELL:
-test-latestlibrun: build $(OTELC) ## Run LatestLibRun tests (bump apps to @latest then run integration suite)
+test-latestlibrun: build $(OTELC) ## Run LatestLibRun tests (bump apps to @latest then run integration and e2e suites)
 	@echo "Bumping test apps to @latest..."
 	set -euo pipefail
 	go -C "test" test -json -v -shuffle=on -timeout=10m -count=1 -tags latestlibrun ./latestlibrun/... 2>&1 | tee ./gotest-latestlibrun.log
@@ -503,9 +504,11 @@ test-latestlibrun: build $(OTELC) ## Run LatestLibRun tests (bump apps to @lates
 	go -C "test" mod tidy
 	@echo "Running integration suite against @latest deps..."
 	$(MAKE) test-integration
+	@echo "Running e2e suite against @latest deps..."
+	$(MAKE) test-e2e
 
 .ONESHELL:
-test-versionmatrix: build $(OTELC) ## Run VersionMatrix tests (pin apps to each rule's bounds then run integration suite, once per tier)
+test-versionmatrix: build $(OTELC) ## Run VersionMatrix tests (pin apps to each rule's bounds then run integration and e2e suites, once per tier)
 	@echo "Computing version matrix tiers..."
 	set -euo pipefail
 	rm -f ./gotest-versionmatrix.log
@@ -519,6 +522,8 @@ test-versionmatrix: build $(OTELC) ## Run VersionMatrix tests (pin apps to each 
 		go -C "test" mod tidy
 		echo "Running integration suite against bound tier $$tier..."
 		$(MAKE) test-integration
+		echo "Running e2e suite against bound tier $$tier..."
+		$(MAKE) test-e2e
 	done
 
 .ONESHELL:
@@ -534,7 +539,7 @@ test-e2e: ## Run e2e tests
 test-e2e: build $(OTELC)
 	@echo "Running e2e tests..."
 	set -euo pipefail
-	go -C "test" test -json -v -shuffle=on -timeout=30m -count=1 -tags e2e ./e2e/... 2>&1 | tee ./gotest-e2e.log
+	go -C "test" test -json -v -shuffle=on -timeout=30m -count=1 -tags e2e -run '$(value E2E_TEST_RUN)' ./e2e/... 2>&1 | tee ./gotest-e2e.log
 
 .ONESHELL:
 test-e2e/coverage: ## Run e2e tests with coverage report

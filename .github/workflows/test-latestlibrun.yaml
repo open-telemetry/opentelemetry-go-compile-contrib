@@ -5,6 +5,11 @@ on:
   workflow_dispatch:
 # Declare default permissions as read only.
 permissions: read-all
+# proxy.golang.org and sum.golang.org intermittently reset HTTP/2 streams
+# (INTERNAL_ERROR), which fails module downloads. Force HTTP/1.1 for Go's
+# HTTP client as a workaround. See golang/go#69544.
+env:
+  GODEBUG: http2client=0
 jobs:
   test-latestlibrun:
     name: LatestLibRun Tests
