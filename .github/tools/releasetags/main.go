@@ -40,8 +40,6 @@ func run(args []string, logger *slog.Logger) error {
 	flags.StringVar(&githubOutput, "github-output", "", "Path to GITHUB_OUTPUT file")
 	flags.BoolVar(&allowAllAtHead, "allow-all-at-head", false, "Include sets whose tags already point to HEAD")
 	flags.BoolVar(&printTags, "print-tags", false, "Print git tag names for pending module sets")
-	// Kept for workflow CLI compatibility; no longer needed without go.mod scanning.
-	flags.String("repo-root", ".", "Unused")
 
 	if err := flags.Parse(args); err != nil {
 		return err

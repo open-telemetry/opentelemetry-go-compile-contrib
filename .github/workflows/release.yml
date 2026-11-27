@@ -24,16 +24,16 @@ jobs:
         id: app-token
         # The client-id var gates App mode. When it is unset, the step is
         # skipped by design and the workflow falls back to github.token.
-        if: vars.OTELBOT_GO_COMPILE_CONTRIB_CLIENT_ID != ''
+        if: vars.OTELBOT_GO_COMPILE_INSTRUMENTATION_CLIENT_ID != ''
         continue-on-error: true
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
         with:
-          client-id: ${{ vars.OTELBOT_GO_COMPILE_CONTRIB_CLIENT_ID }}
-          private-key: ${{ secrets.OTELBOT_GO_COMPILE_CONTRIB_PRIVATE_KEY }}
           # This workflow only pushes tags and creates releases, so it needs
           # contents: write only. The release-prepare.yml copy also requests
           # pull-requests: write. Keep the copies intentionally different and
           # update both together on a SHA bump.
+          client-id: ${{ vars.OTELBOT_GO_COMPILE_INSTRUMENTATION_CLIENT_ID }}
+          private-key: ${{ secrets.OTELBOT_GO_COMPILE_INSTRUMENTATION_PRIVATE_KEY }}
           permission-contents: write
 
       - name: Warn on App token failure
@@ -74,7 +74,6 @@ jobs:
           # we have releasetags to do this.
           go -C .github/tools run ./releasetags \
             -versions-file "${GITHUB_WORKSPACE}/versions.yaml" \
-            -repo-root "${GITHUB_WORKSPACE}" \
             -remote-tags-file "${RUNNER_TEMP}/remote-tags.txt" \
             -head-commit "$(git rev-parse HEAD)" \
             -allow-all-at-head \
@@ -93,8 +92,8 @@ jobs:
 
           # The bot identity must match the credential that pushes the tags.
           if [ -n "${APP_TOKEN}" ]; then
-            git config user.name "otelbot-go-compile-contrib[bot]"
-            git config user.email "otelbot-go-compile-contrib[bot]@users.noreply.github.com"
+            git config user.name "otelbot-go-compile-instrumentation[bot]"
+            git config user.email "350478713+otelbot-go-compile-instrumentation[bot]@users.noreply.github.com"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
