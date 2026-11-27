@@ -90,7 +90,7 @@ func TestDBClient(t *testing.T) {
 		f.Run("dbclient", "-op=commented-query")
 
 		span := f.RequireSingleSpan()
-		require.Equal(t, "SELECT", span.Name())
+		require.Equal(t, "SELECT testdb", span.Name())
 		testutil.RequireDBClientSemconv(t, span,
 			"SELECT",
 			"-- name: GetUserByName :many\nSELECT id, name FROM users WHERE name = ?",
