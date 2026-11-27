@@ -79,6 +79,7 @@ func beforeProcessDeltas(
 	// registration time (see beforeAddEventHandlerWithOptions), so its
 	// span reflects the handler's real, later, asynchronous execution.
 	spanName := "k8s.informer.objects.process"
+	//nolint:spancheck // ended by afterProcessDeltas via the "span" key data, not here
 	_, span := tracer.Start(context.Background(),
 		spanName,
 		trace.WithSpanKind(trace.SpanKindInternal),
@@ -131,6 +132,7 @@ func beforeProcessDeltasInBatch(
 	// See beforeProcessDeltas: this span covers cache-mutation dispatch
 	// only, not any registered handler's own execution.
 	spanName := "k8s.informer.objects.process"
+	//nolint:spancheck // ended by afterProcessDeltasInBatch via the "span" key data, not here
 	_, span := tracer.Start(context.Background(),
 		spanName,
 		trace.WithSpanKind(trace.SpanKindInternal),
@@ -177,7 +179,6 @@ func beforeAddEventHandlerWithOptions(
 		return
 	}
 	if !k8SEnabler.Enable() {
-		logger.Debug("K8S client-go instrumentation disabled")
 		return
 	}
 	initInstrumentation()

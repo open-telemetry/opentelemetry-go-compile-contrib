@@ -151,7 +151,7 @@ func TestBeforeProcessDeltas(t *testing.T) {
 			if tt.expectSpans {
 				require.Len(t, startedSpans, 1, "should have started the objects.process span only")
 			} else {
-				require.Len(t, startedSpans, 0, "no spans should be emitted")
+				require.Empty(t, startedSpans, "no spans should be emitted")
 			}
 		})
 	}
@@ -310,7 +310,7 @@ func TestBeforeProcessDeltasInBatch(t *testing.T) {
 			if tt.expectSpans {
 				require.Len(t, startedSpans, 1, "should have started the objects.process span only")
 			} else {
-				require.Len(t, startedSpans, 0, "no spans should be emitted")
+				require.Empty(t, startedSpans, "no spans should be emitted")
 			}
 		})
 	}
@@ -449,7 +449,7 @@ func TestBeforeAddEventHandlerWithOptions(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			initOnce = *new(sync.Once)
+			initOnce = sync.Once{}
 
 			tt.setupEnv(t)
 			_, _ = setupTestTracer(t)
@@ -477,19 +477,19 @@ func TestBeforeAddEventHandlerWithOptions(t *testing.T) {
 // event must cover the actual registered handler's execution time, not just
 // the time client-go's own dispatch machinery takes to enqueue it.
 func TestBeforeAddEventHandlerWithOptions_SpanReflectsRealHandlerDuration(t *testing.T) {
-	initOnce = *new(sync.Once)
+	initOnce = sync.Once{}
 	t.Setenv("OTEL_GO_ENABLED_INSTRUMENTATIONS", "k8s_client_go")
 	sr, _ := setupTestTracer(t)
 
 	const handlerDelay = 20 * time.Millisecond
-	real := cache.ResourceEventHandlerFuncs{
+	realHandler := cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj any) {
 			time.Sleep(handlerDelay)
 		},
 	}
 
-	mockCtx := hooktest.NewMockHookContext(nil, real, cache.HandlerOptions{})
-	beforeAddEventHandlerWithOptions(mockCtx, nil, real, cache.HandlerOptions{})
+	mockCtx := hooktest.NewMockHookContext(nil, realHandler, cache.HandlerOptions{})
+	beforeAddEventHandlerWithOptions(mockCtx, nil, realHandler, cache.HandlerOptions{})
 
 	wrapped, ok := mockCtx.GetParam(1).(*k8SOtelEventHandler)
 	require.True(t, ok)
