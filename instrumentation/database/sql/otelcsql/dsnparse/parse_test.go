@@ -402,6 +402,34 @@ func TestParseDSN_SQLServer(t *testing.T) {
 			wantDB:   "mydb",
 		},
 		{
+			name:     "sqlserver url with a capitalized database parameter",
+			dsn:      "sqlserver://user:pass@host:1444?Database=mydb&app+name=x",
+			wantHost: "host",
+			wantPort: "1444",
+			wantDB:   "mydb",
+		},
+		{
+			name:     "odbc prefix",
+			dsn:      "odbc:server=db.example.com,1444;database=mydb;user id=sa;password=secret",
+			wantHost: "db.example.com",
+			wantPort: "1444",
+			wantDB:   "mydb",
+		},
+		{
+			name:     "odbc prefix default port",
+			dsn:      "odbc:Server=db.example.com;Database=mydb",
+			wantHost: "db.example.com",
+			wantPort: "1433",
+			wantDB:   "mydb",
+		},
+		{
+			name:     "odbc prefix with a url in the password",
+			dsn:      "odbc:server=db.example.com;password=a://b;database=mydb",
+			wantHost: "db.example.com",
+			wantPort: "1433",
+			wantDB:   "mydb",
+		},
+		{
 			name:     "mssql url",
 			dsn:      "mssql://user:pass@host:1433?database=mydb",
 			wantHost: "host",
@@ -701,4 +729,42 @@ func TestParseDSN_MySQLNoParensUnixSocketWithQueryParam(t *testing.T) {
 	got := ParseDSN("mysql", "unix:/tmp/mysql.sock/db?tls=a/b")
 	assert.Equal(t, "/tmp/mysql.sock", got.Host)
 	assert.Equal(t, "db", got.DBName)
+}
+
+func TestParseDSN_SQLServerDatabaseParameterCase(t *testing.T) {
+	tests := []struct {
+		name   string
+		dsn    string
+		wantDB string
+	}{
+		{
+			name:   "lowercase before capitalized",
+			dsn:    "sqlserver://user:pass@host:1433?database=first&Database=second",
+			wantDB: "first",
+		},
+		{
+			name:   "capitalized before lowercase",
+			dsn:    "sqlserver://user:pass@host:1433?Database=second&database=first",
+			wantDB: "first",
+		},
+		{
+			name:   "only a mixed case key",
+			dsn:    "sqlserver://user:pass@host:1433?DataBase=mydb",
+			wantDB: "mydb",
+		},
+		{
+			name:   "several mixed case keys use the first",
+			dsn:    "sqlserver://user:pass@host:1433?DATABASE=one&Database=two&DataBase=three",
+			wantDB: "one",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// A map iteration order changes between runs, so repeat the parse.
+			for range 50 {
+				info := ParseDSN("sqlserver", tt.dsn)
+				assert.Equal(t, tt.wantDB, info.DBName)
+			}
+		})
+	}
 }
