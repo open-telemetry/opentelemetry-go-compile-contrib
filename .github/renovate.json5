@@ -4,26 +4,164 @@
     "config:best-practices",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "schedule": [
+    "* 0-7 1,15 * *"
+  ],
+  "updateNotScheduled": false,
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+  "platformAutomerge": true,
+  "postUpdateOptions": [
+    "gomodTidyAll",
+    "gomodUpdateImportPaths"
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "automerge": true
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "WEAVER_IMAGE\\s*\\?=\\s*(?<depName>[^:]+):(?<currentValue>v[^\\s]+)"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ],
   "packageRules": [
     {
-      "groupName": "all patch versions",
-      "matchUpdateTypes": ["patch"],
-      "schedule": ["before 8am every weekday"]
+      // The WEAVER_IMAGE reference in the Makefile stays tag-only. Renovate's
+      // docker:pinDigests preset (part of config:best-practices) must not
+      // pin it to a digest.
+      "matchDepNames": [
+        "otel/weaver"
+      ],
+      "pinDigests": false
     },
     {
-      "matchUpdateTypes": ["minor", "major"],
-      "schedule": ["before 8am on Monday"]
-    },
-    {
-      // group all GitHub Actions updates into a single weekly PR
-      // (Renovate applies packageRules in order and later rules win)
-      "groupName": "github actions",
+      // Intra-repository modules are linked via local replace directives and
+      // updated together by make crosslink.
       "matchManagers": [
-        "github-actions"
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "go.opentelemetry.io/otelc-contrib/**"
+      ],
+      "enabled": false
+    },
+    {
+      "dependencyDashboardCategory": "CI Tooling",
+      "matchCategories": [
+        "ci"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "groupName": "all ci dependencies",
+      "groupSlug": "all-ci-deps",
+      "matchCategories": [
+        "ci"
+      ],
+      "matchUpdateTypes": [
+        "!major"
       ],
       "schedule": [
-        "before 8am on Tuesday"
-      ]
+        "* 0-7 1 * *"
+      ],
+      "automerge": true
+    },
+    {
+      "groupName": "all dependencies",
+      "groupSlug": "all-deps",
+      "matchCategories": [
+        "!ci"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor",
+        "digest"
+      ],
+      "matchPackageNames": [
+        "*"
+      ],
+      "automerge": true
+    },
+    {
+      "groupName": "all major docker dependencies",
+      "matchCategories": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "separateMultipleMajor": true
+    },
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchPackageNames": [
+        "!github.com/stretchr/testify",
+        "!go.opentelemetry.io/**"
+      ],
+      "matchFileNames": [
+        "instrumentation/**"
+      ],
+      "dependencyDashboardApproval": true,
+      "dependencyDashboardCategory": "Instrumentation Targets"
+    },
+    {
+      // Major updates outside instrumentation/ are not new module targets,
+      // but they still wait for dashboard approval.
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchPackageNames": [
+        "!github.com/stretchr/testify",
+        "!go.opentelemetry.io/**"
+      ],
+      "matchFileNames": [
+        "!instrumentation/**"
+      ],
+      "dependencyDashboardApproval": true,
+      "dependencyDashboardCategory": "CI Tooling"
+    },
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchPackageNames": [
+        "!github.com/stretchr/testify",
+        "!go.opentelemetry.io/**"
+      ],
+      "matchFileNames": [
+        "instrumentation/github.com/openai/openai-go/otelcopenai/go.mod",
+        "instrumentation/github.com/openai/openai-go/v2/otelcopenai/go.mod",
+        "instrumentation/github.com/stripe/stripe-go/v81/otelcstripe/go.mod",
+        "instrumentation/go.mongodb.org/mongo-driver/mongo/otelcmongo/go.mod"
+      ],
+      "enabled": false
     }
   ],
   "labels": [
