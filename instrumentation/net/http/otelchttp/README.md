@@ -73,7 +73,7 @@ That's it! All HTTP traffic is now instrumented.
 
 ### Configuration
 
-The instrumentation is configured at compile-time via `instrumentation/net/http/client/otelc.yaml` and `instrumentation/net/http/server/otelc.yaml`:
+The instrumentation is configured at compile-time via `instrumentation/net/http/otelchttp/client/otelc.yaml` and `instrumentation/net/http/otelchttp/server/otelc.yaml`:
 
 ```yaml
 client_hook:
@@ -472,13 +472,9 @@ If you see infinite loops, check the exporter's user-agent string.
 
 ## Related Documentation
 
-- [Implementation Details](../../../docs/implementation.md)
-- [Getting Started](../../../docs/getting-started.md)
-
-## Contributing
-
-See [CONTRIBUTING.md](../../../CONTRIBUTING.md) for development guidelines.
+- [Getting Started](../../../../README.md#usage)
+- See [CONTRIBUTING.md](../../../../CONTRIBUTING.md) for development guidelines.
 
 ## License
 
-Apache License 2.0 - See [LICENSE](../../../LICENSE) for details.
+Apache License 2.0 - See [LICENSE](../../../../LICENSE) for details.

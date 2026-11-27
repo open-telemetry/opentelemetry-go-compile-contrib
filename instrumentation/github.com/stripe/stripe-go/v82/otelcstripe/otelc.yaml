@@ -9,7 +9,7 @@ version: "v1.2.0"
 # version is a minimum bound (see tool/util.VersionInRange).
 stripe_backend_request:
   target: github.com/stripe/stripe-go/v82
-  version: v82.0.0
+  version: v82.1.0
   where:
     func: requestWithRetriesAndTelemetry
     recv: "*BackendImplementation"

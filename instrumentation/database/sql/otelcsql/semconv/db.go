@@ -24,9 +24,10 @@ type DatabaseSqlRequest struct {
 }
 
 // OperationName returns the uppercased first token of a SQL statement for use
-// as db.operation.name. Empty or whitespace-only input returns "".
+// as db.operation.name. Leading comments are skipped. Empty, whitespace-only
+// or comment-only input returns "".
 func OperationName(query string) string {
-	trimmed := strings.TrimSpace(query)
+	trimmed := skipLeadingComments(query)
 	if trimmed == "" {
 		return ""
 	}
@@ -36,6 +37,33 @@ func OperationName(query string) string {
 		trimmed = trimmed[:i]
 	}
 	return strings.ToUpper(trimmed)
+}
+
+// skipLeadingComments trims leading whitespace and any "--" line comments and
+// "/* */" block comments before the first token, such as the "-- name: ..."
+// line that sqlc puts at the start of every generated query. An unterminated
+// comment leaves nothing. Block comments do not nest, and MySQL executable
+// comments ("/*! ... */") are skipped like any other block comment.
+func skipLeadingComments(query string) string {
+	s := strings.TrimSpace(query)
+	for {
+		switch {
+		case strings.HasPrefix(s, "--"):
+			end := strings.IndexAny(s, "\r\n")
+			if end < 0 {
+				return ""
+			}
+			s = strings.TrimSpace(s[end+1:])
+		case strings.HasPrefix(s, "/*"):
+			end := strings.Index(s[2:], "*/")
+			if end < 0 {
+				return ""
+			}
+			s = strings.TrimSpace(s[2+end+2:])
+		default:
+			return s
+		}
+	}
 }
 
 func DbClientRequestTraceAttrs(req DatabaseSqlRequest) []attribute.KeyValue {
@@ -62,22 +90,45 @@ func DbClientRequestTraceAttrs(req DatabaseSqlRequest) []attribute.KeyValue {
 		}
 	}
 
-	switch req.DriverName {
-	case "mysql", "mariadb":
-		attrs = append(attrs, semconv.DBSystemNameMySQL)
-	case "postgres", "postgresql", "pgx", "lib/pq":
-		attrs = append(attrs, semconv.DBSystemNamePostgreSQL)
-	case "sqlite3", "sqlite":
-		attrs = append(attrs, semconv.DBSystemNameSQLite)
-	case "clickhouse":
-		attrs = append(attrs, semconv.DBSystemNameClickHouse)
-	case "godror", "oracle", "oci8", "go-oci8":
-		attrs = append(attrs, semconv.DBSystemNameOracleDB)
-	case "mssql", "sqlserver":
-		attrs = append(attrs, semconv.DBSystemNameMicrosoftSQLServer)
-	default:
-		attrs = append(attrs, semconv.DBSystemNameOtherSQL)
-	}
+	attrs = append(attrs, dbSystemName(req.DriverName))
 
 	return attrs
+}
+
+// SpanName returns the name the database semantic conventions give a client
+// span, "{db.operation.name} {target}". The target is db.namespace: the
+// instrumentation does not parse the collection out of the query text.
+// Without a namespace the name is the operation alone; without an operation,
+// the namespace alone, and without either, db.system.name.
+func SpanName(req DatabaseSqlRequest) string {
+	switch {
+	case req.OpType != "" && req.DbName != "":
+		return req.OpType + " " + req.DbName
+	case req.OpType != "":
+		return req.OpType
+	case req.DbName != "":
+		return req.DbName
+	default:
+		return dbSystemName(req.DriverName).Value.AsString()
+	}
+}
+
+// dbSystemName maps a database/sql driver name to db.system.name.
+func dbSystemName(driverName string) attribute.KeyValue {
+	switch driverName {
+	case "mysql", "mariadb":
+		return semconv.DBSystemNameMySQL
+	case "postgres", "postgresql", "pgx", "lib/pq":
+		return semconv.DBSystemNamePostgreSQL
+	case "sqlite3", "sqlite":
+		return semconv.DBSystemNameSQLite
+	case "clickhouse":
+		return semconv.DBSystemNameClickHouse
+	case "godror", "oracle", "oci8", "go-oci8":
+		return semconv.DBSystemNameOracleDB
+	case "mssql", "sqlserver":
+		return semconv.DBSystemNameMicrosoftSQLServer
+	default:
+		return semconv.DBSystemNameOtherSQL
+	}
 }
