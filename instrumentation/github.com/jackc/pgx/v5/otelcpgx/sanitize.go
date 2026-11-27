@@ -30,13 +30,21 @@ func skipBlockComment(chars []rune, i int, b *strings.Builder) int {
 	n := len(chars)
 	_, _ = b.WriteString("/*")
 	i += 2
-	for i+1 < n && (chars[i] != '*' || chars[i+1] != '/') {
-		b.WriteRune(chars[i])
-		i++
-	}
-	if i+1 < n {
-		_, _ = b.WriteString("*/")
-		i += 2
+	depth := 1
+	for i < n && depth > 0 {
+		switch {
+		case i+1 < n && chars[i] == '/' && chars[i+1] == '*':
+			depth++
+			_, _ = b.WriteString("/*")
+			i += 2
+		case i+1 < n && chars[i] == '*' && chars[i+1] == '/':
+			depth--
+			_, _ = b.WriteString("*/")
+			i += 2
+		default:
+			b.WriteRune(chars[i])
+			i++
+		}
 	}
 	return i
 }
@@ -126,8 +134,102 @@ func sanitizeDollar(chars []rune, i int, b *strings.Builder) int {
 	return n
 }
 
-func sanitizeNumber(chars []rune, i int, b *strings.Builder) int {
+func isHexDigit(r rune) bool {
+	return (r >= '0' && r <= '9') || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F')
+}
+
+func skipHexDigits(chars []rune, i int) int {
 	n := len(chars)
+	for i < n {
+		c := chars[i]
+		if isHexDigit(c) || (c == '_' && i+1 < n && isHexDigit(chars[i+1])) {
+			i++
+			continue
+		}
+		break
+	}
+	return i
+}
+
+func skipBinaryDigits(chars []rune, i int) int {
+	n := len(chars)
+	for i < n {
+		c := chars[i]
+		if c == '0' || c == '1' || (c == '_' && i+1 < n && (chars[i+1] == '0' || chars[i+1] == '1')) {
+			i++
+			continue
+		}
+		break
+	}
+	return i
+}
+
+func skipOctalDigits(chars []rune, i int) int {
+	n := len(chars)
+	for i < n {
+		c := chars[i]
+		if (c >= '0' && c <= '7') || (c == '_' && i+1 < n && chars[i+1] >= '0' && chars[i+1] <= '7') {
+			i++
+			continue
+		}
+		break
+	}
+	return i
+}
+
+const radixPrefixLen = 2
+
+func skipRadixNumber(chars []rune, i int) int {
+	n := len(chars)
+	if chars[i] != '0' || i+1 >= n {
+		return i
+	}
+	switch chars[i+1] {
+	case 'x', 'X':
+		if i+radixPrefixLen < n && isHexDigit(chars[i+radixPrefixLen]) {
+			return skipHexDigits(chars, i+radixPrefixLen)
+		}
+	case 'b', 'B':
+		if i+radixPrefixLen < n && (chars[i+radixPrefixLen] == '0' || chars[i+radixPrefixLen] == '1') {
+			return skipBinaryDigits(chars, i+radixPrefixLen)
+		}
+	case 'o', 'O':
+		if i+radixPrefixLen < n && chars[i+radixPrefixLen] >= '0' && chars[i+radixPrefixLen] <= '7' {
+			return skipOctalDigits(chars, i+radixPrefixLen)
+		}
+	}
+	return i
+}
+
+func skipDecimalNumber(chars []rune, i int) int {
+	n := len(chars)
+	for i < n {
+		c := chars[i]
+		switch {
+		case unicode.IsDigit(c):
+			i++
+		case c == '_' && i+1 < n && (unicode.IsDigit(chars[i+1]) || chars[i+1] == '.'):
+			i++
+		case c == '.' && i+1 < n && unicode.IsDigit(chars[i+1]):
+			i++
+		case (c == 'e' || c == 'E') && i+1 < n:
+			next := chars[i+1]
+			switch {
+			case unicode.IsDigit(next):
+				i += 2
+			case (next == '+' || next == '-') && i+2 < n && unicode.IsDigit(chars[i+2]):
+				i += 3
+			default:
+				return i
+			}
+		default:
+			return i
+		}
+	}
+	return i
+}
+
+func sanitizeNumber(chars []rune, i int, b *strings.Builder) int {
 	prevIsIdent := i > 0 && (unicode.IsLetter(chars[i-1]) || chars[i-1] == '_' || chars[i-1] == '$')
 	if prevIsIdent {
 		b.WriteRune(chars[i])
@@ -135,19 +237,11 @@ func sanitizeNumber(chars []rune, i int, b *strings.Builder) int {
 	}
 
 	b.WriteRune('?')
-	for i < n {
-		c := chars[i]
-		if unicode.IsDigit(c) || c == '.' || c == 'e' || c == 'E' {
-			i++
-			continue
-		}
-		if (c == '+' || c == '-') && i > 0 && (chars[i-1] == 'e' || chars[i-1] == 'E') {
-			i++
-			continue
-		}
-		break
+
+	if next := skipRadixNumber(chars, i); next > i {
+		return next
 	}
-	return i
+	return skipDecimalNumber(chars, i)
 }
 
 // sanitizeSQL sanitizes literal strings, numbers, and dollar-quoted literals from SQL queries

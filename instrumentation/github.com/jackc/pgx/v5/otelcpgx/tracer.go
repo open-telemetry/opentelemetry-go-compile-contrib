@@ -41,15 +41,56 @@ func newTracer() *tracer {
 	}
 }
 
-// operationName returns the uppercased first SQL token (e.g. SELECT, INSERT, UPDATE).
+func skipLeadingComments(query string) string {
+	s := strings.TrimSpace(query)
+	for {
+		switch {
+		case strings.HasPrefix(s, "--"):
+			end := strings.IndexAny(s, "\r\n")
+			if end < 0 {
+				return ""
+			}
+			s = strings.TrimSpace(s[end+1:])
+		case strings.HasPrefix(s, "/*"):
+			depth := 1
+			i := 2
+			chars := []rune(s)
+			n := len(chars)
+			for i < n && depth > 0 {
+				switch {
+				case i+1 < n && chars[i] == '/' && chars[i+1] == '*':
+					depth++
+					i += 2
+				case i+1 < n && chars[i] == '*' && chars[i+1] == '/':
+					depth--
+					i += 2
+				default:
+					i++
+				}
+			}
+			if depth > 0 {
+				return ""
+			}
+			s = strings.TrimSpace(string(chars[i:]))
+		default:
+			return s
+		}
+	}
+}
+
+// operationName returns the uppercased first SQL keyword (e.g. SELECT, INSERT, UPDATE).
+// It stops the keyword at the first character that is not a letter.
 func operationName(query string) string {
-	trimmed := strings.TrimSpace(query)
+	trimmed := skipLeadingComments(query)
 	if trimmed == "" {
 		return ""
 	}
 	end := strings.IndexFunc(trimmed, func(r rune) bool {
-		return unicode.IsSpace(r) || r == ';' || r == '('
+		return !unicode.IsLetter(r)
 	})
+	if end == 0 {
+		return ""
+	}
 	if end > 0 {
 		trimmed = trimmed[:end]
 	}

@@ -71,9 +71,13 @@ func TestOperationName(t *testing.T) {
 		want  string
 	}{
 		{"SELECT * FROM users", "SELECT"},
+		{"SELECT'hunter2' FROM t", "SELECT"},
 		{"  insert into table", "INSERT"},
 		{"UPDATE foo SET a=1", "UPDATE"},
 		{"DELETE FROM bar", "DELETE"},
+		{"/* leading comment */ SELECT 1", "SELECT"},
+		{"/* nested /* comment */ */ UPDATE t SET x=1", "UPDATE"},
+		{"-- line comment\nSELECT 1", "SELECT"},
 		{"", ""},
 		{"   ", ""},
 	}
@@ -170,6 +174,36 @@ func TestSanitizeSQL(t *testing.T) {
 			name:  "preserves block comments",
 			input: "/* query */ SELECT * FROM users WHERE id = 1",
 			want:  "/* query */ SELECT * FROM users WHERE id = ?",
+		},
+		{
+			name:  "nested block comment containing quotes",
+			input: "SELECT /* a /* b */ ' */ 'hunter2'",
+			want:  "SELECT /* a /* b */ ' */ ?",
+		},
+		{
+			name:  "hexadecimal numeric literal",
+			input: "SELECT 0x1F2E",
+			want:  "SELECT ?",
+		},
+		{
+			name:  "numeric literal with digit separators",
+			input: "SELECT 1_000_000",
+			want:  "SELECT ?",
+		},
+		{
+			name:  "hexadecimal numeric literal with digit separators",
+			input: "SELECT 0x1F_2E",
+			want:  "SELECT ?",
+		},
+		{
+			name:  "binary and octal numeric literals",
+			input: "SELECT 0b1010, 0o755",
+			want:  "SELECT ?, ?",
+		},
+		{
+			name:  "float with digit separators and exponent",
+			input: "SELECT 1_000.500_001e+2",
+			want:  "SELECT ?",
 		},
 		{
 			name:  "empty query",
