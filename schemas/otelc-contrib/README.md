@@ -22,6 +22,8 @@ schemas/otelc-contrib/
 │   ├── gemini.yaml          # google.golang.org/genai GenAI client spans
 │   ├── mongo.yaml           # go.mongodb.org/mongo-driver client spans
 │   ├── elasticsearch.yaml   # olivere/elastic (v7) client spans
+│   ├── opensearch.yaml      # opensearch-project/opensearch-go (v5) client spans
+│   ├── cassandra.yaml       # apache/cassandra-gocql-driver (v2) client spans
 │   ├── clickhouse.yaml      # ClickHouse/clickhouse-go (v2) native API client spans
 │   ├── gin.yaml             # gin-gonic/gin server-span enrichment
 │   ├── fiber.yaml           # gofiber/fiber (v2) server spans
@@ -46,33 +48,35 @@ X". Modules that emit no telemetry of their own still get a file, with
 `groups: []` and a comment saying why; a missing row, not an empty one, is what
 signals an undeclared instrumentation.
 
-| Instrumentation module                              | Contract file       | Emits                                                                  |
-| --------------------------------------------------- | ------------------- | ---------------------------------------------------------------------- |
-| `net/http/client`, `net/http/server`                | `http.yaml`         | HTTP client + server metrics                                           |
-| `google.golang.org/grpc/{client,server}`            | `grpc.yaml`         | RPC client + server metrics and spans                                  |
-| `github.com/aws/aws-sdk-go-v2`                      | `aws.yaml`          | AWS SDK client spans (trace-only)                                      |
-| `database/sql`                                      | `database-sql.yaml` | DB client spans                                                        |
-| `github.com/redis/go-redis/v9`                      | `redis.yaml`        | DB client spans                                                        |
-| `github.com/segmentio/kafka-go/{producer,consumer}` | `kafka.yaml`        | Messaging producer + consumer spans                                    |
-| `github.com/rabbitmq/amqp091-go`                    | `rabbitmq.yaml`     | Messaging producer + consumer spans                                    |
-| `k8s.io/client-go`                                  | `k8s.yaml`          | Informer spans                                                         |
-| `github.com/openai/openai-go` (v1/v2/v3)            | `openai.yaml`       | GenAI client spans                                                     |
-| `github.com/anthropics/anthropic-sdk-go`            | `anthropic.yaml`    | GenAI client spans                                                     |
-| `google.golang.org/genai`                           | `gemini.yaml`       | GenAI client spans                                                     |
-| `go.mongodb.org/mongo-driver/mongo`                 | `mongo.yaml`        | DB client spans                                                        |
-| `go.mongodb.org/mongo-driver/v2/mongo`              | `mongo.yaml`        | DB client spans                                                        |
-| `github.com/olivere/elastic/v7`                     | `elasticsearch.yaml` | DB client spans                                                        |
-| `github.com/ClickHouse/clickhouse-go/v2`            | `clickhouse.yaml`   | DB client spans (native API)                                           |
-| `github.com/gin-gonic/gin`                          | `gin.yaml`          | `http.route` on the enclosing `net/http` server span                   |
-| `github.com/gofiber/fiber/v2`                       | `fiber.yaml`        | HTTP server spans                                                      |
-| `github.com/labstack/echo/v4`                       | `echo.yaml`         | `http.route` on the enclosing `net/http` server span                   |
-| `github.com/linode/linodego/v2`                     | `linodego.yaml`     | HTTP client spans + operation-duration metric                          |
-| `github.com/stripe/stripe-go` (v81/v82)             | `stripe.yaml`       | Stripe API client spans + request-duration metric                      |
-| `go.opentelemetry.io/otel/init`                     | `otel-sdk.yaml`     | Go runtime metrics (`go.*`)                                            |
-| `go.opentelemetry.io/otel`                          | `otel-sdk.yaml`     | nothing — guards the global tracer provider                            |
-| `go.opentelemetry.io/otel/sdk/trace`                | `otel-sdk.yaml`     | nothing — maintains the GLS span chain                                 |
-| `go.opentelemetry.io/otel/trace`                    | `otel-sdk.yaml`     | nothing — GLS fallback for `SpanFromContext`                           |
-| `log`, `log/slog`, `github.com/sirupsen/logrus`, `go.uber.org/zap` | `logs.yaml`         | nothing — injects `trace_id`/`span_id` into the application's own logs |
+| Instrumentation module                                             | Contract file        | Emits                                                                  |
+| ------------------------------------------------------------------ | -------------------- | ---------------------------------------------------------------------- |
+| `net/http/client`, `net/http/server`                               | `http.yaml`          | HTTP client + server metrics                                           |
+| `google.golang.org/grpc/{client,server}`                           | `grpc.yaml`          | RPC client + server metrics and spans                                  |
+| `github.com/aws/aws-sdk-go-v2`                                     | `aws.yaml`           | AWS SDK client spans (trace-only)                                      |
+| `database/sql`                                                     | `database-sql.yaml`  | DB client spans                                                        |
+| `github.com/redis/go-redis/v9`                                     | `redis.yaml`         | DB client spans                                                        |
+| `github.com/segmentio/kafka-go/{producer,consumer}`                | `kafka.yaml`         | Messaging producer + consumer spans                                    |
+| `github.com/rabbitmq/amqp091-go`                                   | `rabbitmq.yaml`      | Messaging producer + consumer spans                                    |
+| `k8s.io/client-go`                                                 | `k8s.yaml`           | Informer spans                                                         |
+| `github.com/openai/openai-go` (v1/v2/v3)                           | `openai.yaml`        | GenAI client spans                                                     |
+| `github.com/anthropics/anthropic-sdk-go`                           | `anthropic.yaml`     | GenAI client spans                                                     |
+| `google.golang.org/genai`                                          | `gemini.yaml`        | GenAI client spans                                                     |
+| `go.mongodb.org/mongo-driver/mongo`                                | `mongo.yaml`         | DB client spans                                                        |
+| `go.mongodb.org/mongo-driver/v2/mongo`                             | `mongo.yaml`         | DB client spans                                                        |
+| `github.com/olivere/elastic/v7`                                    | `elasticsearch.yaml` | DB client spans                                                        |
+| `github.com/opensearch-project/opensearch-go/v5`                   | `opensearch.yaml`    | DB client spans                                                        |
+| `github.com/apache/cassandra-gocql-driver/v2`                      | `cassandra.yaml`     | Cassandra CQL client spans                                             |
+| `github.com/ClickHouse/clickhouse-go/v2`                           | `clickhouse.yaml`    | DB client spans (native API)                                           |
+| `github.com/gin-gonic/gin`                                         | `gin.yaml`           | `http.route` on the enclosing `net/http` server span                   |
+| `github.com/gofiber/fiber/v2`                                      | `fiber.yaml`         | HTTP server spans                                                      |
+| `github.com/labstack/echo/v4`                                      | `echo.yaml`          | `http.route` on the enclosing `net/http` server span                   |
+| `github.com/linode/linodego/v2`                                    | `linodego.yaml`      | HTTP client spans + operation-duration metric                          |
+| `github.com/stripe/stripe-go` (v81/v82)                            | `stripe.yaml`        | Stripe API client spans + request-duration metric                      |
+| `go.opentelemetry.io/otel/init`                                    | `otel-sdk.yaml`      | Go runtime metrics (`go.*`)                                            |
+| `go.opentelemetry.io/otel`                                         | `otel-sdk.yaml`      | nothing — guards the global tracer provider                            |
+| `go.opentelemetry.io/otel/sdk/trace`                               | `otel-sdk.yaml`      | nothing — maintains the GLS span chain                                 |
+| `go.opentelemetry.io/otel/trace`                                   | `otel-sdk.yaml`      | nothing — GLS fallback for `SpanFromContext`                           |
+| `log`, `log/slog`, `github.com/sirupsen/logrus`, `go.uber.org/zap` | `logs.yaml`          | nothing — injects `trace_id`/`span_id` into the application's own logs |
 
 ## Validate locally
 

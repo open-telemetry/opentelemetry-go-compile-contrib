@@ -399,13 +399,13 @@ To run integration tests:
 make test-integration
 ```
 
-## 4. Register the Instrumentation
+## 4. Update Documentation & Telemetry Contracts
 
-If your PR adds a new user-facing instrumentation, create a PR to add the instrumentation to the OpenTelemetry registry in the `opentelemetry.io` repository.
+When adding a new user-facing instrumentation, keep the repository documentation and schema registry in sync:
 
-Follow the [OpenTelemetry Registry contribution guide](https://opentelemetry.io/ecosystem/registry/adding/).
-
-Not every instrumentation package should be listed. Internal helper packages (for example, `basic`, `runtime`, or packages that only provide implementation details for other instrumentations) generally do not need registry entries.
+- **Supported Instrumentations table**: Add the new target library, relative link to its instrumentation module, and emitted telemetry to the table in [README.md](../README.md#supported-instrumentations).
+- **Telemetry contract & `pkg/otelcconv`**: Add a schema file under `schemas/otelc-contrib/groups/<library>.yaml` and update both the directory tree and the coverage table in [schemas/otelc-contrib/README.md](../schemas/otelc-contrib/README.md#instrumentation-coverage). For attributes not defined in upstream OpenTelemetry semantic conventions, declare them locally with `id:` in the schema file, run `make generate`, and use the Weaver-generated helpers/keys from `go.opentelemetry.io/otelc-contrib/pkg/otelcconv` instead of hardcoding attribute names in Go code. See [Adding telemetry for a new instrumentation](semantic-conventions.md#adding-telemetry-for-a-new-instrumentation) and [Generate Go Code for Local Attributes](semantic-conventions.md#generate-go-code-for-local-attributes) for details.
+- **GenAI compatibility matrix**: If the instrumentation targets a GenAI SDK, update [GenAI Compatibility Matrix](genai-compatibility-matrix.md).
 
 ## 5. Verify
 
@@ -415,4 +415,6 @@ Check that your instrumentation package has the following elements:
 - Hook implementation under `instrumentation/<import_path>/...`.
 - Unit tests alongside the hooks for logic-level behavior.
 - Integration tests in `test/integration/` that execute an instrumented binary and validate spans/attributes.
+- An entry in the `Supported Instrumentations` table in [README.md](../README.md#supported-instrumentations).
+- A telemetry contract file under `schemas/otelc-contrib/groups/` and a row in [schemas/otelc-contrib/README.md](../schemas/otelc-contrib/README.md#instrumentation-coverage).
 - If applicable, a PR has been opened to add the instrumentation to the OpenTelemetry registry in the `opentelemetry.io` repository.

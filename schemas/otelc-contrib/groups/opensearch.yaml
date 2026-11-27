@@ -1,0 +1,31 @@
+groups:
+  # ---------------------------------------------------------------------------
+  # github.com/opensearch-project/opensearch-go/v5 instrumentation emission contract.
+  #
+  # Source of truth for this file:
+  #   instrumentation/github.com/opensearch-project/opensearch-go/v5/otelcopensearch/hook.go           (span lifecycle)
+  #   instrumentation/github.com/opensearch-project/opensearch-go/v5/otelcopensearch/semconv/client.go (ClientTraceAttrs)
+  #
+  # The opensearch-go instrumentation is trace-only: it creates one client span
+  # per (*Client).Request call and records no metrics. db.collection.name is
+  # the target index when the path has one. db.response.status_code is set from
+  # the HTTP response status, and error.type is set on transport or HTTP errors
+  # (status >= 400).
+  # ---------------------------------------------------------------------------
+
+  - id: span.otelc.db.opensearch.client
+    type: span
+    span_kind: client
+    stability: development
+    brief: OpenSearch client span, one per opensearch-go (*Client).Request call.
+    attributes:
+      - ref: db.system.name
+      - ref: db.operation.name
+      - ref: db.collection.name
+      - ref: network.transport
+      - ref: http.request.method
+      - ref: url.path
+      - ref: server.address
+      - ref: server.port
+      - ref: db.response.status_code
+      - ref: error.type
