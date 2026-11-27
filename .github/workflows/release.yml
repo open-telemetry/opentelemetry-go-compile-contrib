@@ -68,9 +68,10 @@ jobs:
           git ls-remote --tags "${remote_url}" > "${RUNNER_TEMP}/remote-tags.txt"
 
           make verify-versions
-          # TODO: Making GPG signing optional in `multimod tag` (which currently
-          # hardcodes `git tag -a -s`) should be made upstream; for now we have
-          # releasetags to do this.
+          # TODO: Making GPG signing optional in `multimod tag` should be made
+          # upstream (https://github.com/open-telemetry/opentelemetry-go-build-tools/blob/main/multimod/internal/tag/tag.go#L203
+          # hardcodes `-s`, which cannot run on CI with GitHub Apps); for now
+          # we have releasetags to do this.
           go -C .github/tools run ./releasetags \
             -versions-file "${GITHUB_WORKSPACE}/versions.yaml" \
             -repo-root "${GITHUB_WORKSPACE}" \

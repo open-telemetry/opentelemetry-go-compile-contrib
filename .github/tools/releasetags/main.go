@@ -5,8 +5,9 @@
 // tagged on remote, writes GitHub Actions outputs, and prints module git tags
 // so CI can create annotated tags without requiring a GPG signing key.
 //
-// TODO: Making GPG signing optional in `multimod tag` (which currently
-// hardcodes `git tag -a -s`) should be made upstream; for now we have
+// TODO: Making GPG signing optional in `multimod tag` should be made upstream
+// (https://github.com/open-telemetry/opentelemetry-go-build-tools/blob/main/multimod/internal/tag/tag.go#L203
+// hardcodes `-s`, which cannot run on CI with GitHub Apps); for now we have
 // releasetags to do this.
 package main
 
