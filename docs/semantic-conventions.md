@@ -43,27 +43,10 @@ The project maintains its own Weaver schema registry under [`schemas/otelc-contr
 schemas/otelc-contrib/
 ├── registry_manifest.yaml   # registry metadata + pinned upstream semconv dependency
 ├── groups/                  # one file per instrumentation (metrics, spans, attributes)
-│   ├── http.yaml            # net/http client & server metrics
-│   ├── grpc.yaml            # google.golang.org/grpc client & server metrics + spans
-│   ├── database-sql.yaml    # database/sql client spans
-│   ├── redis.yaml           # redis/go-redis (v9) client spans
-│   ├── kafka.yaml           # segmentio/kafka-go producer & consumer spans
-│   ├── rabbitmq.yaml        # rabbitmq/amqp091-go producer & consumer spans
-│   ├── k8s.yaml             # k8s.io/client-go informer spans
-│   ├── openai.yaml          # openai/openai-go GenAI client spans
-│   ├── anthropic.yaml       # anthropics/anthropic-sdk-go GenAI client spans
-│   ├── gemini.yaml          # google.golang.org/genai GenAI client spans
-│   ├── mongo.yaml           # go.mongodb.org/mongo-driver client spans
-│   ├── elasticsearch.yaml   # olivere/elastic (v7) client spans
-│   ├── gin.yaml             # gin-gonic/gin server-span enrichment
-│   ├── fiber.yaml           # gofiber/fiber (v2) server spans
-│   ├── echo.yaml            # labstack/echo/v4 server-span enrichment
-│   ├── otel-sdk.yaml        # go.opentelemetry.io/otel* — Go runtime metrics
-│   └── logs.yaml            # log, log/slog, logrus, zap — no telemetry (correlation only)
 └── .deps/                   # pre-fetched upstream semconv (git-ignored, generated)
 ```
 
-Every instrumentation module in `instrumentation/` maps to exactly one file here — see the [coverage table](../schemas/otelc-contrib/README.md#instrumentation-coverage). Instrumentations that emit no telemetry of their own still get a file, with `groups: []` and a comment explaining why.
+Every instrumentation module in `instrumentation/` maps to a file under `groups/` — see [schemas/otelc-contrib/README.md](../schemas/otelc-contrib/README.md#instrumentation-coverage) for the full directory layout and coverage table. Instrumentations that emit no telemetry of their own still get a file, with `groups: []` and a comment explaining why.
 
 - `registry_manifest.yaml` declares the registry name and a **dependency** on the upstream OpenTelemetry semantic conventions, pre-fetched locally under `.deps/` so weaver doesn't clone it over the network on every run.
 - Each `groups/*.yaml` file declares the metrics/spans/attributes one instrumentation produces. Telemetry that exists **upstream** is referenced with `ref:`; telemetry that is **specific to a library** (not covered upstream) is declared locally with `id:`.
@@ -78,7 +61,7 @@ Use `groups/http.yaml` as the template:
 4. Reference upstream attributes with `- ref: <attribute.id>`. For attributes/metrics not defined upstream, declare them locally with `id:` (include `type`, `stability`, `brief`, and `examples` for string attributes — `--future` treats a missing example as an error). Group local attribute definitions in a `type: attribute_group` so several groups can `ref:` them (see `groups/k8s.yaml`, `groups/openai.yaml`).
 5. Run `make lint-schema` and fix any diagnostics.
 
-> **Note on re-declaring upstream metrics.** Most instrumentations emit standard upstream metrics (e.g. `http.client.request.duration`). Weaver has no way to *reference* a metric defined in a dependency, so we re-declare it locally to pin the emission contract. Weaver then reports a `DuplicateMetricName` between our registry and the upstream dependency; this specific, expected duplicate is allowlisted in [`scripts/semconv/lint-schema-filter.jq`](../scripts/semconv/lint-schema-filter.jq). Any *other* diagnostic — including a metric declared twice within our own registry, or an unresolved `ref:` — still fails the lint.
+> **Note on re-declaring upstream metrics.** Most instrumentations emit standard upstream metrics (e.g. `http.client.request.duration`). Weaver has no way to _reference_ a metric defined in a dependency, so we re-declare it locally to pin the emission contract. Weaver then reports a `DuplicateMetricName` between our registry and the upstream dependency; this specific, expected duplicate is allowlisted in [`scripts/semconv/lint-schema-filter.jq`](../scripts/semconv/lint-schema-filter.jq). Any _other_ diagnostic — including a metric declared twice within our own registry, or an unresolved `ref:` — still fails the lint.
 
 ## Prerequisites
 
