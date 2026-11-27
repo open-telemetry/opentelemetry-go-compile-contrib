@@ -3,7 +3,7 @@ module go.opentelemetry.io/otelc-contrib/test/apps/pgxclient
 go 1.26.0
 
 require (
-	github.com/jackc/pgx/v5 v5.7.2
+	github.com/jackc/pgx/v5 v5.9.2
 	go.opentelemetry.io/otelc-contrib/instrumentation/github.com/jackc/pgx/v5/otelcpgx v0.0.0
 	go.opentelemetry.io/otelc-contrib/instrumentation/go.opentelemetry.io/otel/init v0.0.0-20261119084005-f5630b90104d
 )
@@ -58,7 +58,6 @@ require (
 	go.opentelemetry.io/otelc/pkg v0.1.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
