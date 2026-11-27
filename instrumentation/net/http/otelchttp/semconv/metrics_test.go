@@ -116,7 +116,6 @@ func TestHTTPServerActiveRequests(t *testing.T) {
 		customAttr,
 		semconv.HTTPRequestMethodGet,
 		semconv.URLScheme("http"),
-		semconv.ServerAddress("example.com"),
 	}, attrs)
 
 	var adds []int64Add
@@ -153,4 +152,32 @@ func TestHTTPRequestDurationBucketBoundaries(t *testing.T) {
 		expected,
 		configs["http.server.request.duration"].ExplicitBucketBoundaries(),
 	)
+}
+
+func TestHTTPServerMetricAttributesIgnoreRequestHost(t *testing.T) {
+	req := &http.Request{
+		Method: http.MethodGet,
+		Host:   "attacker-chosen.example:8443",
+		URL:    &url.URL{},
+		Header: http.Header{},
+		Proto:  "HTTP/1.1",
+	}
+	server := NewHTTPServer(nil)
+
+	attrs := server.MetricAttributes("", req, http.StatusOK, "/items", nil)
+	set := attribute.NewSet(attrs...)
+	_, hasAddress := set.Value(semconv.ServerAddressKey)
+	_, hasPort := set.Value(semconv.ServerPortKey)
+	assert.False(t, hasAddress, "server.address must not come from the request Host")
+	assert.False(t, hasPort, "server.port must not come from the request Host")
+
+	attrs = server.MetricAttributes("api.internal:9090", req, http.StatusOK, "/items", nil)
+	assert.Contains(t, attrs, semconv.ServerAddress("api.internal"))
+	assert.Contains(t, attrs, semconv.ServerPort(9090))
+
+	attrs = server.MetricAttributes("api.internal", req, http.StatusOK, "/items", nil)
+	assert.Contains(t, attrs, semconv.ServerAddress("api.internal"))
+	set = attribute.NewSet(attrs...)
+	_, hasPort = set.Value(semconv.ServerPortKey)
+	assert.False(t, hasPort, "the port of the request Host must not be borrowed")
 }

@@ -679,3 +679,38 @@ func BenchmarkServeHTTPHooks(b *testing.B) {
 		AfterServeHTTP(mockCtx)
 	}
 }
+
+func TestServeHTTPMetricsIgnoreRequestHost(t *testing.T) {
+	t.Setenv("OTEL_GO_ENABLED_INSTRUMENTATIONS", "nethttp")
+	initOnce = sync.Once{}
+	setupTestTracer(t)
+	reader := setupTestMeter(t)
+
+	for _, host := range []string{"a.example.com:8081", "b.example.com:8082", "c.example.com"} {
+		req := httptest.NewRequest(http.MethodGet, "http://"+host+"/path", nil)
+		ctx := hooktest.NewMockHookContext()
+		BeforeServeHTTP(ctx, nil, httptest.NewRecorder(), req)
+		AfterServeHTTP(ctx)
+	}
+
+	var got metricdata.ResourceMetrics
+	require.NoError(t, reader.Collect(context.Background(), &got))
+	var duration metricdata.Histogram[float64]
+	for _, scope := range got.ScopeMetrics {
+		for _, metric := range scope.Metrics {
+			if metric.Name == "http.server.request.duration" {
+				var ok bool
+				duration, ok = metric.Data.(metricdata.Histogram[float64])
+				require.True(t, ok)
+			}
+		}
+	}
+
+	require.Len(t, duration.DataPoints, 1, "requests that differ only in Host must share one series")
+	attrs := duration.DataPoints[0].Attributes
+	_, hasAddress := attrs.Value("server.address")
+	_, hasPort := attrs.Value("server.port")
+	assert.False(t, hasAddress)
+	assert.False(t, hasPort)
+	assert.Equal(t, uint64(3), duration.DataPoints[0].Count)
+}

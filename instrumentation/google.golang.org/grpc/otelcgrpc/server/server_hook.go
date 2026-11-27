@@ -226,11 +226,13 @@ func (h *serverStatsHandler) HandleRPC(ctx context.Context, rs stats.RPCStats) {
 		if serverResponseSize != nil {
 			serverResponseSize.RecordSet(ctx, int64(rs.Length), gctx.metricAttrSet)
 		}
-	case *stats.OutHeader:
-		// Add peer address attributes
+	case *stats.InHeader:
+		// Request headers arrive for every RPC. Response headers do not: an RPC
+		// that fails before the handler sends any header gets a trailers only
+		// response and no OutHeader event, so the peer is taken from here.
 		if span.IsRecording() {
-			if p, ok := peer.FromContext(ctx); ok {
-				span.SetAttributes(grpcsemconv.ClientAddrAttrs(p.Addr.String())...)
+			if addr := clientAddr(ctx, rs); addr != "" {
+				span.SetAttributes(grpcsemconv.ClientAddrAttrs(addr)...)
 			}
 		}
 	case *stats.End:
@@ -280,6 +282,18 @@ func (h *serverStatsHandler) HandleRPC(ctx context.Context, rs stats.RPCStats) {
 			serverResponsesPerRPC.Inst().Record(ctx, atomic.LoadInt64(&gctx.outMessages), recordOpts...)
 		}
 	}
+}
+
+// clientAddr returns the address of the calling peer. The address on the event
+// is preferred, and the peer on the context is the fallback.
+func clientAddr(ctx context.Context, rs *stats.InHeader) string {
+	if rs.RemoteAddr != nil {
+		return rs.RemoteAddr.String()
+	}
+	if p, ok := peer.FromContext(ctx); ok && p.Addr != nil {
+		return p.Addr.String()
+	}
+	return ""
 }
 
 // TagConn is called when a new connection is established

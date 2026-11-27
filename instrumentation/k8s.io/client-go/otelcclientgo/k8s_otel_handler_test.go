@@ -4,6 +4,7 @@
 package k8s_client_go
 
 import (
+	"context"
 	"reflect"
 	"sync"
 	"testing"
@@ -156,7 +157,7 @@ func TestGetObjectInfo(t *testing.T) {
 }
 
 func TestNewK8SOtelHandler(t *testing.T) {
-	handler := newK8SOtelEventHandler(cache.ResourceEventHandlerFuncs{}, t.Context())
+	handler := newK8SOtelEventHandler(cache.ResourceEventHandlerFuncs{}, context.Background())
 	assert.NotNil(t, handler)
 }
 
@@ -165,7 +166,7 @@ func TestOnAdd(t *testing.T) {
 	sr, _ := setupTestTracer(t)
 	initInstrumentation()
 
-	handler := newK8SOtelEventHandler(cache.ResourceEventHandlerFuncs{}, t.Context())
+	handler := newK8SOtelEventHandler(cache.ResourceEventHandlerFuncs{}, context.Background())
 	handler.OnAdd(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-pod",
@@ -201,7 +202,7 @@ func TestOnUpdate(t *testing.T) {
 	sr, _ := setupTestTracer(t)
 	initInstrumentation()
 
-	handler := newK8SOtelEventHandler(cache.ResourceEventHandlerFuncs{}, t.Context())
+	handler := newK8SOtelEventHandler(cache.ResourceEventHandlerFuncs{}, context.Background())
 	handler.OnUpdate(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-pod",
@@ -246,7 +247,7 @@ func TestOnDelete(t *testing.T) {
 	sr, _ := setupTestTracer(t)
 	initInstrumentation()
 
-	handler := newK8SOtelEventHandler(cache.ResourceEventHandlerFuncs{}, t.Context())
+	handler := newK8SOtelEventHandler(cache.ResourceEventHandlerFuncs{}, context.Background())
 	handler.OnDelete(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-pod",
@@ -308,7 +309,7 @@ func TestOnDelete_TombstoneForwardsWrappedObject(t *testing.T) {
 		},
 	}
 
-	handler := newK8SOtelEventHandler(inner, t.Context())
+	handler := newK8SOtelEventHandler(inner, context.Background())
 	handler.OnDelete(tombstone)
 
 	gotTombstone, ok := forwarded.(cache.DeletedFinalStateUnknown)
